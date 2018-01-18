@@ -1,0 +1,253 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        var FPS = 60;
+        var CANVAS_WIDTH = 800;
+        var CANVAS_HEIGHT = 800;
+
+        /////////////////////////////////////////////////////////
+
+        // code to run before update looping starts.
+
+        function init() {
+            
+            console.log("Init");
+        }
+
+        // code to run every frame.
+
+        function update() {
+
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            //console.log("Update");
+        }
+
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+            //e.pageX e.pageY
+            console.log("Mouse Down");
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+
+            //e.pageX e.pageY
+            console.log("Mouse Up");
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+            //e.pageX e.pageY
+            if (isMouseDown) 
+                console.log("Mouse Move");
+            //else
+                //console.log("Mouse Move (no buttons pressed)");
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+            //e.pageX e.pageY
+            console.log("Secondary Mouse Down");
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+            //e.pageX e.pageY
+            console.log("Secondary Mouse Up");
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+            //e.pageX e.pageY
+            console.log("Secondary Mouse Move");
+        }
+
+        // System stuff ////////////////////////////////////////
+
+        (function() {
+
+            this.ctx = undefined;
+            this.canvas = undefined;
+            this.isMouseDown = false;
+            this.isSecondaryMouseDown = false;
+            this.now = undefined;
+            this.then = Date.now();
+            this.interval = 1000 / FPS;
+            this.delta;
+
+            this.initialize = function() {
+        
+                this.canvas = 
+                    document
+                    .getElementById(
+                        "canvas");
+
+                this.canvas.width = CANVAS_WIDTH;
+                this.canvas.height = CANVAS_HEIGHT;
+
+                this.ctx = 
+                    canvas
+                    .getContext(
+                        "2d");
+
+                init();
+
+                if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
+
+                    this.canvas
+                    .addEventListener(
+                        "touchstart", 
+                        this.touchStartHanlder, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchmove", 
+                        this.touchMoveHanlder, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchend", 
+                        this.touchEndHanlder, 
+                        false);
+
+                } else {
+
+                    this.canvas
+                    .addEventListener(
+                        "mousemove", 
+                        this.mouseMoveHandler, 
+                        false);
+                        
+                    this.canvas
+                    .addEventListener(
+                        "mousedown", 
+                        this.mouseDownHandler, 
+                        false);
+                        
+                    this.canvas
+                    .addEventListener(
+                        "mouseup", 
+                        this.mouseUpHandler, 
+                        false);
+                }
+
+                requestAnimationFrame(this.run);
+            };
+
+            this.touchStartHanlder = function(e) {
+
+                if (e.touches.length == 1)
+                    mouseDown(e.touches[0]);
+                else if (e.touches.length == 2)
+                    secondaryMouseDown(e.touches[0]);
+            }
+
+            this.touchEndHanlder = function(e) {
+
+                if (e.touches.length == 0)
+                    mouseUp();
+                else if (e.touches.length == 1)
+                    secondaryMouseUp();
+            }
+
+            this.touchMoveHanlder = function(e) {
+
+                if (e.touches.length == 0)
+                    mouseMove(e.touches[0], false);
+                else if (e.touches.length == 1)
+                    mouseMove(e.touches[0], true);
+                else if (e.touches.length == 2)
+                    secondaryMouseMove(e.touches[0]);
+            }
+
+            this.mouseDownHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = true;
+                    secondaryMouseDown(e);
+                } else {
+
+                    isMouseDown = true;
+                    mouseDown(e);
+                }
+            }
+
+            this.mouseUpHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = false;
+                    secondaryMouseUp(e);
+                } else {
+
+                    isMouseDown = false;
+                    mouseUp(e);
+                }
+            }
+
+            this.mouseMoveHandler = function(e) {
+
+                if (!isMouseDown && !isSecondaryMouseDown)
+                    mouseMove(e, false);
+                else if (isMouseDown)
+                    mouseMove(e, true);
+                else if (isSecondaryMouseDown)
+                    secondaryMouseMove(e);
+            }
+
+            this.run = function() {
+
+                now = Date.now();
+                delta = now - then;
+
+                if (delta > interval) {
+                    
+                    then = now - (delta % interval);
+                    update();
+                }
+
+                requestAnimationFrame(this.run);
+            }
+
+            window.onload = this.initialize;
+        })();
+
+    </script>
+</html>
