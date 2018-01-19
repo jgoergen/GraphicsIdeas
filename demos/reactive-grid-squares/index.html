@@ -25,29 +25,95 @@
 
         // put any adjustable settings here that would be interesting to tinker with.
 
-        var FPS = 60;
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 800;
+        var FPS = 30;
+        var CANVAS_WIDTH = 1200;
+        var CANVAS_HEIGHT = 600;
+        var GRID_X = 20;
+        var GRID_Y = 20;
+        var GRID_CHANGE_TIME = 20;
+        var GRID_CHANGE_STEP = 0.2;
+        var EXTRA_MOUSE_POSITIONS = 4;
 
         /////////////////////////////////////////////////////////
 
-        var localCtxReference = undefined;
+        var mouseHistory = [];
+        var lastMouseX = 0;
+        var lastMouseY = 0;
+        var drawGridTile = function(){};
+
+        function drawSquares(ctx, x, y, age) {
+
+            if (age > (GRID_CHANGE_TIME - 2))
+                age = GRID_CHANGE_TIME - 2;
+
+            ctx.fillRect(
+                x + (age / 2), 
+                y + (age / 2), 
+                GRID_X - age, 
+                GRID_Y - age);
+        }
 
         // code to run before update looping starts.
 
         function init(ctx) {
             
-            console.log("Init");
+            ctx.fillStyle = "white";
+            drawGridTile = drawSquares;
 
-            localCtxReference = ctx;
-            localCtxReference.fillStyle = "white";
+            // draw initial grid spots
+            for (var x = 0; x < CANVAS_WIDTH; x += GRID_X) 
+                for (var y = 0; y < CANVAS_HEIGHT; y += GRID_Y) 
+                    drawGridTile(ctx, x, y, GRID_CHANGE_TIME);
         }
 
         // code to run every frame.
 
         function update(ctx) {
 
-            //console.log("Update");
+            var index = 0;
+            while (index < mouseHistory.length) {
+
+                // get quantized grid position
+
+                var qX = Math.round(
+                    mouseHistory[index][0] / GRID_X)
+                     * GRID_X;
+
+                var qY = Math.round(
+                    mouseHistory[index][1] / GRID_Y)
+                     * GRID_Y;
+
+                // 'age' and expire mouse positions.
+
+                mouseHistory[index][2] = mouseHistory[index][2] + GRID_CHANGE_STEP;
+
+                // if this mouse position is too old, remove it. otherwise redraw it.
+
+                if (mouseHistory[index][2] > GRID_CHANGE_TIME) {
+
+                    mouseHistory.splice(index, 1);
+                    
+                } else {
+
+                    // clear old area
+
+                    ctx.clearRect(
+                        qX, 
+                        qY, 
+                        GRID_X, 
+                        GRID_Y);
+
+                    // draw new symbol based on age
+
+                    drawGridTile(
+                        ctx, 
+                        qX, 
+                        qY, 
+                        mouseHistory[index][2]);
+
+                    index ++;
+                }
+            }
         }
 
         // code to run when user presses primary mouse button ( or first finger. )
@@ -55,7 +121,6 @@
         function mouseDown(e) {
 
             //e.x e.y e.speed
-            console.log("Mouse Down");
         }
 
         // code to run when user raises primary mouse button ( or first finger. )
@@ -63,18 +128,58 @@
         function mouseUp(e) {
 
             //e.x e.y e.speed
-            console.log("Mouse Up");
         }
 
         // code to run when user moves primary mouse button ( or first finger. )
 
         function mouseMove(e, isMouseDown) {
 
-            //e.x e.y e.speed
-            if (isMouseDown) {
+            // if we haven't moved more then the grid limits away from our last mouse position, don't log it.
 
-                console.log("Mouse Move");
-                localCtxReference.fillRect(e.x, e.y, e.speed, e.speed);
+            if (Math.abs(e.x - lastMouseX) >= GRID_X || Math.abs(e.y - lastMouseY) >= GRID_Y) {
+
+                // limit the size of the speed return.
+                e.speed = Math.min(EXTRA_MOUSE_POSITIONS, e.speed / 10);
+
+                var xIndex = 0;
+                var yIndex = 0;
+
+                for (var x = 0; x < e.speed; x++) {
+                    for (var y = 0; y < e.speed; y++) {
+
+                        var offsetX = x - Math.round(e.speed / 2);
+                        var offsetY = y - Math.round(e.speed / 2);
+                        var actualX = e.x + (GRID_X * offsetX);
+                        var actualY = e.y + (GRID_Y * offsetY);
+                        var startingAge = 0;
+
+                        var exists = false;
+                        for (var i = 0; i < mouseHistory.length; i++)
+                            if (mouseHistory[i][0] == actualX && mouseHistory[i][1] == actualY) {
+
+                                if (mouseHistory[i][2] > startingAge)
+                                    mouseHistory[i][2] = startingAge;
+
+                                exists = true;
+                                break;
+                            }
+
+                        if (!exists)
+                            mouseHistory.push(
+                                [
+                                    actualX, 
+                                    actualY, 
+                                    startingAge
+                                ]);
+
+                        yIndex ++;
+                    }
+
+                    xIndex ++;
+                }
+                
+                lastMouseX = e.x;
+                lastMouseY = e.y;
             }
         }
 
@@ -83,7 +188,6 @@
         function secondaryMouseDown(e) {
 
             //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
         }
 
         // code to run when user raises secondary mouse button ( or second finger. )
@@ -91,7 +195,6 @@
         function secondaryMouseUp(e) {
 
             //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
         }
 
         // code to run when user moves secondary mouse button ( or second finger. )
@@ -99,7 +202,6 @@
         function secondaryMouseMove(e) {
 
             //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
         }
 
         // System stuff ////////////////////////////////////////
@@ -191,7 +293,7 @@
                 }
 
                 var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
-                var steps = distance / 4;
+                var steps = distance / 10;
                 var intervalX = (x - lastX) / steps;
                 var intervalY = (y - lastY) / steps;
 

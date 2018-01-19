@@ -10,7 +10,7 @@
 
         <style type="text/css">
 
-            body { background-color: black; }
+            body { background-color: #fff; }
             canvas { border: 1px solid #ccc; }
 
         </style>
@@ -25,56 +25,173 @@
 
         // put any adjustable settings here that would be interesting to tinker with.
 
-        var FPS = 60;
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 800;
+        var FPS = 30;
+        var CANVAS_WIDTH = 1200;
+        var CANVAS_HEIGHT = 600;
+        var GRID_X = 16;
+        var GRID_Y = 16;
+        var GRID_CHANGE_TIME = 14;
+        var GRID_CHANGE_STEP = 0.5;
+        var EXTRA_MOUSE_POSITIONS = 4;
 
         /////////////////////////////////////////////////////////
 
-        var localCtxReference = undefined;
+        var mouseHistory = [];
+        var lastMouseX = 0;
+        var lastMouseY = 0;
+        var drawGridTile = function(){};
+        var animationData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOAAAAAQCAYAAAAPv3P4AAACFUlEQVRoQ+1Z0RLDIAib///R3W133XmeSghkXZ17lUKIBOhajuM4Hvu3GdgMXMJA2QK8hPcddDPwZuBvBFhKecyGvXVe14tla52jtZfl533RRv4opm/avTC/fisvaX8hQLT4EDvEJqvg0ViWKLL8WHEyz2vMd8SPcvHTAswi3uNnZpvlB76cpKnlwY1is+zO6cVMsB5eJoc7TFCpABnSPKseYstgyCyA3vqEYkLtZhPX4+PksxZPzTG6CrYxPUJQNECGA6vBZJ0PBZixAkQT9z7fu2ivj7oIz4LL8HGKxDMRvHGz8o82oBFuKx/rHF3to/jbRoQ2HkaU0wno6Vy94G0n9SbS68SIj2jcrAuI4hhNIkvEGXFbnhFxWAJRTLe27hQx0Nx7WMy7mn2GYAUYKQBWdMoGgIi+XYe9qxsrtlnXZe8hMkFYAXiK/NsxPNh6dTD9930kwDooC8DqiMjIzoztaShM/lkrIPJuy3CH5q8QIHKPShvENzPBkHuYNkn1h3gmcVUB9t7vRpPTu4KN8rxr/j1e0E0g0ojY6TZbRaN3EBXZpQKMgmfJUzyn8Gnxc0VMCxN6Xq/AqHhHWxPDAzrx0XwUdtLPEArAqE/2wqxCUfkd5cXEy1j9UZ5VdswrgAqL0u+SAmSK1vOMxxZdezMFyOBTFhnr+w4TjM3tUxfqd8AowP38ZmBlBpacgCtf2M5tLQaexpY97+CjCAkAAAAASUVORK5CYII=";
+        var animationFrames = [];
+
+        function drawSquares(ctx, x, y, age) {
+
+            ctx.drawImage(
+                animationFrames[Math.floor(age)],
+                x, 
+                y);
+        }
 
         // code to run before update looping starts.
 
         function init(ctx) {
-            
-            console.log("Init");
 
-            localCtxReference = ctx;
-            localCtxReference.fillStyle = "white";
+            // render animation, break it into chunks, save them to an array.
+            var img = new Image;
+            img.onload = function(){
+
+                for (var i = 0; i < 14; i++) {
+
+                    var tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = 32;
+                    tempCanvas.height = 32;
+                    var tempCTX = tempCanvas.getContext("2d");
+                    tempCTX.drawImage(img, i * 32, 0, 32, 32, 0, 0, 32, 32);
+                    animationFrames.push(tempCanvas);
+                }
+
+                for (var i = 0; i < animationFrames.length; i++)
+                    ctx.drawImage(animationFrames[i], i * 32, 32, 32, 32);
+
+                debugger;
+                
+
+                // draw initial grid spots
+                for (var x = 0; x < CANVAS_WIDTH; x += GRID_X) 
+                    for (var y = 0; y < CANVAS_HEIGHT; y += GRID_Y) 
+                        drawGridTile(ctx, x, y, 0);
+            };
+            img.src = animationData;
+            
+            ctx.fillStyle = "white";
+            drawGridTile = drawSquares;
         }
+
 
         // code to run every frame.
 
         function update(ctx) {
 
-            //console.log("Update");
+            var index = 0;
+            while (index < mouseHistory.length) {
+
+                // get quantized grid position
+
+                var qX = Math.round(
+                    mouseHistory[index][0] / GRID_X)
+                     * GRID_X;
+
+                var qY = Math.round(
+                    mouseHistory[index][1] / GRID_Y)
+                     * GRID_Y;
+
+                // 'age' and expire mouse positions.
+
+                mouseHistory[index][2] = mouseHistory[index][2] + GRID_CHANGE_STEP;
+
+                // if this mouse position is too old, remove it. otherwise redraw it.
+
+                if (mouseHistory[index][2] >= GRID_CHANGE_TIME) {
+
+                    mouseHistory.splice(index, 1);
+                    
+                } else {
+
+                    // draw new symbol based on age
+
+                    drawGridTile(
+                        ctx, 
+                        qX, 
+                        qY, 
+                        mouseHistory[index][2]);
+
+                    index ++;
+                }
+            }
         }
 
         // code to run when user presses primary mouse button ( or first finger. )
 
         function mouseDown(e) {
 
-            //e.x e.y e.speed
-            console.log("Mouse Down");
+            //e.x e.y
         }
 
         // code to run when user raises primary mouse button ( or first finger. )
 
         function mouseUp(e) {
 
-            //e.x e.y e.speed
-            console.log("Mouse Up");
+            //e.x e.y
         }
 
         // code to run when user moves primary mouse button ( or first finger. )
 
         function mouseMove(e, isMouseDown) {
 
-            //e.x e.y e.speed
-            if (isMouseDown) {
+            // if we haven't moved more then the grid limits away from our last mouse position, don't log it.
 
-                console.log("Mouse Move");
-                localCtxReference.fillRect(e.x, e.y, e.speed, e.speed);
+            if (Math.abs(e.x - lastMouseX) >= GRID_X || Math.abs(e.y - lastMouseY) >= GRID_Y) {
+
+                // limit the size of the speed return.
+                e.speed = Math.min(EXTRA_MOUSE_POSITIONS, e.speed / 10);
+                var xIndex = 0;
+                var yIndex = 0;
+
+                for (var x = 0; x < e.speed; x++) {
+                    for (var y = 0; y < e.speed; y++) {
+
+                        var offsetX = x - Math.round(e.speed / 2);
+                        var offsetY = y - Math.round(e.speed / 2);
+                        var actualX = e.x + (GRID_X * offsetX);
+                        var actualY = e.y + (GRID_Y * offsetY);
+                        var startingAge = 0;
+
+                        var exists = false;
+                        for (var i = 0; i < mouseHistory.length; i++)
+                            if (mouseHistory[i][0] == actualX && mouseHistory[i][1] == actualY) {
+
+                                if (mouseHistory[i][2] > startingAge)
+                                    mouseHistory[i][2] = startingAge;
+
+                                exists = true;
+                                break;
+                            }
+
+                        if (!exists)
+                            mouseHistory.push(
+                                [
+                                    actualX, 
+                                    actualY, 
+                                    startingAge
+                                ]);
+
+                        yIndex ++;
+                    }
+
+                    xIndex ++;
+                }
+                
+                lastMouseX = e.x;
+                lastMouseY = e.y;
             }
         }
 
@@ -82,24 +199,21 @@
 
         function secondaryMouseDown(e) {
 
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
+            //e.x e.y
         }
 
         // code to run when user raises secondary mouse button ( or second finger. )
 
         function secondaryMouseUp(e) {
 
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
+            //e.x e.y
         }
 
         // code to run when user moves secondary mouse button ( or second finger. )
 
         function secondaryMouseMove(e) {
 
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
+            //e.x e.y
         }
 
         // System stuff ////////////////////////////////////////
@@ -191,7 +305,7 @@
                 }
 
                 var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
-                var steps = distance / 4;
+                var steps = distance / 10;
                 var intervalX = (x - lastX) / steps;
                 var intervalY = (y - lastY) / steps;
 
