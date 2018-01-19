@@ -11,12 +11,17 @@
         <style type="text/css">
 
             body { background-color: #fff; }
-            canvas { border: 1px solid #ccc; width: 100%; }
+            #canvasContainer  { border: 1px solid #ccc; width: 100%; position: relative; }
+            #canvas { position: absolute; width: 100%; }
+            #colorCanvas { position: absolute; width: 100%; mix-blend-mode: color; pointer-events: none; } 
 
         </style>
     </head>
     <body>
-        <canvas id="canvas" width="300" height="300"></canvas>
+        <div id="canvasContainer">
+            <canvas id="canvas" width="300" height="300"></canvas>
+            <canvas id="colorCanvas" width="300" height="300"></canvas>
+        </div>
     </body>
 
     <script type="text/javascript">
@@ -57,7 +62,7 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(ctx, colorCtx) {
 
             // render animation, break it into chunks, save them to an array.
             var img = new Image;
@@ -91,10 +96,13 @@
             drawGridTile = drawSquares;
         }
 
-
         // code to run every frame.
 
-        function update(ctx) {
+        function update(ctx, colorCtx) {
+
+            // update color canvas, fade it to black
+            colorCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            colorCtx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             var index = 0;
             while (index < mouseHistory.length) {
@@ -120,6 +128,11 @@
                     mouseHistory.splice(index, 1);
                     
                 } else {
+
+                    // draw color onto color canvas
+
+                    colorCtx.fillStyle = "rgba(0, 255, " + (mouseHistory[index][2] * 12) + ", 0.5)";
+                    colorCtx.fillRect(qX - 32, qY - 32, 64, 64);
 
                     // draw new symbol based on age
 
@@ -228,6 +241,8 @@
             var thisRef = this;
             this.ctx = undefined;
             this.canvas = undefined;
+            this.colorCtx = undefined;
+            this.colorCanvas = undefined;
             this.isMouseDown = false;
             this.isSecondaryMouseDown = false;
             this.now = undefined;
@@ -240,19 +255,28 @@
             this.initialize = function() {
 
                 this.canvas = 
-                    document
-                    .getElementById(
+                    document.getElementById(
                         "canvas");
 
                 this.canvas.width = CANVAS_WIDTH;
                 this.canvas.height = CANVAS_HEIGHT;
 
                 this.ctx = 
-                    canvas
-                    .getContext(
+                    this.canvas.getContext(
                         "2d");
 
-                init(this.ctx);
+                this.colorCanvas = 
+                    document.getElementById(
+                        "colorCanvas");
+
+                this.colorCanvas.width = CANVAS_WIDTH;
+                this.colorCanvas.height = CANVAS_HEIGHT;
+
+                this.colorCtx = 
+                    this.colorCanvas.getContext(
+                        "2d");
+
+                init(this.ctx, this.colorCtx);
 
                 if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
 
@@ -417,7 +441,7 @@
                 if (delta > interval) {
                     
                     then = now - (delta % interval);
-                    update(this.ctx);
+                    update(this.ctx, this.colorCtx);
                 }
 
                 requestAnimationFrame(this.run);

@@ -11,7 +11,7 @@
         <style type="text/css">
 
             body { background-color: black; }
-            canvas { border: 1px solid #ccc; }
+            canvas { border: 1px solid #ccc; width: 100%; }
 
         </style>
     </head>
@@ -283,6 +283,10 @@
 
             
             this.interpolateMove = function(x, y) {
+
+                // fix canvas scaling
+                x = x * this.canvas.width / this.canvas.clientWidth;
+                y = y * this.canvas.height / this.canvas.clientHeight;
 
                 var result = [];
 
