@@ -65,6 +65,8 @@
         var lastMouseX = 0;
         var lastMouseY = 0;
         var frame = 0;
+        var animationReady = false;
+        var waveReady = false;
 
         // animation build up from here 
         // http://doyouevenscriptbro.com/home/spriteeditor?spriteCode=0ZZZZS1B0N1B|0ZZZZS1B0N1B|0ZZZZS1B0N1B|0ZZZZB1D0L10B10L10B10L1D|0ZZZJ1F0J1F0J1B0B1B0J1B0B1B0J1F0J1F|0ZZR1H0H1H0H1B0D1B0H1B0D1B0H1B0D1B0H1B0D1B0H1H0H1H|0ZZ1J0F1J0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1J0F1J|0ZP1B0L1D0I1H0F1E0C1B0F1C0E1B0G1B0F1B0F1B0F1B0G1B0E1C0F1B0C1E0F1H0I1D0L1B|0W10N1C0L1E0J1C01C0H1C0C1C0F1C0E1C0D1C0G1C0D1C0G1C0D1C0E1C0F1C0C1C0H1C01C0J1E0L1C0N1|0V10N1D0L1E0J1B0C1C0H1B0D1D0E1B0G1C0C1B0H1B0D1B0H1B0C1C0G1B0E1C0E1B0H1C0C1B0I1F0L1D0N1|0ZZB1D0L1I0G1B0B1E0G1B0E1B0G1B0E1B0F1B0E1B0G1B0E1B0G1E0B1B0G1I0L1D|0ZP1B0L1D0I1H0F1E0C1B0F1C0E1B0G1B0F1B0F1B0F1B0G1B0E1C0F1B0C1E0F1H0I1D0L1B|0W10N1C0L1E0J1C01C0H1C0C1C0F1C0E1C0D1C0G1C0D1C0G1C0D1C0E1C0F1C0C1C0H1C01C0J1E0L1C0N1|0ZZZZC1B0M1C0N1C0M1B
@@ -111,6 +113,8 @@
                 for (var x = 0; x < CANVAS_WIDTH; x += GRID_X) 
                     for (var y = 0; y < CANVAS_HEIGHT; y += GRID_Y) 
                         drawGridTile(ctx, x, y, 0);
+
+                animationReady = true;
             };
             img.src = animationData;
 
@@ -122,6 +126,8 @@
                 theWaveCvsData.height = 400;
                 var tempCTX = theWaveCvsData.getContext("2d");
                 tempCTX.drawImage(img2, 0, 0, 400, 400);
+
+                waveReady = true;
             };
             img2.src = theWave;
             
@@ -131,6 +137,9 @@
         // code to run every frame.
 
         function update(ctx, colorCtx) {
+
+            if (!animationReady || !waveReady)
+                return;
 
             for (var i = 0; i < CLEANUP_CELL_COUNT; i++) {
 
