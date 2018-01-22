@@ -219,6 +219,8 @@
             this.delta;
             this.lastX = undefined;
             this.lastY = undefined;
+            this.canvasOffsetX = undefined;
+            this.canvasOffsetY = undefined;
 
             this.initialize = function() {
 
@@ -229,6 +231,8 @@
 
                 this.canvas.width = CANVAS_WIDTH;
                 this.canvas.height = CANVAS_HEIGHT;
+                this.canvasOffsetX = this.canvas.offsetLeft;
+                this.canvasOffsetY = this.canvas.offsetTop;
 
                 this.ctx = 
                     canvas
@@ -257,26 +261,25 @@
                         function(e) { thisRef.touchEndHanlder(e); }, 
                         false);
 
-                } else {
+                } 
 
-                    this.canvas
-                    .addEventListener(
-                        "mousemove", 
-                        function(e) { thisRef.mouseMoveHandler(e); }, 
-                        false);
-                        
-                    this.canvas
-                    .addEventListener(
-                        "mousedown", 
-                        function(e) { thisRef.mouseDownHandler(e); }, 
-                        false);
-                        
-                    this.canvas
-                    .addEventListener(
-                        "mouseup", 
-                        function(e) { thisRef.mouseUpHandler(e); }, 
-                        false);
-                }
+                this.canvas
+                .addEventListener(
+                    "mousemove", 
+                    function(e) { thisRef.mouseMoveHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mousedown", 
+                    function(e) { thisRef.mouseDownHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mouseup", 
+                    function(e) { thisRef.mouseUpHandler(e); }, 
+                    false);
 
                 requestAnimationFrame(this.run);
             };
@@ -297,7 +300,7 @@
                 }
 
                 var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
-                var steps = distance / 10;
+                var steps = distance / 4;
                 var intervalX = (x - lastX) / steps;
                 var intervalY = (y - lastY) / steps;
 
@@ -317,9 +320,9 @@
             this.touchStartHanlder = function(e) {
 
                 if (e.touches.length == 1)
-                    mouseDown(e.touches[0]);
+                    mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
                 else if (e.touches.length == 2)
-                    secondaryMouseDown(e.touches[0]);
+                    secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
             }
 
             this.touchEndHanlder = function(e) {
@@ -328,15 +331,18 @@
                     mouseUp();
                 else if (e.touches.length == 1)
                     secondaryMouseUp();
+
+                this.lastX = undefined;
+                this.lastY = undefined;
             }
 
             this.touchMoveHanlder = function(e) {
 
                 var steps = 
                     this.interpolateMove(
-                        e.touches[0].offsetX, 
-                        e.touches[0].offsetY);
-
+                        e.touches[0].pageX - this.canvasOffsetX, 
+                        e.touches[0].pageY - this.canvasOffsetY);
+                        
                 for (var i = 0; i < steps.length; i++) {
 
                     if (e.touches.length == 0)
@@ -372,6 +378,9 @@
                     isMouseDown = false;
                     mouseUp(e);
                 }
+
+                this.lastX = undefined;
+                this.lastY = undefined;
             }
 
             this.mouseMoveHandler = function(e) {

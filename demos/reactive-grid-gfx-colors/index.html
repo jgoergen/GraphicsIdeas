@@ -13,7 +13,7 @@
             body { background-color: #fff; }
             #canvasContainer  { border: 1px solid #ccc; width: 100%; position: relative; }
             #canvas { position: absolute; width: 100%; }
-            #colorCanvas { position: absolute; width: 100%; mix-blend-mode: color; pointer-events: none; } 
+            #colorCanvas { position: absolute; width: 100%; mix-blend-mode: overlay; pointer-events: none; } 
 
         </style>
     </head>
@@ -36,27 +36,27 @@
         var GRID_X = 16;
         var GRID_Y = 16;
         var GRID_CHANGE_TIME = 14;
-        var GRID_CHANGE_STEP = 0.5;
+        var GRID_CHANGE_STEP = 0.2;
         var EXTRA_MOUSE_POSITIONS = 6;
+        var GRID_COLOR_FADE_SPEED = 0.1;
 
         /////////////////////////////////////////////////////////
 
         var mouseHistory = [];
         var lastMouseX = 0;
         var lastMouseY = 0;
-        var drawGridTile = function(){};
 
         // animation build up from here 
-        // http://doyouevenscriptbro.com/home/spriteeditor?spriteCode=0ZZZZB10B10M1B0N1B0M10B1%7C0ZZZL10O10O1D0J1D0O10O1%7C0ZZU10O10O10O1E0H1E0O10O10O1%7C0ZQ10N10O10H10E10J1B0C10L1D0N1D0L10C1B0J10E10H10O10N1%7C0ZI10J10E10H10G10F10I10D10K10B10M1B0N1B0M10B10K10D10I10F10G10H10E10J1%7C0ZL10P10O10P10E10I10C1B0J1D0J1D0J1B0C10I10E10P10O10P1%7C0ZN10O10O10O10O10O1G0D1G0O10O10O10O10O1%7C0ZQ10N10O10H10E10J1B0C10L1D0N1D0L10C1B0J10E10H10O10N1%7C0ZZZJ1F0J10D10J10D10J10D10J10D10J1F%7C0ZZT1C0L10C1B0J10E10H10F10H10F10H10E10J1B0C10L1C%7C0ZN1B0M10B10K10D10I10F10G10H10E10J10D10J10E10H10G10F10I10D10K10B10M1B%7C0ZZU1B0M10B10K10D10I10F10H10F10I10D10K10B10M1B%7C0ZZZZC1B0M10B10L10B10M1B%7C0ZZZZS1B0N1B
+        // http://doyouevenscriptbro.com/home/spriteeditor?spriteCode=0ZZZZS1B0N1B|0ZZZZS1B0N1B|0ZZZZS1B0N1B|0ZZZZB1D0L10B10L10B10L1D|0ZZZJ1F0J1F0J1B0B1B0J1B0B1B0J1F0J1F|0ZZR1H0H1H0H1B0D1B0H1B0D1B0H1B0D1B0H1B0D1B0H1H0H1H|0ZZ1J0F1J0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1B0F1J0F1J|0ZP1B0L1D0I1H0F1E0C1B0F1C0E1B0G1B0F1B0F1B0F1B0G1B0E1C0F1B0C1E0F1H0I1D0L1B|0W10N1C0L1E0J1C01C0H1C0C1C0F1C0E1C0D1C0G1C0D1C0G1C0D1C0E1C0F1C0C1C0H1C01C0J1E0L1C0N1|0V10N1D0L1E0J1B0C1C0H1B0D1D0E1B0G1C0C1B0H1B0D1B0H1B0C1C0G1B0E1C0E1B0H1C0C1B0I1F0L1D0N1|0ZZB1D0L1I0G1B0B1E0G1B0E1B0G1B0E1B0F1B0E1B0G1B0E1B0G1E0B1B0G1I0L1D|0ZP1B0L1D0I1H0F1E0C1B0F1C0E1B0G1B0F1B0F1B0F1B0G1B0E1C0F1B0C1E0F1H0I1D0L1B|0W10N1C0L1E0J1C01C0H1C0C1C0F1C0E1C0D1C0G1C0D1C0G1C0D1C0E1C0F1C0C1C0H1C01C0J1E0L1C0N1|0ZZZZC1B0M1C0N1C0M1B
         // http://dataurl.net/#dataurlmaker
-        var animationData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOAAAAAQCAYAAAAPv3P4AAACFUlEQVRoQ+1Z0RLDIAib///R3W133XmeSghkXZ17lUKIBOhajuM4Hvu3GdgMXMJA2QK8hPcddDPwZuBvBFhKecyGvXVe14tla52jtZfl533RRv4opm/avTC/fisvaX8hQLT4EDvEJqvg0ViWKLL8WHEyz2vMd8SPcvHTAswi3uNnZpvlB76cpKnlwY1is+zO6cVMsB5eJoc7TFCpABnSPKseYstgyCyA3vqEYkLtZhPX4+PksxZPzTG6CrYxPUJQNECGA6vBZJ0PBZixAkQT9z7fu2ivj7oIz4LL8HGKxDMRvHGz8o82oBFuKx/rHF3to/jbRoQ2HkaU0wno6Vy94G0n9SbS68SIj2jcrAuI4hhNIkvEGXFbnhFxWAJRTLe27hQx0Nx7WMy7mn2GYAUYKQBWdMoGgIi+XYe9qxsrtlnXZe8hMkFYAXiK/NsxPNh6dTD9930kwDooC8DqiMjIzoztaShM/lkrIPJuy3CH5q8QIHKPShvENzPBkHuYNkn1h3gmcVUB9t7vRpPTu4KN8rxr/j1e0E0g0ojY6TZbRaN3EBXZpQKMgmfJUzyn8Gnxc0VMCxN6Xq/AqHhHWxPDAzrx0XwUdtLPEArAqE/2wqxCUfkd5cXEy1j9UZ5VdswrgAqL0u+SAmSK1vOMxxZdezMFyOBTFhnr+w4TjM3tUxfqd8AowP38ZmBlBpacgCtf2M5tLQaexpY97+CjCAkAAAAASUVORK5CYII=";
+        var animationData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOAAAAAQCAYAAAAPv3P4AAACL0lEQVRoQ+1Z0Y7DIAxr//+jO/V0SByXYDu00G3Z0yQCxMFOAt2P4zi2/GUEMgJLIrCnAJfE/S023fd9i+bnkblPCc4MDCnAp5z2jX6cRDp/ipjKHHXeaV/Pjcy/OhSz8Sv+pwCVaN1s2xLX244VUlQIlh/snpYAFRFGfbZiFV1rFL9CkxSgEi3CFomoR2Q0t2w/sgYSUlv51EpoVRtlDSYGT8ZPUOSPSQrQiJhHAkReL/vXWzDk8Wx6rRTK2kwb5gklIqAWA1uNWj8RrhJbZDcLfwrwNwLsgTOtC1N5WiJ4BJwhQGsPREAkMjReJx8Go9eWMkmmhy+ybps4I+v3eNSNR+8VFB0aUvvK+efeBXj9H/lsEUnB4dkyayCbu8YZcSGSIt9QgmLG0R7R8Svwt7yi10wB/pek1wYpLejsCshUIKa6oAcT1KaiGDE+RCr4avyok3KvFZ/6HfDbWlClgqA2TR2nsz34HBIVZ01+Zg0Vn3XPRImGSQg/Np8qQKbV9GysCz2qDNYhWesz96PII0xPgOiBwiJwixeJjB1n8Nf+1NcI5gwsAc7AH+VbCjAaOWeeJ95irhIwKmIPlpK5C+GRuBQBj+JH/o/E36t0Cn6VTilANWI32iPyMCKuWx/W3oKkVI12/kgHgdZCAnwCfoUiKUAlWm9ii14DWRijmX/kHs762EsejFh7+4ziZzCkAJkofbHNScIriDy6xqojuAJ/V+T5CLPqaHPfjMC2vQBXmz3vMNevRgAAAABJRU5ErkJggg==";        
         var animationFrames = [];
 
-        function drawSquares(ctx, x, y, age) {
+        function drawGridTile (ctx, x, y, age) {
 
             ctx.drawImage(
                 animationFrames[Math.floor(age)],
-                x, 
+                x,
                 y);
         }
 
@@ -93,7 +93,6 @@
             img.src = animationData;
             
             ctx.fillStyle = "white";
-            drawGridTile = drawSquares;
         }
 
         // code to run every frame.
@@ -101,7 +100,7 @@
         function update(ctx, colorCtx) {
 
             // update color canvas, fade it to black
-            colorCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            colorCtx.fillStyle = "rgba(0, 0, 0, " + GRID_COLOR_FADE_SPEED + ")";
             colorCtx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             var index = 0;
@@ -125,14 +124,15 @@
 
                 if (mouseHistory[index][2] >= GRID_CHANGE_TIME) {
 
+                    drawGridTile(
+                        ctx, 
+                        qX, 
+                        qY, 
+                        0);
+
                     mouseHistory.splice(index, 1);
                     
                 } else {
-
-                    // draw color onto color canvas
-
-                    colorCtx.fillStyle = "rgba(0, 255, " + (mouseHistory[index][2] * 12) + ", 0.5)";
-                    colorCtx.fillRect(qX - 32, qY - 32, 64, 64);
 
                     // draw new symbol based on age
 
@@ -163,11 +163,16 @@
 
         // code to run when user moves primary mouse button ( or first finger. )
 
-        function mouseMove(e, isMouseDown) {
+        function mouseMove(e, isMouseDown, ctx, colorCtx) {
 
             // if we haven't moved more then the grid limits away from our last mouse position, don't log it.
 
             if (Math.abs(e.x - lastMouseX) >= GRID_X || Math.abs(e.y - lastMouseY) >= GRID_Y) {
+
+                // draw color onto color canvas
+
+                colorCtx.fillStyle = "rgba(255, 0, 155, 1)";
+                colorCtx.fillRect(e.x - 32, e.y - 32, 64, 64);
 
                 // limit the size of the speed return.
                 e.speed = Math.min(EXTRA_MOUSE_POSITIONS, e.speed / 15);
@@ -251,6 +256,8 @@
             this.delta;
             this.lastX = undefined;
             this.lastY = undefined;
+            this.canvasOffsetX = undefined;
+            this.canvasOffsetY = undefined;
 
             this.initialize = function() {
 
@@ -260,6 +267,8 @@
 
                 this.canvas.width = CANVAS_WIDTH;
                 this.canvas.height = CANVAS_HEIGHT;
+                this.canvasOffsetX = this.canvas.offsetLeft;
+                this.canvasOffsetY = this.canvas.offsetTop;
 
                 this.ctx = 
                     this.canvas.getContext(
@@ -298,26 +307,25 @@
                         function(e) { thisRef.touchEndHanlder(e); }, 
                         false);
 
-                } else {
-
-                    this.canvas
-                    .addEventListener(
-                        "mousemove", 
-                        function(e) { thisRef.mouseMoveHandler(e); }, 
-                        false);
-                        
-                    this.canvas
-                    .addEventListener(
-                        "mousedown", 
-                        function(e) { thisRef.mouseDownHandler(e); }, 
-                        false);
-                        
-                    this.canvas
-                    .addEventListener(
-                        "mouseup", 
-                        function(e) { thisRef.mouseUpHandler(e); }, 
-                        false);
                 }
+                
+                this.canvas
+                .addEventListener(
+                    "mousemove", 
+                    function(e) { thisRef.mouseMoveHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mousedown", 
+                    function(e) { thisRef.mouseDownHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mouseup", 
+                    function(e) { thisRef.mouseUpHandler(e); }, 
+                    false);
 
                 requestAnimationFrame(this.run);
             };
@@ -358,9 +366,9 @@
             this.touchStartHanlder = function(e) {
 
                 if (e.touches.length == 1)
-                    mouseDown(e.touches[0]);
+                    mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
                 else if (e.touches.length == 2)
-                    secondaryMouseDown(e.touches[0]);
+                    secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
             }
 
             this.touchEndHanlder = function(e) {
@@ -369,21 +377,24 @@
                     mouseUp();
                 else if (e.touches.length == 1)
                     secondaryMouseUp();
+
+                this.lastX = undefined;
+                this.lastY = undefined;
             }
 
             this.touchMoveHanlder = function(e) {
 
                 var steps = 
                     this.interpolateMove(
-                        e.touches[0].offsetX, 
-                        e.touches[0].offsetY);
-
+                        e.touches[0].pageX - this.canvasOffsetX, 
+                        e.touches[0].pageY - this.canvasOffsetY);
+                        
                 for (var i = 0; i < steps.length; i++) {
 
                     if (e.touches.length == 0)
-                        mouseMove(steps[i], false);
+                        mouseMove(steps[i], false, this.ctx, this.colorCtx);
                     else if (e.touches.length == 1)
-                        mouseMove(steps[i], true);
+                        mouseMove(steps[i], true, this.ctx, this.colorCtx);
                     else if (e.touches.length == 2)
                         secondaryMouseMove(steps[i]);
                 }
@@ -413,6 +424,9 @@
                     isMouseDown = false;
                     mouseUp(e);
                 }
+
+                this.lastX = undefined;
+                this.lastY = undefined;
             }
 
             this.mouseMoveHandler = function(e) {
@@ -425,9 +439,9 @@
                 for (var i = 0; i < steps.length; i++) {
 
                     if (!isMouseDown && !isSecondaryMouseDown)
-                        mouseMove(steps[i], false);
+                        mouseMove(steps[i], false, this.ctx, this.colorCtx);
                     else if (isMouseDown)
-                        mouseMove(steps[i], true);
+                        mouseMove(steps[i], true, this.ctx, this.colorCtx);
                     else if (isSecondaryMouseDown)
                         secondaryMouseMove(steps[i]);
                 }
