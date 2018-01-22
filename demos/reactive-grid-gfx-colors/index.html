@@ -76,13 +76,13 @@
                     tempCanvas.width = 32;
                     tempCanvas.height = 32;
                     var tempCTX = tempCanvas.getContext("2d");
-                    tempCTX.drawImage(img, i * 32, 0, 32, 32, 0, 0, 32, 32);
+                    tempCTX.drawImage(img, i * 16, 0, 16, 16, 0, 0, 16, 16);
                     animationFrames.push(tempCanvas);
                 }
 
                 /*
                 for (var i = 0; i < animationFrames.length; i++)
-                    ctx.drawImage(animationFrames[i], i * 32, 32, 32, 32);
+                    ctx.drawImage(animationFrames[i], 16, i * 16, 16, 16);
 
                 debugger;
                 */

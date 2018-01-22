@@ -28,19 +28,36 @@
 
         /// Settings ////////////////////////////////////////////
 
-        // put any adjustable settings here that would be interesting to tinker with.
-
+        // frames per second limit
         var FPS = 30;
+
+        // width and height of actual canvases
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 600;
+
+        // size of grid squares
         var GRID_X = 16;
         var GRID_Y = 16;
-        var GRID_CHANGE_TIME = 14;
-        var GRID_CHANGE_STEP = 0.5;
+
+        // this should be the number of frames in your animation
+        var ANIMATION_FRAMES = 14;
+
+        // this is the animation playback speed
+        var ANIMATION_SPEED = 0.5;
+
+        // the amount of frames that can be randomly stopped early on
+        var COMPLETION_ERROR_FRAMES = 4;
+
+        // the amount of cells to be randomly 'cleaned up' per loop
+        var CLEANUP_CELL_COUNT = 3;
+
+        // the chances a random point will be spawn somewhere ( 0 - 1 )
+        var RANDOM_POINT_SPAWN_CHANCE = 0.5;
+
+        // this is the limit to how big the 'brush' will get as the mouse speed increases
         var EXTRA_MOUSE_POSITIONS = 6;
-        var GRID_COLOR_FADE_SPEED = 0.05;
-        var SPEED_INCREASE_DEVISOR = 2;
-        var SPEED_INCREASE_LIMIT_DEVISOR = 15;
+        var EXTRA_MOUSE_INCREASE_DEVISOR = 2;
+        var EXTRA_MOUSE_INCREASE_LIMIT_DEVISOR = 15;
 
         /////////////////////////////////////////////////////////
 
@@ -86,7 +103,7 @@
                     tempCanvas.width = 32;
                     tempCanvas.height = 32;
                     var tempCTX = tempCanvas.getContext("2d");
-                    tempCTX.drawImage(img, i * 32, 0, 32, 32, 0, 0, 32, 32);
+                    tempCTX.drawImage(img, i * 16 , 0, 16, 16, 0, 0, 16, 16);
                     animationFrames.push(tempCanvas);
                 }
                 
@@ -115,6 +132,26 @@
 
         function update(ctx, colorCtx) {
 
+            for (var i = 0; i < CLEANUP_CELL_COUNT; i++) {
+
+                var x = Math.round((Math.random() * CANVAS_WIDTH) / GRID_X) * GRID_X;
+                var y = Math.round((Math.random() * CANVAS_HEIGHT) / GRID_Y) * GRID_Y;
+
+                drawGridTile(
+                    ctx, 
+                    x, 
+                    y, 
+                    0);
+            }
+
+            if (Math.random() < RANDOM_POINT_SPAWN_CHANCE) {
+
+                var x = Math.round((Math.random() * CANVAS_WIDTH) / GRID_X) * GRID_X;
+                var y = Math.round((Math.random() * CANVAS_HEIGHT) / GRID_Y) * GRID_Y;
+
+                addPoint(x, y);
+            }
+
             // draw the wave
 
             updateTheWave(colorCtx);
@@ -124,11 +161,11 @@
 
                 // 'age' and expire mouse positions.
 
-                mouseHistory[index][2] = mouseHistory[index][2] + GRID_CHANGE_STEP;
+                mouseHistory[index][2] = mouseHistory[index][2] + ANIMATION_SPEED;
 
                 // if this mouse position is too old, remove it. otherwise redraw it.
 
-                if (mouseHistory[index][2] >= GRID_CHANGE_TIME) {
+                if (mouseHistory[index][2] >= (ANIMATION_FRAMES - (Math.random() * COMPLETION_ERROR_FRAMES))) {
                     
                     mouseHistory.splice(index, 1);
                     
@@ -155,7 +192,7 @@
 
             theWaveData.x += Math.sin(frame) * 4;
             theWaveData.rotation += Math.cos(frame * 2) / 2;
-            theWaveData.width += Math.cos(frame * 2) * 10 + 1;
+            theWaveData.width += Math.cos(frame * 2) * 10;
 
             // draw it
 
@@ -195,7 +232,7 @@
             if (Math.abs(e.x - lastMouseX) >= GRID_X || Math.abs(e.y - lastMouseY) >= GRID_Y) {
 
                 // limit the size of the speed return.
-                e.speed = Math.min(EXTRA_MOUSE_POSITIONS, e.speed / SPEED_INCREASE_LIMIT_DEVISOR);
+                e.speed = Math.min(EXTRA_MOUSE_POSITIONS, e.speed / EXTRA_MOUSE_INCREASE_LIMIT_DEVISOR);
 
                 for (var x = 0; x < e.speed; x ++) {
                     for (var y = 0; y < e.speed; y ++) {
@@ -206,31 +243,38 @@
 
                         var actualY = 
                             Math.floor(
-                                (e.y + (GRID_Y * y)) / GRID_Y) * GRID_Y;
+                                (e.y + (GRID_Y * y)) / GRID_Y) * GRID_Y;     
 
-                        var exists = false;
-                        for (var i = 0; i < mouseHistory.length; i++)
-                            if (mouseHistory[i][0] == actualX && mouseHistory[i][1] == actualY) {
-
-                                mouseHistory[i][2] = 0;
-                                exists = true;
-                                break;
-                            }
-
-                        if (!exists) {
-
-                            mouseHistory.push(
-                                [
-                                    actualX, 
-                                    actualY, 
-                                    0
-                                ]);                            
-                        }
+                        addPoint(
+                            actualX, 
+                            actualY);               
                     }
                 }
                 
                 lastMouseX = e.x;
                 lastMouseY = e.y;
+            }
+        }
+
+        function addPoint(x, y) {
+
+            var exists = false;
+            for (var i = 0; i < mouseHistory.length; i++)
+                if (mouseHistory[i][0] == x && mouseHistory[i][1] == y) {
+
+                    mouseHistory[i][2] = 0;
+                    exists = true;
+                    break;
+                }
+
+            if (!exists) {
+
+                mouseHistory.push(
+                    [
+                        x, 
+                        y, 
+                        0
+                    ]);    
             }
         }
 
