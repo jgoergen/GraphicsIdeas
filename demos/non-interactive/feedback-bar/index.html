@@ -26,37 +26,78 @@
         // put any adjustable settings here that would be interesting to tinker with.
 
         var FPS = 60;
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 400;
+        var CANVAS_WIDTH = 1920;
+        var CANVAS_HEIGHT = 1080;
 
         /////////////////////////////////////////////////////////
 
-        var localCtxReference = undefined;
         var lastTime = 0;
         var date = undefined;
         var elapsed = 0;
+        var aDevisor = 2;
+        var cDevisor = 4;
+        var baseR = 80;
+        var baseGMultiplier = 35;
+        var baseB = 150;
+        var expansionDevisor = 10;
+        var alpha = 1;
 
         // code to run before update looping starts.
 
         function init(ctx) {
             
-            console.log("Init");
-
-            localCtxReference = ctx;
-            localCtxReference.fillStyle = "white";
             lastTime = new Date();
             elapsed = Math.random() * 10000;
+            aDevisor = Math.random() * 4;
+            cDevisor = Math.random() * 4;
+            baseR = parseInt(Math.random() * 255);
+            baseB = parseInt(Math.random() * 150);
+            baseGMultiplier = parseInt(Math.random() * 40);
+            expansionDevisor = Math.random() * 20;
+            alpha = 0.2 + Math.random() * 0.8;
         }
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(ctx, canvas) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
+
+            var a = 
+                Math.cos((elapsed / 1000) / aDevisor) * 100;
+
+            var b = 
+                Math.cos(elapsed / 1000) * (a / 100);
             
-            //console.log("Update");
+            var c = 
+                Math.sin((elapsed / 1000) / cDevisor) * 100;
+
+            ctx.drawImage(
+                canvas, 
+                b, 
+                b, 
+                CANVAS_WIDTH + (b / expansionDevisor), 
+                CANVAS_HEIGHT + (b / expansionDevisor));
+
+            ctx.fillStyle = 
+                "rgba(80, " + parseInt(Math.abs(b) * baseGMultiplier) + ", " + parseInt(a + baseB) + ", " + alpha + ")";
+                
+            ctx.save();
+
+            ctx.rotate(b);
+
+            ctx.fillRect(
+                (CANVAS_WIDTH / 2) + (c * 10), 
+                a * 4, 
+                a * b, 
+                (c + ((CANVAS_HEIGHT - (a * 4)) / 2)));
+
+            ctx.restore();
+
+            ctx.rotate(
+                b / 4080);
         }
 
         // code to run when user presses primary mouse button ( or first finger. )
@@ -64,7 +105,6 @@
         function mouseDown(e) {
 
             //e.x e.y e.speed
-            console.log("Mouse Down");
         }
 
         // code to run when user raises primary mouse button ( or first finger. )
@@ -72,7 +112,6 @@
         function mouseUp(e) {
 
             //e.x e.y e.speed
-            console.log("Mouse Up");
         }
 
         // code to run when user moves primary mouse button ( or first finger. )
@@ -80,11 +119,6 @@
         function mouseMove(e, isMouseDown) {
 
             //e.x e.y e.speed
-            if (isMouseDown) {
-
-                console.log("Mouse Move");
-                localCtxReference.fillRect(e.x, e.y, e.speed, e.speed);
-            }
         }
 
         // code to run when user presses secondary mouse button ( or second finger. )
@@ -92,7 +126,6 @@
         function secondaryMouseDown(e) {
 
             //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
         }
 
         // code to run when user raises secondary mouse button ( or second finger. )
@@ -100,7 +133,6 @@
         function secondaryMouseUp(e) {
 
             //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
         }
 
         // code to run when user moves secondary mouse button ( or second finger. )
@@ -108,7 +140,6 @@
         function secondaryMouseMove(e) {
 
             //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
         }
 
         // System stuff ////////////////////////////////////////
@@ -316,7 +347,7 @@
                 if (delta > interval) {
                     
                     then = now - (delta % interval);
-                    update(this.ctx);
+                    update(this.ctx, this.canvas);
                 }
 
                 requestAnimationFrame(this.run);
