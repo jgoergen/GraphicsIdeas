@@ -1,0 +1,371 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var FPS = 60;
+        var CANVAS_WIDTH = 1920;
+        var CANVAS_HEIGHT = 1080;
+
+        /////////////////////////////////////////////////////////
+
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+        var aDevisor = 2;
+        var cDevisor = 4;
+        var baseR = 80;
+        var baseGMultiplier = 35;
+        var baseB = 150;
+        var expansionDevisor = 10;
+        var alpha = 1;
+        var chars = ["+", "[]", "-", "O", "I", "X", "*", ".", ":", "8", "~", "(o)", "="];
+        var char = "";
+
+        // code to run before update looping starts.
+
+        function init(ctx) {
+            
+            lastTime = new Date();
+            elapsed = Math.random() * 10000;
+            aDevisor = Math.random() * 4;
+            cDevisor = Math.random() * 4;
+            baseRMultiplier = parseInt(Math.random() * 6);
+            baseGMultiplier = parseInt(Math.random() * 60);
+            baseBMultiplier = parseInt(Math.random() * 6);
+            expansionDevisor = Math.random() * 20;
+            alpha = 0.2 + Math.random() * 0.8;
+            ctx.font = ((Math.random() * 300) + 100) + "px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            char = chars[parseInt(Math.random() * chars.length)];
+        }
+
+        // code to run every frame.
+
+        function update(ctx, canvas) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+
+            var a = 
+                Math.cos((elapsed / 1000) / aDevisor) * 100;
+
+            var b = 
+                Math.cos(elapsed / 1000) * (a / 100);
+            
+            var c = 
+                Math.sin((elapsed / 1000) / cDevisor) * 100;
+
+            ctx.drawImage(
+                canvas, 
+                b, 
+                b, 
+                CANVAS_WIDTH + (b / expansionDevisor), 
+                CANVAS_HEIGHT + (b / expansionDevisor));
+
+            ctx.fillStyle = 
+                "rgba(" + 
+                parseInt(Math.abs(a) * baseRMultiplier) + ", " + 
+                parseInt(Math.abs(b) * baseGMultiplier) + ", " + 
+                parseInt(Math.abs(c) * baseBMultiplier) + ", " + 
+                alpha + ")";
+                
+            ctx.save();
+            ctx.translate(
+                (CANVAS_WIDTH / 2) + (c * 4), 
+                (CANVAS_HEIGHT / 2) + (a * 2));
+            ctx.rotate(b * 2);
+
+            ctx.fillText(
+                char,
+                0,
+                0);
+
+            ctx.restore();
+
+            ctx.rotate(
+                b / 4080);
+        }
+
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // System stuff ////////////////////////////////////////
+
+        (function() {
+
+            var thisRef = this;
+            this.ctx = undefined;
+            this.canvas = undefined;
+            this.isMouseDown = false;
+            this.isSecondaryMouseDown = false;
+            this.now = undefined;
+            this.then = Date.now();
+            this.interval = 1000 / FPS;
+            this.delta;
+            this.lastX = undefined;
+            this.lastY = undefined;
+            this.canvasOffsetX = undefined;
+            this.canvasOffsetY = undefined;
+
+            this.initialize = function() {
+
+                this.canvas = 
+                    document
+                    .getElementById(
+                        "canvas");
+
+                this.canvas.width = CANVAS_WIDTH;
+                this.canvas.height = CANVAS_HEIGHT;
+                this.canvasOffsetX = this.canvas.offsetLeft;
+                this.canvasOffsetY = this.canvas.offsetTop;
+
+                this.ctx = 
+                    canvas
+                    .getContext(
+                        "2d");
+
+                init(this.ctx);
+
+                if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
+
+                    this.canvas
+                    .addEventListener(
+                        "touchstart", 
+                        function(e) { thisRef.touchStartHanlder(e); }, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchmove", 
+                        function(e) { thisRef.touchMoveHanlder(e); }, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchend", 
+                        function(e) { thisRef.touchEndHanlder(e); }, 
+                        false);
+
+                } 
+
+                this.canvas
+                .addEventListener(
+                    "mousemove", 
+                    function(e) { thisRef.mouseMoveHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mousedown", 
+                    function(e) { thisRef.mouseDownHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mouseup", 
+                    function(e) { thisRef.mouseUpHandler(e); }, 
+                    false);
+
+                requestAnimationFrame(this.run);
+            };
+
+            
+            this.interpolateMove = function(x, y) {
+
+                // fix canvas scaling
+                x = x * this.canvas.width / this.canvas.clientWidth;
+                y = y * this.canvas.height / this.canvas.clientHeight;
+
+                var result = [];
+
+                if (!this.lastX) {
+
+                    this.lastX = x;
+                    this.lastY = y;
+                }
+
+                var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
+                var steps = distance / 4;
+                var intervalX = (x - lastX) / steps;
+                var intervalY = (y - lastY) / steps;
+
+                for (var step = 0; step < steps; step ++) {
+
+                    x = lastX + (step * intervalX);
+                    y = lastY + (step * intervalY);
+                    result.push({x: x, y: y, speed: distance});
+                }
+
+                this.lastX = x;
+                this.lastY = y;
+
+                return result;
+            }
+
+            this.touchStartHanlder = function(e) {
+
+                if (e.touches.length == 1)
+                    mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+                else if (e.touches.length == 2)
+                    secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+            }
+
+            this.touchEndHanlder = function(e) {
+
+                if (e.touches.length == 0)
+                    mouseUp();
+                else if (e.touches.length == 1)
+                    secondaryMouseUp();
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.touchMoveHanlder = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.touches[0].pageX - this.canvasOffsetX, 
+                        e.touches[0].pageY - this.canvasOffsetY);
+                        
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (e.touches.length == 0)
+                        mouseMove(steps[i], false);
+                    else if (e.touches.length == 1)
+                        mouseMove(steps[i], true);
+                    else if (e.touches.length == 2)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.mouseDownHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = true;
+                    secondaryMouseDown(e);
+                } else {
+
+                    isMouseDown = true;
+                    mouseDown(e);
+                }
+            }
+
+            this.mouseUpHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = false;
+                    secondaryMouseUp(e);
+                } else {
+
+                    isMouseDown = false;
+                    mouseUp(e);
+                }
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.mouseMoveHandler = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.offsetX, 
+                        e.offsetY);
+
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (!isMouseDown && !isSecondaryMouseDown)
+                        mouseMove(steps[i], false);
+                    else if (isMouseDown)
+                        mouseMove(steps[i], true);
+                    else if (isSecondaryMouseDown)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.run = function() {
+
+                now = Date.now();
+                delta = now - then;
+
+                if (delta > interval) {
+                    
+                    then = now - (delta % interval);
+                    update(this.ctx, this.canvas);
+                }
+
+                requestAnimationFrame(this.run);
+            }
+
+            window.onload = this.initialize;
+        })();
+
+    </script>
+</html>
