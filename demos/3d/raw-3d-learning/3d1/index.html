@@ -1,0 +1,494 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script id="2d-vertex-shader" type="notjs">
+ 
+        // an attribute will receive data from a buffer
+        attribute vec2 a_position;
+        uniform vec2 u_resolution;
+        
+        // all shaders have a main function
+
+        void main() {
+        
+            // convert the position from pixels to 0.0 to 1.0
+            vec2 zeroToOne = a_position / u_resolution;
+            
+            // convert from 0->1 to 0->2
+            vec2 zeroToTwo = zeroToOne * 2.0;
+            
+            // convert from 0->2 to -1->+1 (clipspace)
+            vec2 clipSpace = zeroToTwo - 1.0;
+            
+            gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+        }
+    
+    </script>
+       
+    <script id="2d-fragment-shader" type="notjs">
+    
+        // fragment shaders don't have a default precision so we need
+        // to pick one. mediump is a good default
+
+        precision mediump float;
+
+        uniform vec4 u_color;
+        
+        void main() {
+
+            // gl_FragColor is a special variable a fragment shader
+            // is responsible for setting
+
+            gl_FragColor = u_color;
+        }
+       
+    </script>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var FPS = 60;
+        var CANVAS_WIDTH = 800;
+        var CANVAS_HEIGHT = 400;
+
+        /////////////////////////////////////////////////////////
+
+        var localCtxReference = undefined;
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+
+        // code to run before update looping starts.
+
+        function init(ctx, program) {
+            
+            console.log("Init");
+            localCtxReference = ctx;
+            lastTime = new Date();
+            elapsed = Math.random() * 10000;
+
+            // setup and bind position buffer
+
+            var positionAttributeLocation = ctx.getAttribLocation(program, "a_position");
+            var positionBuffer = ctx.createBuffer();
+            ctx.bindBuffer(ctx.ARRAY_BUFFER, positionBuffer);
+            ctx.enableVertexAttribArray(positionAttributeLocation);
+
+            // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+
+            ctx.vertexAttribPointer(
+                    positionAttributeLocation, 
+                    2, // size, 2 components per iteration
+                    ctx.FLOAT, // type, the data is 32bit floats
+                    false, // normalize, don't normalize the data
+                    0, // stride, 0 = move forward size * sizeof(type) each iteration to get the next position
+                    0 // offset, start at the beginning of the buffer
+                );
+
+            // setup and bind resolution 
+
+            var resolutionUniformLocation = ctx.getUniformLocation(program, "u_resolution");
+
+            // set it
+            
+            ctx.uniform2f(resolutionUniformLocation, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // setup and bind color
+
+            var colorUniformLocation = ctx.getUniformLocation(program, "u_color");
+            
+            // Clear the viewport
+            
+            ctx.clearColor(0, 0, 0, 0);
+            ctx.clear(ctx.COLOR_BUFFER_BIT);
+
+            // draw 50 random rectangles in random colors
+
+            for (var ii = 0; ii < 50; ++ii) {
+
+                // Setup a random rectangle
+                // This will write to positionBuffer because
+                // its the last thing we bound on the ARRAY_BUFFER
+                // bind point
+
+                var x1 = Math.floor(Math.random() * 300);
+                var x2 = Math.floor(Math.random() * 300) + Math.floor(Math.random() * 300);
+                var y1 = Math.floor(Math.random() * 300);
+                var y2 = Math.floor(Math.random() * 300) + Math.floor(Math.random() * 300);
+                
+                // NOTE: gl.bufferData(gl.ARRAY_BUFFER, ...) will affect
+                // whatever buffer is bound to the `ARRAY_BUFFER` bind point
+                // but so far we only have one buffer. If we had more than one
+                // buffer we'd want to bind that buffer to `ARRAY_BUFFER` first.
+                
+                ctx.bufferData(ctx.ARRAY_BUFFER, new Float32Array([
+                    x1, y1,
+                    x2, y1,
+                    x1, y2,
+                    x1, y2,
+                    x2, y1,
+                    x2, y2]), ctx.STATIC_DRAW);
+            
+                // Set a random color.
+
+                ctx.uniform4f(colorUniformLocation, Math.random(), Math.random(), Math.random(), 1);
+            
+                // Draw the rectangle.
+
+                ctx.drawArrays(ctx.TRIANGLES, 0, 6);
+            }
+        }
+
+        // code to run every frame.
+
+        function update(ctx) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+            
+            //console.log("Update");
+        }
+
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+            //e.x e.y e.speed
+            console.log("Mouse Down");
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+
+            //e.x e.y e.speed
+            console.log("Mouse Up");
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+            //e.x e.y e.speed
+            if (isMouseDown) {
+
+                console.log("Mouse Move");
+                localCtxReference.fillRect(e.x, e.y, e.speed, e.speed);
+            }
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+            //e.x e.y e.speed
+            console.log("Secondary Mouse Down");
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+            //e.x e.y e.speed
+            console.log("Secondary Mouse Up");
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+            //e.x e.y e.speed
+            console.log("Secondary Mouse Move");
+        }
+
+        // System stuff ////////////////////////////////////////
+
+        (function() {
+
+            var thisRef = this;
+            this.ctx = undefined;
+            this.canvas = undefined;
+            this.isMouseDown = false;
+            this.isSecondaryMouseDown = false;
+            this.now = undefined;
+            this.then = Date.now();
+            this.interval = 1000 / FPS;
+            this.delta;
+            this.lastX = undefined;
+            this.lastY = undefined;
+            this.canvasOffsetX = undefined;
+            this.canvasOffsetY = undefined;
+
+            this.initialize = function() {
+
+                this.canvas = 
+                    document
+                    .getElementById(
+                        "canvas");
+
+                this.canvas.width = CANVAS_WIDTH;
+                this.canvas.height = CANVAS_HEIGHT;
+                this.canvasOffsetX = this.canvas.offsetLeft;
+                this.canvasOffsetY = this.canvas.offsetTop;
+
+                this.ctx = 
+                    canvas
+                    .getContext(
+                        "webgl");
+
+                var vertexShader = 
+                    createShader(
+                        ctx, 
+                        ctx.VERTEX_SHADER, 
+                        document.getElementById("2d-vertex-shader").text);
+
+                var fragmentShader = 
+                    createShader(
+                        ctx, 
+                        ctx.FRAGMENT_SHADER, 
+                        document.getElementById("2d-fragment-shader").text);
+
+                var program = 
+                    createProgram(
+                        ctx, 
+                        vertexShader, 
+                        fragmentShader);
+
+                ctx.viewport(
+                    0, 
+                    0, 
+                    CANVAS_WIDTH, 
+                    CANVAS_HEIGHT);
+
+                ctx.useProgram(program);
+
+                init(this.ctx, program);
+
+                if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
+
+                    this.canvas
+                    .addEventListener(
+                        "touchstart", 
+                        function(e) { thisRef.touchStartHanlder(e); }, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchmove", 
+                        function(e) { thisRef.touchMoveHanlder(e); }, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchend", 
+                        function(e) { thisRef.touchEndHanlder(e); }, 
+                        false);
+
+                } 
+
+                this.canvas
+                .addEventListener(
+                    "mousemove", 
+                    function(e) { thisRef.mouseMoveHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mousedown", 
+                    function(e) { thisRef.mouseDownHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mouseup", 
+                    function(e) { thisRef.mouseUpHandler(e); }, 
+                    false);
+
+                requestAnimationFrame(this.run);
+            };
+
+            
+            this.interpolateMove = function(x, y) {
+
+                // fix canvas scaling
+                x = x * this.canvas.width / this.canvas.clientWidth;
+                y = y * this.canvas.height / this.canvas.clientHeight;
+
+                var result = [];
+
+                if (!this.lastX) {
+
+                    this.lastX = x;
+                    this.lastY = y;
+                }
+
+                var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
+                var steps = distance / 4;
+                var intervalX = (x - lastX) / steps;
+                var intervalY = (y - lastY) / steps;
+
+                for (var step = 0; step < steps; step ++) {
+
+                    x = lastX + (step * intervalX);
+                    y = lastY + (step * intervalY);
+                    result.push({x: x, y: y, speed: distance});
+                }
+
+                this.lastX = x;
+                this.lastY = y;
+
+                return result;
+            }
+
+            this.touchStartHanlder = function(e) {
+
+                if (e.touches.length == 1)
+                    mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+                else if (e.touches.length == 2)
+                    secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+            }
+
+            this.touchEndHanlder = function(e) {
+
+                if (e.touches.length == 0)
+                    mouseUp();
+                else if (e.touches.length == 1)
+                    secondaryMouseUp();
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.touchMoveHanlder = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.touches[0].pageX - this.canvasOffsetX, 
+                        e.touches[0].pageY - this.canvasOffsetY);
+                        
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (e.touches.length == 0)
+                        mouseMove(steps[i], false);
+                    else if (e.touches.length == 1)
+                        mouseMove(steps[i], true);
+                    else if (e.touches.length == 2)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.mouseDownHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = true;
+                    secondaryMouseDown(e);
+                } else {
+
+                    isMouseDown = true;
+                    mouseDown(e);
+                }
+            }
+
+            this.mouseUpHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = false;
+                    secondaryMouseUp(e);
+                } else {
+
+                    isMouseDown = false;
+                    mouseUp(e);
+                }
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.mouseMoveHandler = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.offsetX, 
+                        e.offsetY);
+
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (!isMouseDown && !isSecondaryMouseDown)
+                        mouseMove(steps[i], false);
+                    else if (isMouseDown)
+                        mouseMove(steps[i], true);
+                    else if (isSecondaryMouseDown)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.run = function() {
+
+                now = Date.now();
+                delta = now - then;
+
+                if (delta > interval) {
+                    
+                    then = now - (delta % interval);
+                    update(this.ctx);
+                }
+
+                requestAnimationFrame(this.run);
+            }
+
+            this.createShader = function(ctx, type, source) {
+
+                var shader = ctx.createShader(type);
+                ctx.shaderSource(shader, source);
+                ctx.compileShader(shader);
+                var success = ctx.getShaderParameter(shader, ctx.COMPILE_STATUS);
+
+                if (success) 
+                    return shader;
+
+                ctx.deleteShader(shader);
+            }
+
+            this.createProgram = function(ctx, vertexShader, fragmentShader) {
+
+                var program = ctx.createProgram();
+                ctx.attachShader(program, vertexShader);
+                ctx.attachShader(program, fragmentShader);
+                ctx.linkProgram(program);
+                var success = ctx.getProgramParameter(program, ctx.LINK_STATUS);
+
+                if (success)
+                    return program;
+
+                ctx.deleteProgram(program);
+            }
+
+            window.onload = this.initialize;
+        })();
+
+    </script>
+</html>
