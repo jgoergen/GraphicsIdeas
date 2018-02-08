@@ -1,0 +1,456 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var FPS = 30;
+        var CANVAS_WIDTH = 800;
+        var CANVAS_HEIGHT = 800;
+        var RADIUS = Math.ceil(Math.random() * 20) + 4;
+        var BLUR = Math.ceil(Math.random() * 100) + 10;
+        var WIGGLE_AMOUNT = Math.ceil(Math.random() * 20);
+        var MAX_ADD_VALUE = Math.random() / 100;
+
+        // TODO: generate these values https://gist.github.com/paulmillr/6205257
+        
+        var GRADIENT_COLORS = {
+            0.05: "#000AB2",
+            0.1: "#1701B6",
+            0.15: "#3803BA",
+            0.2: "#5B04BE",
+            0.25: "#7F06C2",
+            0.3: "#A308C6",
+            0.35: "#C80ACA",
+            0.4: "#CE0CAF",
+            0.45: "#D20E90",
+            0.5: "#D61071",
+            0.55: "#DA1352",
+            0.6: "#DE1531",
+            0.65: "#E21E17",
+            0.7: "#E6441A",
+            0.75: "#EA6A1C",
+            0.8: "#EE911F",
+            0.85: "#F2B921",
+            0.9: "#F6E124",
+            0.95: "#EAFA27",
+            1.0: "#C9FE2A",
+        };
+
+        /////////////////////////////////////////////////////////
+
+        var localCtxReference = undefined;
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+
+        this.data = null;
+        this.max = 0;
+        this.minOpacity = 0.1;
+        var circle = undefined;
+        var gradient = undefined;
+
+        // code to run before update looping starts.
+
+        function init(ctx) {
+            
+            localCtxReference = ctx;
+            localCtxReference.fillStyle = "white";
+            lastTime = new Date();
+            elapsed = Math.random() * 10000;
+
+            data = new Array();
+            max = 0;
+            circle = getRadialBlur(RADIUS);
+            gradient = getGradient(GRADIENT_COLORS);
+        }
+
+        // code to run every frame.
+
+        function update(ctx) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+            
+            //console.log("Update");
+            localCtxReference.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            var randomX = 0;
+            var randomY = 0;
+
+            for (var i = 0, len = data.length; i < len; i++) {
+                
+                randomX = Math.random() * WIGGLE_AMOUNT;
+                randomY = Math.random() * WIGGLE_AMOUNT;
+
+                localCtxReference.globalAlpha = Math.max(data[i].data / max, minOpacity);
+                localCtxReference.drawImage(circle, data[i].x - (circle.width / 2) + randomX, data[i].y - (circle.height / 2) + randomY);
+            }
+
+            var colored = localCtxReference.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            colorize(colored.data, gradient);
+            localCtxReference.putImageData(colored, 0, 0);
+        }
+            
+        function getRadialBlur(_r) {
+        
+            var circle = document.createElement("canvas");
+            var ctx = circle.getContext("2d");
+            var r2 = _r + BLUR;
+            
+            circle.width = circle.height = r2 * 2;
+            ctx.shadowOffsetX = ctx.shadowOffsetY = 200;
+            ctx.shadowBlur = BLUR;
+            ctx.shadowColor = "black";
+            ctx.beginPath();
+            ctx.arc(r2 - 200, r2- 200, _r, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
+            
+            return circle;
+        }
+        
+        function addPoint(_x, _y, _data) {
+        
+            if (_x < 0 || _x > CANVAS_WIDTH)
+                return;
+            
+            if (_y < 0 || _y > CANVAS_HEIGHT)
+                return;
+            
+            if (typeof _data != "number")
+                return;
+            
+            if (_data < 0)
+                return;
+            
+            if (_data > max)
+                max = _data;
+            
+            for (var i = 0; i < data.len; i++) {
+
+                if (data[i].x === _x && data[i].y === _y) {
+
+                    data[i].data += _data;
+                    return;
+                }
+            }
+
+            data.push({x: _x, y: _y, data: _data});
+        }
+        
+        function getGradient(_grad) {
+        
+            var tempCanvas = document.createElement("canvas");
+            var ctx = tempCanvas.getContext("2d");
+            var gradient = ctx.createLinearGradient(0, 0, 0, 256);
+            
+            tempCanvas.width = 1;
+            tempCanvas.height = 256;
+            
+            for (var i in _grad)
+                gradient.addColorStop(i, _grad[i]);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1, 256);
+            
+            return ctx.getImageData(0, 0, 1, 256).data;
+        }
+        
+        function colorize(_imageData, _gradient) {
+        
+            var alpha = 0;
+            
+            for (var i = 3, len = _imageData.length; i < len; i += 4) {
+                
+                alpha = _imageData[i] * 4; 
+
+                if (alpha) {
+                    
+                    _imageData[i - 3] = _gradient[alpha];
+                    _imageData[i - 2] = _gradient[alpha + 1];
+                    _imageData[i - 1] = _gradient[alpha + 2];
+                }
+            }
+        }
+        
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+            
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+            // quantize to reduce the amount of points possible
+
+            var quantizedX = Math.round(e.x / RADIUS) * RADIUS;
+            var quantizedY = Math.round(e.y / RADIUS) * RADIUS;
+
+            addPoint(quantizedX, quantizedY, Math.random() * MAX_ADD_VALUE);
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+        }
+
+        // System stuff ////////////////////////////////////////
+
+        (function() {
+
+            var thisRef = this;
+            this.ctx = undefined;
+            this.canvas = undefined;
+            this.isMouseDown = false;
+            this.isSecondaryMouseDown = false;
+            this.now = undefined;
+            this.then = Date.now();
+            this.interval = 1000 / FPS;
+            this.delta;
+            this.lastX = undefined;
+            this.lastY = undefined;
+            this.canvasOffsetX = undefined;
+            this.canvasOffsetY = undefined;
+
+            this.initialize = function() {
+
+                this.canvas = 
+                    document
+                    .getElementById(
+                        "canvas");
+
+                this.canvas.width = CANVAS_WIDTH;
+                this.canvas.height = CANVAS_HEIGHT;
+                this.canvasOffsetX = this.canvas.offsetLeft;
+                this.canvasOffsetY = this.canvas.offsetTop;
+
+                this.ctx = 
+                    canvas
+                    .getContext(
+                        "2d");
+
+                init(this.ctx);
+
+                if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
+
+                    this.canvas
+                    .addEventListener(
+                        "touchstart", 
+                        function(e) { thisRef.touchStartHanlder(e); }, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchmove", 
+                        function(e) { thisRef.touchMoveHanlder(e); }, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchend", 
+                        function(e) { thisRef.touchEndHanlder(e); }, 
+                        false);
+
+                } 
+
+                this.canvas
+                .addEventListener(
+                    "mousemove", 
+                    function(e) { thisRef.mouseMoveHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mousedown", 
+                    function(e) { thisRef.mouseDownHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mouseup", 
+                    function(e) { thisRef.mouseUpHandler(e); }, 
+                    false);
+
+                requestAnimationFrame(this.run);
+            };
+
+            
+            this.interpolateMove = function(x, y) {
+
+                // fix canvas scaling
+                x = x * this.canvas.width / this.canvas.clientWidth;
+                y = y * this.canvas.height / this.canvas.clientHeight;
+
+                var result = [];
+
+                if (!this.lastX) {
+
+                    this.lastX = x;
+                    this.lastY = y;
+                }
+
+                var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
+                var steps = distance / RADIUS;
+                var intervalX = (x - lastX) / steps;
+                var intervalY = (y - lastY) / steps;
+
+                for (var step = 0; step < steps; step ++) {
+
+                    x = lastX + (step * intervalX);
+                    y = lastY + (step * intervalY);
+                    result.push({x: x, y: y, speed: distance});
+                }
+
+                this.lastX = x;
+                this.lastY = y;
+
+                return result;
+            }
+
+            this.touchStartHanlder = function(e) {
+
+                if (e.touches.length == 1)
+                    mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+                else if (e.touches.length == 2)
+                    secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+            }
+
+            this.touchEndHanlder = function(e) {
+
+                if (e.touches.length == 0)
+                    mouseUp();
+                else if (e.touches.length == 1)
+                    secondaryMouseUp();
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.touchMoveHanlder = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.touches[0].pageX - this.canvasOffsetX, 
+                        e.touches[0].pageY - this.canvasOffsetY);
+                        
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (e.touches.length == 0)
+                        mouseMove(steps[i], false);
+                    else if (e.touches.length == 1)
+                        mouseMove(steps[i], true);
+                    else if (e.touches.length == 2)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.mouseDownHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = true;
+                    secondaryMouseDown(e);
+                } else {
+
+                    isMouseDown = true;
+                    mouseDown(e);
+                }
+            }
+
+            this.mouseUpHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = false;
+                    secondaryMouseUp(e);
+                } else {
+
+                    isMouseDown = false;
+                    mouseUp(e);
+                }
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.mouseMoveHandler = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.offsetX, 
+                        e.offsetY);
+
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (!isMouseDown && !isSecondaryMouseDown)
+                        mouseMove(steps[i], false);
+                    else if (isMouseDown)
+                        mouseMove(steps[i], true);
+                    else if (isSecondaryMouseDown)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.run = function() {
+
+                now = Date.now();
+                delta = now - then;
+
+                if (delta > interval) {
+                    
+                    then = now - (delta % interval);
+                    update(this.ctx);
+                }
+
+                requestAnimationFrame(this.run);
+            }
+
+            window.onload = this.initialize;
+        })();
+
+    </script>
+</html>

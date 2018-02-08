@@ -1,0 +1,474 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var FPS = 60;
+        var CANVAS_WIDTH = 1600;
+        var CANVAS_HEIGHT = 1600;
+
+        var MAX_DEGREE_CHANGE = 1 + Math.floor(Math.random() * 90);
+        var MOVE_SPEED = Math.ceil(Math.random() * 2);
+        var ROTATION_CHANCE = (Math.random() * 1) / 2;
+        var MAX_RUNTIME = 800;
+        var STARTING_THICKNESS = 1; //1 + Math.floor(Math.random() * 20);
+        var DEFLECTORS = 4 + Math.floor(Math.random() * 20);
+        var R_ADJUST = 2 + Math.floor(Math.random() * 20);
+        var G_ADJUST = 2 + Math.floor(Math.random() * 20);
+        var B_ADJUST = 2 + Math.floor(Math.random() * 20);
+        var QUANTIZE_SIZE = Math.round(5 + Math.floor(Math.random() * 50));
+        var QUANTIZE_MOD = (Math.random() * 2) - 1;
+        var STEPS_PER_RUN = 10;
+
+        /////////////////////////////////////////////////////////
+
+        var localCtxReference = undefined;
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+
+        var x, y, angle, lineColor, runtime, r, g, b;
+        var deflectors = new Array();
+        var finish = false;
+
+        // code to run before update looping starts.
+
+        function init(ctx) {
+            
+            console.log("Init");
+
+            localCtxReference = ctx;
+            lastTime = new Date();
+            elapsed = Math.random() * 10000;
+
+            ctx.lineStyle = "#fff";
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            r = 255; //Math.floor(Math.random() * 255);
+            g = Math.floor(Math.random() * 255);
+            b = Math.floor(Math.random() * 255);
+            
+            for (var i = 0; i < DEFLECTORS; i++) {
+                
+                deflectors.push({
+                        x: Math.floor(Math.random() * CANVAS_WIDTH),
+                            y: Math.floor(Math.random() * CANVAS_HEIGHT)
+                });
+                
+                //ctx.fillRect(deflectors[i].x - 2, deflectors[i].y - 2, 4, 4);
+            };    
+
+            iterate();
+        }
+
+        // code to run every frame.
+
+        function update(ctx) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+            
+            //ctx.clearRect(0, 0, 300, 300);
+    
+            for (var step = 0; step < STEPS_PER_RUN; step ++) {
+
+                if (Math.random() < ROTATION_CHANCE)
+                        angle += Math.floor((MAX_DEGREE_CHANGE / 2) - (Math.random() * MAX_DEGREE_CHANGE));
+                    
+                if (angle < 0)
+                    angle += 360;
+                
+                if (angle > 360)
+                    angle -= 360;
+                    
+                var oldX = x;
+                var oldY = y;
+                
+                x += (Math.cos(angle* (Math.PI/180)) * MOVE_SPEED);
+                y += (Math.sin(angle* (Math.PI/180)) * MOVE_SPEED);
+                
+                for (var i = 0; i < deflectors.length; i++) {
+                
+                    var distance = 
+                        Math.sqrt(
+                        (x - deflectors[i].x) * (x - deflectors[i].x) + 
+                        (y - deflectors[i].y) * (y - deflectors[i].y));
+
+                    if (distance < 200) {
+
+                        var bhAngle = 
+                            Math.atan2(
+                            (deflectors[i].x - x), 
+                            (deflectors[i].y - y));
+                                    
+                        x += Math.cos(bhAngle) * ((200 - distance) / 100);
+                        y += Math.sin(bhAngle) * ((200 - distance) / 100);
+                    }
+                }
+                
+                if (x < 0 || x > CANVAS_WIDTH) 
+                    angle += 180;
+                
+                if (y < 0 || y > CANVAS_HEIGHT)
+                    angle += 180;
+                
+                var alpha = 
+                    runtime > (MAX_RUNTIME / 2) ? 
+                    (1 - (runtime / MAX_RUNTIME)) * 2 : 
+                    (runtime / MAX_RUNTIME) * 2;
+                    
+                ctx.fillStyle = "rgba(" + r + "," + g  + "," + b + "," + alpha + ")";
+                ctx.strokeStyle = "rgba(" + r + "," + g  + "," + b + "," + alpha + ")";
+                ctx.lineWidth = STARTING_THICKNESS;
+                
+                var offset = STARTING_THICKNESS / 2;
+                var qX = Math.round(x / QUANTIZE_SIZE) * QUANTIZE_SIZE;
+                var qY = Math.round(y / QUANTIZE_SIZE) * QUANTIZE_SIZE;
+                var oldQX = Math.round(oldX / (QUANTIZE_SIZE * QUANTIZE_MOD)) * (QUANTIZE_SIZE * QUANTIZE_MOD);
+                var oldQY = Math.round(oldY / (QUANTIZE_SIZE * QUANTIZE_MOD)) * (QUANTIZE_SIZE * QUANTIZE_MOD);
+                
+                // draw top left
+                ctx.fillRect(qX - offset, qY - offset, STARTING_THICKNESS, STARTING_THICKNESS);
+                ctx.beginPath();
+                ctx.moveTo(oldQX, oldQY);
+                ctx.lineTo(qX, qY);
+                ctx.stroke();
+                
+                // draw top right
+                ctx.fillRect(CANVAS_WIDTH - qX - offset, qY - offset, STARTING_THICKNESS, STARTING_THICKNESS);
+                ctx.beginPath();
+                ctx.moveTo(CANVAS_WIDTH - oldQX, oldQY);
+                ctx.lineTo(CANVAS_WIDTH - qX, qY);
+                ctx.stroke();
+                
+                // draw bottom left
+                ctx.fillRect(CANVAS_WIDTH - qX - offset, CANVAS_HEIGHT - qY - offset, STARTING_THICKNESS, STARTING_THICKNESS);
+                ctx.beginPath();
+                ctx.moveTo(oldQX, CANVAS_HEIGHT - oldQY);
+                ctx.lineTo(qX, CANVAS_HEIGHT - qY);
+                ctx.stroke();
+                
+                // draw bottom right
+                ctx.fillRect(qX - offset, CANVAS_HEIGHT - qY - offset, STARTING_THICKNESS, STARTING_THICKNESS);
+                ctx.beginPath();
+                ctx.moveTo(CANVAS_WIDTH - oldQX, CANVAS_HEIGHT - oldQY);
+                ctx.lineTo(CANVAS_WIDTH - qX, CANVAS_HEIGHT - qY);
+                ctx.stroke();
+                
+                runtime ++;
+                if (runtime >= MAX_RUNTIME)
+                        iterate();
+            }
+        }
+
+        function iterate() {
+
+            runtime = 0;
+            x = CANVAS_WIDTH / 2;
+            y = CANVAS_HEIGHT / 2;
+            angle = Math.floor(Math.random() * 360);
+            //STARTING_THICKNESS -= 2;
+            r += R_ADJUST;
+            //g += G_ADJUST;
+            //b += B_ADJUST;
+
+            if (r < 1 || r > 255)
+                R_ADJUST *= -1;
+
+            if (g < 1 || g > 255)
+                G_ADJUST *= -1;
+
+            if (b < 1 || b > 255)
+                B_ADJUST *= -1;
+
+            if (STARTING_THICKNESS < 1)
+            STARTING_THICKNESS = 1;
+
+            //setDynamicBackground();
+        }
+
+        function setDynamicBackground() {
+
+            //generate the image from the canvas
+            var imageDataURL = canvas.toDataURL();
+
+            //set the dynamic image as the background
+            document.body.style.background = 
+                "transparent url('"+imageDataURL+"') repeat";
+        }
+
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+        }
+
+        // System stuff ////////////////////////////////////////
+
+        (function() {
+
+            var thisRef = this;
+            this.ctx = undefined;
+            this.canvas = undefined;
+            this.isMouseDown = false;
+            this.isSecondaryMouseDown = false;
+            this.now = undefined;
+            this.then = Date.now();
+            this.interval = 1000 / FPS;
+            this.delta;
+            this.lastX = undefined;
+            this.lastY = undefined;
+            this.canvasOffsetX = undefined;
+            this.canvasOffsetY = undefined;
+
+            this.initialize = function() {
+
+                this.canvas = 
+                    document
+                    .getElementById(
+                        "canvas");
+
+                this.canvas.width = CANVAS_WIDTH;
+                this.canvas.height = CANVAS_HEIGHT;
+                this.canvasOffsetX = this.canvas.offsetLeft;
+                this.canvasOffsetY = this.canvas.offsetTop;
+
+                this.ctx = 
+                    canvas
+                    .getContext(
+                        "2d");
+
+                init(this.ctx);
+
+                if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
+
+                    this.canvas
+                    .addEventListener(
+                        "touchstart", 
+                        function(e) { thisRef.touchStartHanlder(e); }, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchmove", 
+                        function(e) { thisRef.touchMoveHanlder(e); }, 
+                        false);
+
+                    this.canvas
+                    .addEventListener(
+                        "touchend", 
+                        function(e) { thisRef.touchEndHanlder(e); }, 
+                        false);
+
+                } 
+
+                this.canvas
+                .addEventListener(
+                    "mousemove", 
+                    function(e) { thisRef.mouseMoveHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mousedown", 
+                    function(e) { thisRef.mouseDownHandler(e); }, 
+                    false);
+                    
+                this.canvas
+                .addEventListener(
+                    "mouseup", 
+                    function(e) { thisRef.mouseUpHandler(e); }, 
+                    false);
+
+                requestAnimationFrame(this.run);
+            };
+
+            
+            this.interpolateMove = function(x, y) {
+
+                // fix canvas scaling
+                x = x * this.canvas.width / this.canvas.clientWidth;
+                y = y * this.canvas.height / this.canvas.clientHeight;
+
+                var result = [];
+
+                if (!this.lastX) {
+
+                    this.lastX = x;
+                    this.lastY = y;
+                }
+
+                var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
+                var steps = distance / 4;
+                var intervalX = (x - lastX) / steps;
+                var intervalY = (y - lastY) / steps;
+
+                for (var step = 0; step < steps; step ++) {
+
+                    x = lastX + (step * intervalX);
+                    y = lastY + (step * intervalY);
+                    result.push({x: x, y: y, speed: distance});
+                }
+
+                this.lastX = x;
+                this.lastY = y;
+
+                return result;
+            }
+
+            this.touchStartHanlder = function(e) {
+
+                if (e.touches.length == 1)
+                    mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+                else if (e.touches.length == 2)
+                    secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+            }
+
+            this.touchEndHanlder = function(e) {
+
+                if (e.touches.length == 0)
+                    mouseUp();
+                else if (e.touches.length == 1)
+                    secondaryMouseUp();
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.touchMoveHanlder = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.touches[0].pageX - this.canvasOffsetX, 
+                        e.touches[0].pageY - this.canvasOffsetY);
+                        
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (e.touches.length == 0)
+                        mouseMove(steps[i], false);
+                    else if (e.touches.length == 1)
+                        mouseMove(steps[i], true);
+                    else if (e.touches.length == 2)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.mouseDownHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = true;
+                    secondaryMouseDown(e);
+                } else {
+
+                    isMouseDown = true;
+                    mouseDown(e);
+                }
+            }
+
+            this.mouseUpHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = false;
+                    secondaryMouseUp(e);
+                } else {
+
+                    isMouseDown = false;
+                    mouseUp(e);
+                }
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.mouseMoveHandler = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.offsetX, 
+                        e.offsetY);
+
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (!isMouseDown && !isSecondaryMouseDown)
+                        mouseMove(steps[i], false);
+                    else if (isMouseDown)
+                        mouseMove(steps[i], true);
+                    else if (isSecondaryMouseDown)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.run = function() {
+
+                now = Date.now();
+                delta = now - then;
+
+                if (delta > interval) {
+                    
+                    then = now - (delta % interval);
+                    update(this.ctx);
+                }
+
+                requestAnimationFrame(this.run);
+            }
+
+            window.onload = this.initialize;
+        })();
+
+    </script>
+</html>
