@@ -1,0 +1,379 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100% !important; height: auto !important; }
+
+        </style>
+    </head>
+    <body>
+    </body>
+
+    <script src="vendor/three.js"></script>
+    <script src="vendor/TrackballControls.js"></script>
+    
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var FPS = 60;
+        var CANVAS_WIDTH = 800;
+        var CANVAS_HEIGHT = 400;
+
+        /////////////////////////////////////////////////////////
+
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+        var cubes = [];
+
+        // code to run before update looping starts.
+
+        function init(scene, camera, renderer) {
+            
+            console.log("Init");
+            lastTime = new Date();
+            elapsed = Math.random() * 10000;
+
+            var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+            var material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+            var geometry = new THREE.Geometry();
+            var matrix = new THREE.Matrix4();
+			var quaternion = new THREE.Quaternion();
+
+            for (var i = 0; i < 10; i++) {
+                    
+                var box = new THREE.Mesh( geometry, material );
+
+                var position = new THREE.Vector3();
+                position.x = Math.random() * 10000 - 5000;
+                position.y = Math.random() * 6000 - 3000;
+                position.z = Math.random() * 8000 - 4000;
+
+                var rotation = new THREE.Euler();
+                rotation.x = Math.random() * 2 * Math.PI;
+                rotation.y = Math.random() * 2 * Math.PI;
+                rotation.z = Math.random() * 2 * Math.PI;
+
+                var scale = new THREE.Vector3();
+                scale.x = Math.random() * 200 + 100;
+                scale.y = Math.random() * 200 + 100;
+                scale.z = Math.random() * 200 + 100;
+
+                quaternion.setFromEuler( rotation, false );
+                matrix.compose( position, quaternion, scale );
+                geometry.merge( box, matrix );
+                cubes.push(box);
+                scene.add(box);
+            }
+
+            scene.add( new THREE.AmbientLight( 0x555555 ) );
+            var light = new THREE.SpotLight( 0xffffff, 1.5 );
+            light.position.set( 0, 500, 2000 );
+            scene.add( light );
+
+            camera.position.z = 10;
+        }
+
+        // code to run every frame.
+
+        function update(scene, camera, renderer) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+
+            controls.update();
+            
+            for (var i = 0; i < 10; i++) {
+            
+                cubes[i].rotation.x = elapsed / 1000;
+                cubes[i].rotation.y = elapsed / 1000;
+            }
+            
+            renderer.render( scene, camera );
+        }
+
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+            //e.x e.y e.speed
+            console.log("Mouse Down");
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+
+            //e.x e.y e.speed
+            console.log("Mouse Up");
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+            //e.x e.y e.speed
+            if (isMouseDown) {
+
+                console.log("Mouse Move");
+            }
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+            //e.x e.y e.speed
+            console.log("Secondary Mouse Down");
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+            //e.x e.y e.speed
+            console.log("Secondary Mouse Up");
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+            //e.x e.y e.speed
+            console.log("Secondary Mouse Move");
+        }
+
+        // System stuff ////////////////////////////////////////
+
+        (function() {
+
+            var thisRef = this;
+            this.container = undefined;
+            this.scene = undefined;
+            this.camera = undefined;
+            this.controls = undefined;
+            this.renderer = undefined;
+            this.isMouseDown = false;
+            this.isSecondaryMouseDown = false;
+            this.now = undefined;
+            this.then = Date.now();
+            this.interval = 1000 / FPS;
+            this.delta;
+            this.lastX = undefined;
+            this.lastY = undefined;
+            this.canvasOffsetX = undefined;
+            this.canvasOffsetY = undefined;
+
+            this.initialize = function() {
+
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera( 75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000 );
+                this.renderer = new THREE.WebGLRenderer();
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( CANVAS_WIDTH, CANVAS_HEIGHT );
+
+                this.controls = new THREE.TrackballControls( camera );
+				this.controls.rotateSpeed = 1.0;
+				this.controls.zoomSpeed = 1.2;
+				this.controls.panSpeed = 0.8;
+				this.controls.noZoom = false;
+				this.controls.noPan = false;
+				this.controls.staticMoving = true;
+				this.controls.dynamicDampingFactor = 0.3;
+
+                document.body.appendChild( this.renderer.domElement );
+
+                init(this.scene, this.camera, this.renderer);
+
+                if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
+
+                    this.renderer.domElement
+                    .addEventListener(
+                        "touchstart", 
+                        function(e) { thisRef.touchStartHanlder(e); }, 
+                        false);
+
+                    this.renderer.domElement
+                    .addEventListener(
+                        "touchmove", 
+                        function(e) { thisRef.touchMoveHanlder(e); }, 
+                        false);
+
+                    this.renderer.domElement
+                    .addEventListener(
+                        "touchend", 
+                        function(e) { thisRef.touchEndHanlder(e); }, 
+                        false);
+
+                } 
+
+                this.renderer.domElement
+                .addEventListener(
+                    "mousemove", 
+                    function(e) { thisRef.mouseMoveHandler(e); }, 
+                    false);
+                    
+                    this.renderer.domElement
+                .addEventListener(
+                    "mousedown", 
+                    function(e) { thisRef.mouseDownHandler(e); }, 
+                    false);
+                    
+                    this.renderer.domElement
+                .addEventListener(
+                    "mouseup", 
+                    function(e) { thisRef.mouseUpHandler(e); }, 
+                    false);
+
+                requestAnimationFrame(this.run);
+            };
+
+            
+            this.interpolateMove = function(x, y) {
+
+                // fix canvas scaling
+                x = x * CANVAS_WIDTH / this.renderer.domElement.clientWidth;
+                y = y * CANVAS_HEIGHT / this.renderer.domElement.clientHeight;
+
+                var result = [];
+
+                if (!this.lastX) {
+
+                    this.lastX = x;
+                    this.lastY = y;
+                }
+
+                var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
+                var steps = distance / 4;
+                var intervalX = (x - lastX) / steps;
+                var intervalY = (y - lastY) / steps;
+
+                for (var step = 0; step < steps; step ++) {
+
+                    x = lastX + (step * intervalX);
+                    y = lastY + (step * intervalY);
+                    result.push({x: x, y: y, speed: distance});
+                }
+
+                this.lastX = x;
+                this.lastY = y;
+
+                return result;
+            }
+
+            this.touchStartHanlder = function(e) {
+
+                if (e.touches.length == 1)
+                    mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+                else if (e.touches.length == 2)
+                    secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+            }
+
+            this.touchEndHanlder = function(e) {
+
+                if (e.touches.length == 0)
+                    mouseUp();
+                else if (e.touches.length == 1)
+                    secondaryMouseUp();
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.touchMoveHanlder = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.touches[0].pageX - this.canvasOffsetX, 
+                        e.touches[0].pageY - this.canvasOffsetY);
+                        
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (e.touches.length == 0)
+                        mouseMove(steps[i], false);
+                    else if (e.touches.length == 1)
+                        mouseMove(steps[i], true);
+                    else if (e.touches.length == 2)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.mouseDownHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = true;
+                    secondaryMouseDown(e);
+                } else {
+
+                    isMouseDown = true;
+                    mouseDown(e);
+                }
+            }
+
+            this.mouseUpHandler = function(e) {
+
+                if ((e.which === 3 || e.button === 2)) {
+
+                    isSecondaryMouseDown = false;
+                    secondaryMouseUp(e);
+                } else {
+
+                    isMouseDown = false;
+                    mouseUp(e);
+                }
+
+                this.lastX = undefined;
+                this.lastY = undefined;
+            }
+
+            this.mouseMoveHandler = function(e) {
+
+                var steps = 
+                    this.interpolateMove(
+                        e.offsetX, 
+                        e.offsetY);
+
+                for (var i = 0; i < steps.length; i++) {
+
+                    if (!isMouseDown && !isSecondaryMouseDown)
+                        mouseMove(steps[i], false);
+                    else if (isMouseDown)
+                        mouseMove(steps[i], true);
+                    else if (isSecondaryMouseDown)
+                        secondaryMouseMove(steps[i]);
+                }
+            }
+
+            this.run = function() {
+
+                now = Date.now();
+                delta = now - then;
+
+                if (delta > interval) {
+                    
+                    then = now - (delta % interval);
+                    update(this.scene, this.camera, this.renderer);
+                }
+
+                requestAnimationFrame(this.run);
+            }
+
+            window.onload = this.initialize;
+        })();
+
+    </script>
+</html>
