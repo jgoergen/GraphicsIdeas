@@ -28,14 +28,15 @@
         // put any adjustable settings here that would be interesting to tinker with.
 
         var CANVAS_WIDTH = 1600;
-        var CANVAS_HEIGHT = 1200;
-        var CELL_SIZE = Math.ceil(Math.random() * 10) + 2;
+        var CANVAS_HEIGHT = 800;
+        
+        var CELL_SIZE = Math.ceil(Math.random() * 20);
         var CELLS_X = Math.ceil(CANVAS_WIDTH / CELL_SIZE);
         var CELLS_Y = Math.ceil(CANVAS_HEIGHT / CELL_SIZE);
-        var CELL_FADE = Math.random() / 10;
+        var CELL_FADE = 0;//Math.random() / 2;
         var CELL_DENSITY = 1 + Math.ceil(Math.random() * 10);
         var CELL_LIFE = 20 + Math.ceil(Math.random() * 50);
-        var MAX_COLOR_CHANGE_SPEED = Math.random() * 5;
+        var MAX_COLOR_CHANGE_SPEED = 3;
 
         /////////////////////////////////////////////////////////
 
@@ -49,24 +50,24 @@
         var blackPixel = null;
         var whitePixel = null;
         var aFix = 255 / CELL_LIFE;
+
         var rLower = Math.floor(Math.random() * 100);
         var rUpper = Math.floor(Math.random() * (200 - rLower)) + 50;
         var rVal = rLower + Math.floor(Math.random() * rUpper);
         var r = rVal;
         var rChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
+
         var gLower = Math.floor(Math.random() * 100);
         var gUpper = Math.floor(Math.random() * (205 - gLower)) + 50;
         var gVal = rLower + Math.floor(Math.random() * gUpper);
         var g = gVal;
         var gChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
+
         var bLower = Math.floor(Math.random() * 100);
         var bUpper = Math.floor(Math.random() * (205 - bLower)) + 50;
         var bVal = rLower + Math.floor(Math.random() * bUpper);
         var b = bVal;
         var bChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
-        var drawPoints = new Array();
-        var button = 0;
-        var cellTop, cellLeft, cellRight, cellBottom, neighbors, state, newState;
 
         // code to run before update looping starts.
 
@@ -74,17 +75,11 @@
             
             return new Promise(
                 function(resolve, reject) {
-                            
-                    console.log("Init");
 
-                    localCtxReference = ctx;
-                    lastTime = new Date();
-                    elapsed = Math.random() * 10000;
-
+                    ctx.lineWidth = 1;
                     map = generateMap();
-                    ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
-                    ctx.fillRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
-
+                    ctx.fillStyle="rgba(" + rLower + "," + gLower + "," + bLower + ",1)";
+                    ctx.fillRect(0,0,CELLS_X * CELL_SIZE,CELLS_Y * CELL_SIZE);
                     resolve();
                 });
         }
@@ -96,126 +91,105 @@
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
-            
+        
             // colors
             rVal += rChange;
             if (rVal > rUpper || rVal < rLower)
-                rChange *= -1;
+            rChange *= -1;
 
             gVal += gChange;
             if (gVal > gUpper || gVal < gLower)
-                gChange *= -1;
+            gChange *= -1;
 
             bVal += bChange;
             if (bVal > bUpper || bVal < bLower)
-                bChange *= -1;
-
+            bChange *= -1;
+            
             r = Math.floor(rVal);
             g = Math.floor(gVal);
             b = Math.floor(bVal);
-
+            
             // run step
-            for (var y = 0; y < map.length; y++)
+            for (var y = 0; y < map.length; y++)     
                 for (var x = 0; x < map[0].length; x++)
                     if (map[y][x].u)
                         if (phase == 0)
                             map[y][x].n = checkCell(x, y);
                         else
                             map[y][x].c = checkCell(x, y);
-
+                            
             phase = (phase == 0 ? 1 : 0);
         }
 
-        function activeCell(x, y) {
-
-            x = Math.floor(x / CELL_SIZE);
-            y = Math.floor(y / CELL_SIZE);
-
-            var cell = map[y][x];
-            cell.c = 1;
-            cell.n = 1;
-            cell.u = true;
-            cell.a = Math.floor(Math.random() * CELL_LIFE);
-
-            cell = cell.t;
-            cell.c = 1;
-            cell.n = 1;
-            cell.u = true;
-            cell.a = Math.floor(Math.random() * CELL_LIFE);
-
-            cell = cell.br;
-            cell.c = 1;
-            cell.n = 1;
-            cell.u = true;
-            cell.a = Math.floor(Math.random() * CELL_LIFE);
-        }
-
         function generateMap() {
-
+            
             var tempMap = new Array();
-
+            
             for (var y = 0; y < CELLS_Y; y++) {
-
-                var row = new Array();
-
+                
+                var row = new Array(); 
+                
                 for (var x = 0; x < CELLS_X; x++) {
+                    
+                    var state = (Math.floor(Math.random() * CELL_DENSITY) == 0) ? 0 : 1;
 
-                    var state = 0;
                     row.push({ c: state, n: state, a: Math.floor(Math.random() * CELL_LIFE), u: state == 1, t: null, b: null, l: null, r: null, tl: null, tr: null, bl: null, br: null });
                 }
-
+                
                 tempMap.push(row);
             }
-
+            
             for (var y = 0; y < CELLS_Y; y++) {
-
-                var row = new Array();
-
+                
+                var row = new Array(); 
+                
                 for (var x = 0; x < CELLS_X; x++) {
+                    
+                    topCell = y - 1;
+                    if (topCell < 0) 
+                        topCell = CELLS_Y - 1;
 
-                    cellTop = y - 1;
-                    if (cellTop < 0)
-                        cellTop = CELLS_Y - 1;
+                    left = x - 1;
+                    if (left < 0) 
+                        left = CELLS_X - 1;
 
-                    cellLeft = x - 1;
-                    if (cellLeft < 0)
-                        cellLeft = CELLS_X - 1;
+                    bottom = y + 1;
+                    if (bottom >= CELLS_Y) 
+                        bottom = 0;
 
-                    cellBottom = y + 1;
-                    if (cellBottom >= CELLS_Y)
-                        cellBottom = 0;
+                    right = x + 1;
+                    if (right >= CELLS_X) 
+                        right = 0;
 
-                    cellRight = x + 1;
-                    if (cellRight >= CELLS_X)
-                        cellRight = 0;
-
-                    var cell = tempMap[y][x];
-                    cell.t = tempMap[cellTop][x];
-                    cell.b = tempMap[cellBottom][x];
-                    cell.r = tempMap[y][cellRight];
-                    cell.l = tempMap[y][cellLeft];
-                    cell.tl = tempMap[cellTop][cellLeft];
-                    cell.tr = tempMap[cellTop][cellRight];
-                    cell.bl = tempMap[cellBottom][cellLeft];
-                    cell.br = tempMap[cellBottom][cellRight];
+                                var cell = tempMap[y][x];
+                    cell.t = tempMap[topCell][x];
+                    cell.b = tempMap[bottom][x];
+                    cell.r = tempMap[y][right];
+                    cell.l = tempMap[y][left];
+                    cell.tl = tempMap[topCell][left];
+                    cell.tr = tempMap[topCell][right];
+                    cell.bl = tempMap[bottom][left];
+                    cell.br = tempMap[bottom][right];
                 }
             }
-
+            
             return tempMap;
         }
 
+        var topCell, left, right, bottom, neighbors, state, newState;
+
         function checkCell(_x, _y) {
-
+            
             var cell = map[_y][_x];
-            var state =
+            var state = 
                 phase == 0 ?
-                cell.c :
+                cell.c:
                 cell.n;
-
+                
             neighbors = 0;
-
+            
             if (phase == 0)
-                neighbors =
+                neighbors = 
                 cell.tl.c +
                 cell.t.c +
                 cell.tr.c +
@@ -225,7 +199,7 @@
                 cell.b.c +
                 cell.br.c;
             else
-                neighbors =
+                neighbors = 
                 cell.tl.n +
                 cell.t.n +
                 cell.tr.n +
@@ -234,9 +208,16 @@
                 cell.bl.n +
                 cell.b.n +
                 cell.br.n;
-
+            
             newState = 0;
-
+            
+            /*
+            Any live cell with fewer than two live neighbours dies, as if caused by under-population.
+            Any live cell with two or three live neighbours lives on to the next generation.
+            Any live cell with more than three live neighbours dies, as if by overcrowding.
+            Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+            */
+            
             if (state == 1 && neighbors < 2) {
                 newState = 0;
                 setupUpdates(cell);
@@ -252,26 +233,26 @@
                 newState = 1;
                 setupUpdates(cell);
             } else {
-                cell.u = false;
+                    cell.u = false;
             }
-
+            
             if (cell.a <= 0) {
-
-                cell.a = Math.floor(Math.random() * CELL_LIFE);
-                newState = 0;
+            
+                    cell.a = Math.floor(Math.random() * CELL_LIFE);
+                    newState = 0;
                 setupUpdates(cell);
             }
-
+                
             if (state == newState == 1)
-                cell.a--;
-
+                    cell.a --;
+                
             if (newState == 1)
                 ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ",1)";
             else
-                ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + CELL_FADE + ")";
-
-            ctx.fillRect(_x * CELL_SIZE, _y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-
+                    ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + CELL_FADE + ")";
+            
+            ctx.fillRect( _x * CELL_SIZE, _y * CELL_SIZE, CELL_SIZE, CELL_SIZE );
+            
             return newState;
         }
 
@@ -287,7 +268,6 @@
             cell.b.u = true;
             cell.br.u = true;
         }
-
         // code to run when the user tilts a device ( where available )
 
         function tilt(e) {
@@ -299,51 +279,37 @@
 
         function mouseDown(e) {
 
-            ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
-    		ctx.fillRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
+            map = generateMap();
         }
 
         // code to run when user raises primary mouse button ( or first finger. )
 
         function mouseUp(e) {
 
-            for(var i = 0; i < drawPoints.length; i++)
-                activeCell(drawPoints[i].x, drawPoints[i].y);
         }
 
         // code to run when user moves primary mouse button ( or first finger. )
 
         function mouseMove(e, isMouseDown) {
 
-             if (isMouseDown) {
-            
-                activeCell(e.x, e.y);
-                drawPoints.push({x: e.x, y: e.y});
-            }
         }
 
         // code to run when user presses secondary mouse button ( or second finger. )
 
         function secondaryMouseDown(e) {
 
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
         }
 
         // code to run when user raises secondary mouse button ( or second finger. )
 
         function secondaryMouseUp(e) {
 
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
         }
 
         // code to run when user moves secondary mouse button ( or second finger. )
 
         function secondaryMouseMove(e) {
 
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
         }
 
     </script>
