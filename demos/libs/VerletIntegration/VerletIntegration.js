@@ -177,12 +177,26 @@ let VerletIntegration = function(options) {
 
                 let distance = particles[i].vector.distanceTo(particles[o].vector);
                 if (distance <= totalRadius) {
-
-                    let particleDifferenceVector2D = particles[o].vector.getSubtractedFrom(particles[i].lastVector);
+                    
+                    // slower but takes mass into account
+                    let particleDifferenceVector2D = particles[o].vector.getSubtractedFrom(particles[i].vector);
+                    particleDifferenceVector2D.normalize();
+                    
+                    let dot1 = particles[i].vector.dotProduct(particleDifferenceVector2D);
+                    let dot2 = particles[o].vector.dotProduct(particleDifferenceVector2D);
+                    let optimizedP = (2.0 * (dot1 - dot2)) / (particles[i].mass + particles[o].mass);
+                    optimizedP *= (CIRCULAR_COLLISION_RESPONSE_DAMPENING / 10);
+                    particles[i].vector.addTo(particleDifferenceVector2D.getMultipliedBy(optimizedP * particles[o].mass));
+                    particles[o].vector.subtractBy(particleDifferenceVector2D.getMultipliedBy(optimizedP * particles[i].mass));
+                    
+                    /*
+                    // faster but ignores mass
+                    let particleDifferenceVector2D = particles[o].vector.getSubtractedFrom(particles[i].vector);
                     particleDifferenceVector2D.normalize();
                     particleDifferenceVector2D.multiplyBy(CIRCULAR_COLLISION_RESPONSE_DAMPENING);
                     particles[i].vector.subtractBy(particleDifferenceVector2D);
                     particles[o].vector.addTo(particleDifferenceVector2D);
+                    */
                 }
             }
         }

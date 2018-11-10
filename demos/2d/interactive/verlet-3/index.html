@@ -37,7 +37,7 @@
         var VERLET_FPS = 120;
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 500;
-        var GRAVITY_DAMPENING = 0.01;
+        var GRAVITY_DAMPENING = 0.005;
 
         /////////////////////////////////////////////////////////
 
@@ -287,7 +287,7 @@
         function tilt(e) {
             
             usingTilt = true;
-            verlet.gravity.x = (e.gamma * -1) * GRAVITY_DAMPENING;
+            verlet.gravity.x = (e.gamma) * GRAVITY_DAMPENING;
             verlet.gravity.y = (e.beta) * GRAVITY_DAMPENING;
         }
 
