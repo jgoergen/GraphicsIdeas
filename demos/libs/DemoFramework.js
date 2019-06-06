@@ -1,4 +1,4 @@
-(function() {
+(function () {
 
     var FPS = 60;
 
@@ -16,12 +16,12 @@
     this.canvasOffsetX = undefined;
     this.canvasOffsetY = undefined;
 
-    this.initialize = function() {
+    this.initialize = function () {
 
         this.canvas =
             document
-            .getElementById(
-                "canvas");
+                .getElementById(
+                    "canvas");
 
         this.canvas.width = CANVAS_WIDTH;
         this.canvas.height = CANVAS_HEIGHT;
@@ -32,69 +32,69 @@
         if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
 
             this.canvas
-            .addEventListener(
-                "touchstart", 
-                function(e) { thisRef.touchStartHanlder(e); }, 
-                false);
+                .addEventListener(
+                    "touchstart",
+                    function (e) { thisRef.touchStartHanlder(e); },
+                    false);
 
             this.canvas
-            .addEventListener(
-                "touchmove", 
-                function(e) { thisRef.touchMoveHanlder(e); }, 
-                false);
+                .addEventListener(
+                    "touchmove",
+                    function (e) { thisRef.touchMoveHanlder(e); },
+                    false);
 
             this.canvas
+                .addEventListener(
+                    "touchend",
+                    function (e) { thisRef.touchEndHanlder(e); },
+                    false);
+        }
+
+        this.canvas
             .addEventListener(
-                "touchend", 
-                function(e) { thisRef.touchEndHanlder(e); }, 
+                "mousemove",
+                function (e) { thisRef.mouseMoveHandler(e); },
                 false);
-        } 
 
         this.canvas
-        .addEventListener(
-            "mousemove", 
-            function(e) { thisRef.mouseMoveHandler(e); }, 
-            false);
+            .addEventListener(
+                "mousedown",
+                function (e) { thisRef.mouseDownHandler(e); },
+                false);
 
         this.canvas
-        .addEventListener(
-            "mousedown", 
-            function(e) { thisRef.mouseDownHandler(e); }, 
-            false);
-
-        this.canvas
-        .addEventListener(
-            "mouseup", 
-            function(e) { thisRef.mouseUpHandler(e); }, 
-            false);
+            .addEventListener(
+                "mouseup",
+                function (e) { thisRef.mouseUpHandler(e); },
+                false);
 
         // does the device support tilt events?
         if (window.DeviceOrientationEvent) {
 
             window
-            .addEventListener(
-                "deviceorientation", 
-                function (e) { thisRef.tiltHandler(e); }, 
-                false);
+                .addEventListener(
+                    "deviceorientation",
+                    function (e) { thisRef.tiltHandler(e); },
+                    false);
 
         } else if (window.DeviceMotionEvent) {
 
             window
-            .addEventListener(
-                "devicemotion", 
-                function (e) { thisRef.tiltHandler(e); }, 
-                false);
+                .addEventListener(
+                    "devicemotion",
+                    function (e) { thisRef.tiltHandler(e); },
+                    false);
         }
 
         init(this.ctx)
-        .then(
-            function() {
+            .then(
+                function () {
 
-                requestAnimationFrame(this.run);
-            });
+                    requestAnimationFrame(this.run);
+                });
     };
 
-    this.interpolateMove = function(x, y) {
+    this.interpolateMove = function (x, y) {
 
         // fix canvas scaling
         x = x * this.canvas.width / this.canvas.clientWidth;
@@ -113,11 +113,11 @@
         var intervalX = (x - lastX) / steps;
         var intervalY = (y - lastY) / steps;
 
-        for (var step = 0; step < steps; step ++) {
+        for (var step = 0; step < steps; step++) {
 
             x = lastX + (step * intervalX);
             y = lastY + (step * intervalY);
-            result.push({x: x, y: y, speed: distance});
+            result.push({ x: x, y: y, speed: distance });
         }
 
         this.lastX = x;
@@ -126,7 +126,7 @@
         return result;
     }
 
-    this.tiltHandler = function(e) {
+    this.tiltHandler = function (e) {
 
         // browser compatability
         if (!e.gamma && !e.beta) {
@@ -136,7 +136,7 @@
                 e.gamma = e.acceleration.x * 2;
                 e.beta = e.acceleration.y * 2;
 
-            } else  if (e.x && e.y) {
+            } else if (e.x && e.y) {
 
                 e.gamma = -(e.x * (180 / Math.PI));
                 e.beta = -(e.y * (180 / Math.PI));
@@ -148,7 +148,7 @@
             tilt({ gamma: e.gamma, beta: e.beta, alpha: e.alpha });
     }
 
-    this.touchStartHanlder = function(e) {
+    this.touchStartHanlder = function (e) {
 
         if (e.touches.length == 1)
             mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
@@ -156,7 +156,7 @@
             secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
     }
 
-    this.touchEndHanlder = function(e) {
+    this.touchEndHanlder = function (e) {
 
         if (e.touches.length == 0)
             mouseUp();
@@ -167,11 +167,11 @@
         this.lastY = undefined;
     }
 
-    this.touchMoveHanlder = function(e) {
+    this.touchMoveHanlder = function (e) {
 
         var steps =
             this.interpolateMove(
-                e.touches[0].pageX - this.canvasOffsetX, 
+                e.touches[0].pageX - this.canvasOffsetX,
                 e.touches[0].pageY - this.canvasOffsetY);
 
         for (var i = 0; i < steps.length; i++) {
@@ -185,54 +185,73 @@
         }
     }
 
-    this.mouseDownHandler = function(e) {
+    this.mouseDownHandler = function (e) {
 
         if ((e.which === 3 || e.button === 2)) {
 
             isSecondaryMouseDown = true;
-            secondaryMouseDown(e);
+
+            if (window.hasOwnProperty("secondaryMouseDown"))
+                secondaryMouseDown(e);
+
         } else {
 
             isMouseDown = true;
-            mouseDown(e);
+
+            if (window.hasOwnProperty("mouseDown"))
+                mouseDown(e);
         }
     }
 
-    this.mouseUpHandler = function(e) {
+    this.mouseUpHandler = function (e) {
 
         if ((e.which === 3 || e.button === 2)) {
 
             isSecondaryMouseDown = false;
-            secondaryMouseUp(e);
+
+            if (window.hasOwnProperty("secondaryMouseUp"))
+                secondaryMouseUp(e);
+
         } else {
 
             isMouseDown = false;
-            mouseUp(e);
+
+            if (window.hasOwnProperty("mouseUp"))
+                mouseUp(e);
         }
 
         this.lastX = undefined;
         this.lastY = undefined;
     }
 
-    this.mouseMoveHandler = function(e) {
+    this.mouseMoveHandler = function (e) {
 
         var steps =
             this.interpolateMove(
-                e.offsetX, 
+                e.offsetX,
                 e.offsetY);
 
         for (var i = 0; i < steps.length; i++) {
 
-            if (!isMouseDown && !isSecondaryMouseDown)
-                mouseMove(steps[i], false);
-            else if (isMouseDown)
-                mouseMove(steps[i], true);
-            else if (isSecondaryMouseDown)
-                secondaryMouseMove(steps[i]);
+            if (!isMouseDown && !isSecondaryMouseDown) {
+
+                if (window.hasOwnProperty("mouseMove"))
+                    mouseMove(steps[i], false);
+
+            } else if (isMouseDown) {
+
+                if (window.hasOwnProperty("mouseMove"))
+                    mouseMove(steps[i], true);
+
+            } else if (isSecondaryMouseDown) {
+
+                if (window.hasOwnProperty("secondaryMouseMove"))
+                    secondaryMouseMove(steps[i]);
+            }
         }
     }
 
-    this.run = function() {
+    this.run = function () {
 
         now = Date.now();
         delta = now - then;
