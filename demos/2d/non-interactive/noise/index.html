@@ -29,7 +29,14 @@
         // put any adjustable settings here that would be interesting to tinker with.
 
         var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 400;
+        var CANVAS_HEIGHT = 800;
+        var MAP_DIMENSIONS = [32, 64, 128, 256][Math.floor(Math.random() * 4)];
+        var ROUGHNESS = Math.random() * 10;
+        var UNIT_SIZE = 1;
+        var BLOCK_SIZE = Math.floor(Math.random() * 4);
+        var OFFSET_SPEED = (Math.floor(Math.random() * 40) - 20);
+        var LOOPING = Math.random() > 0.5
+        var FPS = 60;
 
         /////////////////////////////////////////////////////////
 
@@ -38,9 +45,10 @@
         var date = undefined;
         var elapsed = 0;
         var noise;
+        var offset = 0;
 
         // code to run before update looping starts.
-
+        
         function init(ctx) {
             
             return new Promise(
@@ -51,19 +59,12 @@
                     localCtxReference.fillStyle = "white";
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
-
-                    noise = new MidpointDisplacementNoiseGenerator();
-                    var noiseGraphic = noise.generate();
-
-                    ctx.drawImage(
-                        noiseGraphic,
-                        0,
-                        0);
-
-                    resolve();
+                    noise = new MidpointDisplacementNoiseGenerator(MAP_DIMENSIONS, ROUGHNESS, UNIT_SIZE, BLOCK_SIZE, LOOPING);
+                    noise.generateNoise();
+                    resolve(FPS);
                 });
         }
-
+        
         // code to run every frame.
 
         function update(ctx, canvas) {
@@ -71,8 +72,21 @@
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
+
+            if (offset >= 255)
+                offset = 0;
+
+            if (offset < 0)
+                offset = 255;
+
+            offset += OFFSET_SPEED;
             
-            //console.log("Update");
+            ctx.drawImage(
+                noise.draw(0, 0, offset),
+                0,
+                0,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT);
         }
 
         // code to run when the user tilts a device ( where available )

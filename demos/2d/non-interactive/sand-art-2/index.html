@@ -28,9 +28,10 @@
         // put any adjustable settings here that would be interesting to tinker with.
 
         var CANVAS_WIDTH = 1920;
-        var CANVAS_HEIGHT = 1080;
+        var CANVAS_HEIGHT = 1920;
         var nxMultiplier = 500;
         var nyMultiplier = 500;
+        var FPS = -1;
 
         /////////////////////////////////////////////////////////
 
@@ -62,7 +63,7 @@
                     loopReducer = (Math.random() * 1) + 1;
                     atanDevisor = (Math.random() * 20) + 5;
 
-                    resolve();
+                    resolve(FPS);
                 });
         }
 

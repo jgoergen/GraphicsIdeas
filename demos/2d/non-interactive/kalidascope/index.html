@@ -41,6 +41,7 @@
         var SPLITS = Math.ceil(Math.random() * 100);
         var RUNS = 5 + Math.ceil(Math.random() * 40);
         var STEPS_PER_RUN = 15;
+        var FPS = 240;
 
         /////////////////////////////////////////////////////////
 
@@ -82,7 +83,7 @@
                     };    
 
                     iterate();
-                    resolve();
+                    resolve(FPS);
                 });
         }
 

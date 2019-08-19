@@ -1,6 +1,7 @@
 (function () {
 
     var FPS = 60;
+    var waitForAnimationFrame = true;
 
     var thisRef = this;
     this.ctx = undefined;
@@ -88,7 +89,22 @@
 
         init(this.ctx)
             .then(
-                function () {
+                function (fpsOverride) {
+
+                    if (fpsOverride) {
+
+                        if (fpsOverride === -1) {
+
+                            waitForAnimationFrame = false;
+                            setInterval(function() { update(this.ctx, this.canvas);}, 0);
+                            return;
+
+                        } else {
+
+                            this.FPS = fpsOverride;
+                            this.interval = 1000 / fpsOverride;
+                        }
+                    }
 
                     requestAnimationFrame(this.run);
                 });

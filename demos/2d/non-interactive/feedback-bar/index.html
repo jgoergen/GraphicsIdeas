@@ -29,6 +29,7 @@
 
         var CANVAS_WIDTH = 1920;
         var CANVAS_HEIGHT = 1080;
+        var FPS = 60;
 
         /////////////////////////////////////////////////////////
 
@@ -60,7 +61,7 @@
                     expansionDevisor = Math.random() * 20;
                     alpha = 0.2 + Math.random() * 0.8;
 
-                    resolve();
+                    resolve(FPS);
                 });
         }
 
