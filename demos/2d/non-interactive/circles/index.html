@@ -1,0 +1,203 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var CANVAS_WIDTH = 800;
+        var CANVAS_HEIGHT = 800;
+        var FPS = 60;
+        var CIRCLE_COUNT = (Math.random() * 6) * 500;
+        var CIRCLE_MIN_SIZE = 1 + (Math.random() * 10);
+        var CIRCLE_MAX_SIZE = CIRCLE_MIN_SIZE + (Math.random() * 10);
+        var CIRCLE_BORDER_THICKNESS = 1; //Math.random() * 4;
+        var MOVE_SPEED_MIN = (1 + (Math.random() * 2));
+        var MOVE_SPEED_MAX = (MOVE_SPEED_MIN + (Math.random() * 20));
+        var MOVE_SPEED_MIN_WIGGLE_SPEED = Math.random() * 0.02;
+        var MOVE_SPEED_MAX_WIGGLE_SPEED = MOVE_SPEED_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
+        var MOVE_SPEED_MIN_WIGGLE_STRENGTH = Math.random() * 5;
+        var MOVE_SPEED_MAX_WIGGLE_STRENGTH = MOVE_SPEED_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
+        var CIRCLE_MIN_FLICKER_AMOUNT = Math.random() * 0.2;
+        var CIRCLE_MAX_FLICKER_AMOUNT = CIRCLE_MIN_FLICKER_AMOUNT + (Math.random() * 0.8);
+        var CIRCLE_FLICKER_SPEED_BASE = Math.random() * 0.05;
+        var CIRLCE_FLICKER_SPEED_VARIANCE = CIRCLE_FLICKER_SPEED_BASE + (Math.random() * 0.05);
+        var START_POSITIONS_ON_GRID = Math.random() > 0.5;
+        var USE_COLOR = Math.random() > 0.5;
+
+        /////////////////////////////////////////////////////////
+
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+        var circles = [];
+
+        // code to run before update looping starts.
+
+        function init(ctx) {
+
+            ctx.lineWidth = CIRCLE_BORDER_THICKNESS;
+            
+            return new Promise(
+                function(resolve, reject) {
+                            
+                    lastTime = new Date();
+                    elapsed = Math.random() * 1000;
+
+                    var gridCols = Math.floor(Math.sqrt(CIRCLE_COUNT));
+                    var gridColSpacing = CANVAS_WIDTH / gridCols;
+                    var gridRowSpacing = CANVAS_HEIGHT / gridCols;
+                    
+                    for (var i = 0; i < CIRCLE_COUNT; i++) {
+
+                        var x = Math.random() * CANVAS_WIDTH;
+                        var y = Math.random() * CANVAS_HEIGHT;
+
+                        if (START_POSITIONS_ON_GRID) {
+
+                            var gridPos = MathHelperFunctions.IndexToXY(i, gridCols);
+                            x = gridPos[0] * gridColSpacing;
+                            y = gridPos[1] * gridRowSpacing;
+                        }
+
+                        circles.push({
+                            x: x,
+                            baseY: y,
+                            y: 0,
+                            wiggleSpeed: MOVE_SPEED_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_MAX_WIGGLE_SPEED - MOVE_SPEED_MIN_WIGGLE_SPEED)),
+                            wiggleStrength: MOVE_SPEED_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_MAX_WIGGLE_STRENGTH - MOVE_SPEED_MIN_WIGGLE_STRENGTH)),
+                            speed: MOVE_SPEED_MIN + (Math.random() * (MOVE_SPEED_MAX - MOVE_SPEED_MIN)),
+                            radius: CIRCLE_MIN_SIZE + (Math.random() * (CIRCLE_MAX_SIZE - CIRCLE_MIN_SIZE)),
+                            flicker: CIRCLE_MIN_FLICKER_AMOUNT + (Math.random() * (CIRCLE_MAX_FLICKER_AMOUNT - CIRCLE_MIN_FLICKER_AMOUNT)),
+                            flickerSpeed: CIRCLE_FLICKER_SPEED_BASE + (Math.random() * CIRLCE_FLICKER_SPEED_VARIANCE) 
+                        });
+                    }
+                    
+                    resolve(FPS);
+                });
+        }
+
+        // code to run every frame.
+
+        function update(ctx, canvas) {
+
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+            
+            for (var i = 0; i < circles.length; i++) {
+
+                var circle = circles[i];
+                circle.x += circle.speed;
+                circle.y = circle.baseY + (Math.cos(circle.x * circle.wiggleSpeed) * circle.wiggleStrength);
+                circle.flicker += circle.flickerSpeed;
+
+                circle.x = MathHelperFunctions.WrapVal(circle.x, 0, CANVAS_WIDTH);
+                circle.y = MathHelperFunctions.WrapVal(circle.y, 0, CANVAS_HEIGHT);
+
+                if (circle.flicker < 0) {
+
+                    circle.flicker = 0;
+                    circle.flickerSpeed *= -1;
+                }
+
+                if (circle.flicker > 1) {
+                    
+                    circle.flicker = 1;
+                    circle.flickerSpeed *= -1;
+                }
+
+                ctx.beginPath();
+
+                if (USE_COLOR)
+                    ctx.strokeStyle = "rgba(" + MathHelperFunctions.WrapVal(circle.x / circle.wiggleStrength, 0, 255) + ", " + MathHelperFunctions.WrapVal(circle.x / circle.wiggleStrength, 0, 255) + ", " + MathHelperFunctions.WrapVal(circle.y * circle.wiggleStrength, 0, 255) + ", " + circle.flicker + ")";
+                else
+                    ctx.strokeStyle = "rgba(255, 255, 255, " + circle.flicker + ")";
+
+                ctx.arc(
+                    circle.x, 
+                    circle.y, 
+                    circle.radius, 
+                    0, 
+                    2 * Math.PI);
+
+                ctx.stroke();
+            }
+        }
+
+        // code to run when the user tilts a device ( where available )
+
+        function tilt(e) {
+            
+            // x = e.gamma, y = e.beta, z = e.alpha
+        }
+
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+            //e.x e.y e.speed
+        }
+
+    </script>
+</html>
