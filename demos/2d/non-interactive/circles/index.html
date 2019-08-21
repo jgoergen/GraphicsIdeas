@@ -31,22 +31,35 @@
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 800;
         var FPS = 60;
-        var CIRCLE_COUNT = (Math.random() * 6) * 500;
+        var CIRCLE_COUNT = 500 + Math.floor(Math.random() * 2000);
         var CIRCLE_MIN_SIZE = 1 + (Math.random() * 10);
         var CIRCLE_MAX_SIZE = CIRCLE_MIN_SIZE + (Math.random() * 10);
-        var CIRCLE_BORDER_THICKNESS = 1; //Math.random() * 4;
-        var MOVE_SPEED_MIN = (1 + (Math.random() * 2));
-        var MOVE_SPEED_MAX = (MOVE_SPEED_MIN + (Math.random() * 20));
-        var MOVE_SPEED_MIN_WIGGLE_SPEED = Math.random() * 0.02;
-        var MOVE_SPEED_MAX_WIGGLE_SPEED = MOVE_SPEED_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
-        var MOVE_SPEED_MIN_WIGGLE_STRENGTH = Math.random() * 5;
-        var MOVE_SPEED_MAX_WIGGLE_STRENGTH = MOVE_SPEED_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
+        var CIRCLE_BORDER_THICKNESS = 1;
+        var MOVE_SPEED_X_MIN = (Math.random() * 10) - 5;
+        var MOVE_SPEED_X_MAX = (MOVE_SPEED_X_MIN + (Math.random() * 10));
+        var MOVE_SPEED_X_MIN_WIGGLE_SPEED = Math.random() * 0.02;
+        var MOVE_SPEED_X_MAX_WIGGLE_SPEED = MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
+        var MOVE_SPEED_X_MIN_WIGGLE_STRENGTH = Math.random() * 5;
+        var MOVE_SPEED_X_MAX_WIGGLE_STRENGTH = MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
+        var MOVE_SPEED_Y_MIN = (Math.random() * 10) - 5;
+        var MOVE_SPEED_Y_MAX = (MOVE_SPEED_Y_MIN + (Math.random() * 10));
+        var MOVE_SPEED_Y_MIN_WIGGLE_SPEED = Math.random() * 0.02;
+        var MOVE_SPEED_Y_MAX_WIGGLE_SPEED = MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
+        var MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH = Math.random() * 5;
+        var MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH = MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
         var CIRCLE_MIN_FLICKER_AMOUNT = Math.random() * 0.2;
         var CIRCLE_MAX_FLICKER_AMOUNT = CIRCLE_MIN_FLICKER_AMOUNT + (Math.random() * 0.8);
         var CIRCLE_FLICKER_SPEED_BASE = Math.random() * 0.05;
         var CIRLCE_FLICKER_SPEED_VARIANCE = CIRCLE_FLICKER_SPEED_BASE + (Math.random() * 0.05);
         var START_POSITIONS_ON_GRID = Math.random() > 0.5;
         var USE_COLOR = Math.random() > 0.5;
+        var RED_MIN_RANGE = Math.random() * 125;
+        var RED_MAX_RANGE = RED_MIN_RANGE + Math.random() * 130;
+        var GREEN_MIN_RANGE = Math.random() * 125;
+        var GREEN_MAX_RANGE = GREEN_MIN_RANGE + Math.random() * 130;
+        var BLUE_MIN_RANGE = Math.random() * 125;
+        var BLUE_MAX_RANGE = BLUE_MIN_RANGE + Math.random() * 130;
+        var DRAW_MODES = ["source-over", "hard-light", "luminosity"];
 
         /////////////////////////////////////////////////////////
 
@@ -60,7 +73,9 @@
         function init(ctx) {
 
             ctx.lineWidth = CIRCLE_BORDER_THICKNESS;
-            
+            ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
+            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
+            console.log(ctx.globalCompositeOperation);
             return new Promise(
                 function(resolve, reject) {
                             
@@ -84,12 +99,16 @@
                         }
 
                         circles.push({
-                            x: x,
+                            baseX: x,
+                            x: 0,
                             baseY: y,
                             y: 0,
-                            wiggleSpeed: MOVE_SPEED_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_MAX_WIGGLE_SPEED - MOVE_SPEED_MIN_WIGGLE_SPEED)),
-                            wiggleStrength: MOVE_SPEED_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_MAX_WIGGLE_STRENGTH - MOVE_SPEED_MIN_WIGGLE_STRENGTH)),
-                            speed: MOVE_SPEED_MIN + (Math.random() * (MOVE_SPEED_MAX - MOVE_SPEED_MIN)),
+                            xWiggleSpeed: MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_X_MAX_WIGGLE_SPEED - MOVE_SPEED_X_MIN_WIGGLE_SPEED)),
+                            xWiggleStrength: MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_X_MAX_WIGGLE_STRENGTH - MOVE_SPEED_X_MIN_WIGGLE_STRENGTH)),
+                            yWiggleSpeed: MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_Y_MAX_WIGGLE_SPEED - MOVE_SPEED_Y_MIN_WIGGLE_SPEED)),
+                            yWiggleStrength: MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH - MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH)),
+                            xSpeed: MOVE_SPEED_X_MIN + (Math.random() * (MOVE_SPEED_X_MAX - MOVE_SPEED_X_MIN)),
+                            ySpeed: MOVE_SPEED_Y_MIN + (Math.random() * (MOVE_SPEED_Y_MAX - MOVE_SPEED_Y_MIN)),
                             radius: CIRCLE_MIN_SIZE + (Math.random() * (CIRCLE_MAX_SIZE - CIRCLE_MIN_SIZE)),
                             flicker: CIRCLE_MIN_FLICKER_AMOUNT + (Math.random() * (CIRCLE_MAX_FLICKER_AMOUNT - CIRCLE_MIN_FLICKER_AMOUNT)),
                             flickerSpeed: CIRCLE_FLICKER_SPEED_BASE + (Math.random() * CIRLCE_FLICKER_SPEED_VARIANCE) 
@@ -104,7 +123,8 @@
 
         function update(ctx, canvas) {
 
-            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            //ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             date = new Date();
             elapsed += date - lastTime;
@@ -113,8 +133,10 @@
             for (var i = 0; i < circles.length; i++) {
 
                 var circle = circles[i];
-                circle.x += circle.speed;
-                circle.y = circle.baseY + (Math.cos(circle.x * circle.wiggleSpeed) * circle.wiggleStrength);
+                circle.baseX += circle.xSpeed;
+                circle.baseY += circle.ySpeed;
+                circle.x = circle.baseX + (Math.cos(circle.baseY * circle.xWiggleSpeed) * circle.xWiggleStrength);
+                circle.y = circle.baseY + (Math.cos(circle.baseX * circle.yWiggleSpeed) * circle.yWiggleStrength);
                 circle.flicker += circle.flickerSpeed;
 
                 circle.x = MathHelperFunctions.WrapVal(circle.x, 0, CANVAS_WIDTH);
@@ -135,7 +157,12 @@
                 ctx.beginPath();
 
                 if (USE_COLOR)
-                    ctx.strokeStyle = "rgba(" + MathHelperFunctions.WrapVal(circle.x / circle.wiggleStrength, 0, 255) + ", " + MathHelperFunctions.WrapVal(circle.x / circle.wiggleStrength, 0, 255) + ", " + MathHelperFunctions.WrapVal(circle.y * circle.wiggleStrength, 0, 255) + ", " + circle.flicker + ")";
+                    ctx.strokeStyle = 
+                        "rgba(" + 
+                        MathHelperFunctions.WrapVal(circle.x / circle.yWiggleStrength, RED_MIN_RANGE, RED_MAX_RANGE) + ", " + 
+                        MathHelperFunctions.WrapVal(circle.flicker * circle.xWiggleStrength, GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " + 
+                        MathHelperFunctions.WrapVal(circle.y * circle.xWiggleStrength, BLUE_MIN_RANGE, BLUE_MAX_RANGE) + ", " + 
+                        circle.flicker + ")";
                 else
                     ctx.strokeStyle = "rgba(255, 255, 255, " + circle.flicker + ")";
 
