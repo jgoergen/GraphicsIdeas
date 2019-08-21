@@ -9,7 +9,7 @@ let Constraint = function(options) {
     };
 
     this.data = options.data || {};
-    this.rest = this.ends.startParticle.vector.getSubtractedFrom(this.ends.endParticle.vector).magnitude();
+    this.rest = this.ends.startParticle.vector.getSubtractedFromVector(this.ends.endParticle.vector).magnitude();
     this.stiffness = options.stiffness || 1;
     this.tolerance = options.tolerance || 9999;
     this.collides = options.collides || false;

@@ -1,152 +1,157 @@
-let Line2D = function(vect2DA, vect2dB) {
+let Line2D = function (vect2DA, vect2DB) {
 
-    let ends = {
-        startVect2D,
-        endVect2D
+    // initialize
+    this.ends = {
+        startVect2D: vect2DA || new Vector2D(),
+        endVect2D: vect2DB || new Vector2D()
     };
+};
 
-    function init(vect2DA, vect2dB) {
+Line2D.prototype.length = function() {
 
-        ends.startVect2D = vect2DA || new Vector2D();
-        ends.endVect2D = vect2DB || new Vector2D();
-    }
+    return Math.Sqrt(
+        Math.Pow(this.ends.startVect2D.X - this.ends.endVect2D.X, 2) +
+        Math.Pow(this.ends.startVect2D.Y - this.ends.endVect2D.Y, 2));
+};
 
-    function length() {
+Line2D.prototype.setLength = function() {
 
-       return Math.Sqrt(Math.Pow(ends.startVect2D.X - ends.endVect2D.X, 2) + Math.Pow(ends.startVect2D.Y - ends.endVect2D.Y, 2));
-    }
+    // TODO
+    throw "setLength not implimented";
+};
 
-    function setLength() {
+Line2D.prototype.leftNormal = function() {
 
-        // TODO
-        throw "setLength not implimented";
-    }
+    let dx = this.ends.endVect2D.x - this.ends.startVect2D.x;
+    let dy = this.ends.endVect2D.y - this.ends.startVect2D.y;
+    return new Vector2D(dy * -1, dx);
+};
 
-    function leftNormal() {
+Line2D.prototype.rightNormal = function() {
 
-        let dx = ends.endVect2D.x - ends.startVect2D.x;
-        let dy = ends.endVect2D.y - ends.startVect2D.y;
-        return new Vector2D(dy * -1, dx);
-    }
+    let dx = this.ends.endVect2D.x - this.ends.startVect2D.x;
+    let dy = this.ends.endVect2D.y - this.ends.startVect2D.y;
+    return new Vector2D(dy, dx * -1);
+};
 
-    function rightNormal() {
+Line2D.prototype.crossProduct = function(vect2D) {
 
-        let dx = ends.endVect2D.x - ends.startVect2D.x;
-        let dy = ends.endVect2D.y - ends.startVect2D.y;
-        return new Vector2D(dy, dx * -1);
-    }
+    return (
+        (this.ends.endVect2D.X - this.ends.startVect2D.X) * (vect2D.y - this.ends.startVect2D.Y) -
+        (this.ends.endVect2D.Y - this.ends.startVect2D.Y) * (vect2D.x - this.ends.startVect2D.X));
+};
 
-    function isPointColinear(x, y, tolerance) {
+Line2D.prototype.isVect2DColinear = function(vect2D, tolerance) {
 
-        return isVect2DColinear(new Vector2D(x, y, tolerance));
-    }
+    if (!tolerance)
+        tolerance = 0;
 
-    function isVect2DColinear(vect2D, tolerance) {
+    return Math.abs(this.crossProduct(vect2D)) < tolerance;
+};
 
-        let crossProduct = ((ends.endVect2D.X - ends.startVect2D.X) * (vect2D.y - ends.startVect2D.Y) - (ends.endVect2D.Y - ends.startVect2D.Y) * (vect2D.x - ends.startVect2D.X));
-        return Math.abs(crossProduct) < (tolerance || 0);
-    }
+Line2D.prototype.isVect2DToTheLeft = function(vect2D) {
 
-    function isPointToTheLeft(x, y) {
+    return this.crossProduct(vect2D) > 0;
+};
 
-        return isVect2DToTheLeft(new Vector2D(x, y));
-    }
+Line2D.prototype.isVect2DToTheRight = function(vect2D) {
 
-    function isPointToTheRight(x, y) {
+    return this.crossProduct(vect2D) < 0;
+};
 
-        return isVect2DToTheRight(new Vector2D(x, y));
-    }
+Line2D.prototype.direction = function() {
 
-    function isVect2DToTheLeft(vect2D) {
+    // radians
+    return Math.PI + Math.atan2(this.ends.endVect2D.x + this.ends.startVect2D.x, this.ends.endVect2D.y - this.ends.startVect2D.y);
+};
 
-        return ((ends.endVect2D.X - ends.startVect2D.X) * (vect2D.y - ends.startVect2D.Y) - (ends.endVect2D.Y - ends.startVect2D.Y) * (vect2D.x - ends.startVect2D.X)) > 0;
-    }
+Line2D.prototype.setDirection = function() {
 
-    function isVect2DToTheRight(vect2D) {
-        
-        return ((ends.endVect2D.X - ends.startVect2D.X) * (vect2D.y - ends.startVect2D.Y) - (ends.endVect2D.Y - ends.startVect2D.Y) * (vect2D.x - ends.startVect2D.X)) < 0;
-    }
+    // TODO:
+    throw "setLength not implimented";
+};
 
-    function direction() {
+Line2D.prototype.clamp = function(minVect2D, maxVect2D) {
 
-        // radians
-        return Math.PI + Math.atan2(ends.endVect2D.x + ends.startVect2D.x, ends.endVect2D.y - ends.startVect2D.y);
-    }
+    this.ends.startVect2D.clamp(minVect2D, maxVect2D);
+    this.ends.endVect2D.clamp(minVect2D, maxVect2D);
+};
 
-    function setDirection() {
+// https://stackoverflow.com/questions/37224912/circle-line-segment-collision
+// maybe try this instead? https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm
 
-        // TODO
-        throw "setLength not implimented";
-    }
+Line2D.prototype.CircleIntersects = function (vect2D, radius) {
 
-    function clamp(minVect2D, maxVect2D) {
+    if (!radius)
+        radius = 1;
 
-        ends.startVect2D.clamp(minVect2D, maxVect2D);
-        ends.endVect2D.clamp(minVect2D, maxVect2D);
-    }
+    let v1 = this.endVect2D.getSubtractedFromVector(lineStartVect);
+    let v2 = this.startVect2D.getSubtractedFromVector(vect2D);
 
-    function copy() {
+    let b = v1.dotProduct(v2);
+    let c = 2 * (v1.x * v1.x + v1.y * v1.y);
+    b *= -2;
+    let d = Math.sqrt(b * b - 2 * c * (v2.x * v2.x + v2.y * v2.y - radius * radius));
 
-        return new Line2D(ends.startVect2D.copy(), ends.endVect2D.copy());
-    }
+    // no intercept
+    if (isNaN(d))
+        return false;
 
-    function toString() {
+    // these represent the unit distance of point one and two on the line
+    let u1 = (b - d) / c;
+    let u2 = (b + d) / c;
 
-        return "start: " + ends.startVect2D.toString() + ", end: " + ends.endVect2D.toString();
-    }
+    if ((u1 <= 1 && u1 >= 0))
+        return true;
 
-    init(vect2DA, vect2dB);
+    if ((u2 <= 1 && u2 >= 0))
+        return true;
 
-    return{
-        ends,
-        length,
-        setLength,
-        leftNormal,
-        rightNormal,
-        isPointColinear,
-        isVect2DColinear,
-        isPointToTheLeft,
-        isPointToTheRight,
-        isVect2DToTheLeft,
-        isVect2DToTheRight,
-        direction,
-        setDirection,
-        clamp,
-        copy,
-        toString
-    }
+    return false;
 }
 
+Line2D.prototype.GetCircleCollision = function(vect2D, radius) {
+
+    // todo: shouldn't this take the circle radius into account?
+
+    if (!radius)
+        radius = 1;
+
+    let lineDirection = this.startVect2D.getSubtractedFromVector(this.endVect2D).normalize();
+    let pointToStart = vect2D.getSubtractedFromVector(this.startVect2D);
+    let dot = pointToStart.dotProduct(lineDirection);
+    let nearestPointOnLine = this.startVect2D.getAddedToScalar(lineDirection.getMultipliedByScalar(dot));
+    let collisionVector = vect2D.getSubtractedFromVector(nearestPointOnLine).normalize();
+
+    let t;
+
+    if (Math.abs(this.startVect2D.x - this.endVect2D.x) > Math.abs(this.startVect2D.y - this.endVect2D.y))
+        t = (vect2D.x - collisionVector.x - this.startVect2D.x) / (this.endVect2D.x - this.startVect2D.x);
+    else
+        t = (vect2D.y - collisionVector.y - this.startVect2D.y) / (this.endVect2D.y - this.startVect2D.y);
+
+    let lambda = 1 / (t * t + (1 - t) * (1 - t));
+
+    return {
+        pointCollisionVector: collisionVector.getMultipliedByScalar(0.5),
+        lineStartCollisionVector: collisionVector.getMultipliedByScalar(1 - t).multiplyByScalar(0.5).multiplyByScalar(lambda),
+        lineEndCollisionVector: collisionVector.getMultipliedByScalar(t).multiplyByScalar(0.5).multiplyByScalar(lambda)
+    };
+};
+
+Line2D.prototype.copy = function() {
+
+    return new Line2D(
+        this.ends.startVect2D.copy(), 
+        this.ends.endVect2D.copy());
+};
+
+Line2D.prototype.toString = function() {
+
+    return "start: " + this.ends.startVect2D.toString() + ", end: " + this.ends.endVect2D.toString();
+};
+
 /*
-function intersects(constraint) {
-
-        // TODO: get rid of all these goddamn variables
-
-        let a = ends.startParticle.vector.position.x;
-        let b = ends.startParticle.vector.position.y;
-        let c = ends.endParticle.vector.position.x;
-        let d = ends.endParticle.vector.position.y;
-
-        let p = constraint.ends.startParticle.vector.position.x;
-        let q = constraint.ends.startParticle.vector.position.y;
-        let r = constraint.ends.endParticle.vector.position.x;
-        let s = constraint.ends.endParticle.vector.position.y;
-
-        let determinant = 
-            (c - a) * (s - q) - (r - p) * (d - b);
-
-        if (determinant === 0)
-            return false;
-
-        let lambda =
-            ((s - q) * (r - a) + (p - r) * (s - b)) / determinant;
-
-        let gamma =
-            ((b - d) * (r - a) + (c - a) * (s - b)) / determinant;
-
-        return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
-    }
-
     // http://ericleong.me/research/circle-line/
     function closestPointOnIntersection (vect2D) {
 
@@ -177,4 +182,4 @@ function intersects(constraint) {
 
         return new Vector2D(cx, cy);
     }
-    */
+*/

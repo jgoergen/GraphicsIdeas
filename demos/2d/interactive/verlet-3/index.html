@@ -227,10 +227,11 @@
                 segments, 
                 setgmentLength, 
                 1, 
+                60,
                 true);
         }
 
-        function genCloth(startX, startY, links, linkLength, elasticity, pinCorners) {
+        function genCloth(startX, startY, links, linkLength, elasticity, tolerance, pinCorners) {
 
             let particleArray = {};
             let xlinks = links * 2;
@@ -239,19 +240,18 @@
 
                 for (var o = 0; o < links; o++) {
 
-                    let pin = 
-                        (o == 0 && (i == 0 || i == (xlinks - 1))) ||
-                        (o == links - 1 && (i == 0 || i == (xlinks - 1))) ? 
+                    let pin =
+                        (o == 0 && (i == 0 || i == (xlinks - 1))) ?
                             new Vector2D(startX + (i * linkLength), startY + (o * linkLength)) :
                             null;
 
-                    let particle = 
+                    let particle =
                         new Particle({
                             vector: new Vector2D(
-                                startX + (i * linkLength), 
+                                startX + (i * linkLength),
                                 startY + (o * linkLength)),
                             pinnedTo: pin
-                        }); 
+                        });
 
                     particleArray[i + "_" + o] = particle;
 
@@ -263,23 +263,23 @@
                                 startParticle: particle,
                                 endParticle: particleArray[(i - 1) + "_" + o],
                                 stiffness: elasticity,
-                                tolerance: Math.random() * elasticity * 4,
+                                tolerance: tolerance,
                                 collides: true,
                                 objectID: 0,
-                                data: {drawn: true}//{ drawn: (o % 4 === 0) || ((o == 0 || o == (links - 1))) ? true : false }
+                                data: { drawn: (o % 4 === 0) || ((o == 0 || o == (links - 1))) ? true : false }
                             }));
-                                
+
                     if (o > 0)
                         verlet.addConstraint(
                             new Constraint({
                                 startParticle: particle,
                                 endParticle: particleArray[i + "_" + (o - 1)],
                                 stiffness: elasticity,
-                                tolerance: Math.random() * elasticity * 4,
+                                tolerance: tolerance,
                                 collides: true,
                                 objectID: 0,
-                                data: {drawn: true}//{ drawn: (i % 4 === 0) || ((i == 0 || i == (xlinks - 1)))? true : false }
-                            })); 
+                                data: { drawn: (i % 4 === 0) || ((i == 0 || i == (xlinks - 1))) ? true : false }
+                            }));
                 }
             }
         }

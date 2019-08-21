@@ -12,8 +12,11 @@
         <script src="../../../libs/2DLib/CollisionFuncs.js" type="text/javascript"></script>
         <script src="../../../libs/VerletIntegration/Particle.js" type="text/javascript"></script>
         <script src="../../../libs/VerletIntegration/Constraint.js" type="text/javascript"></script>
+        <script src="../../../libs/VerletIntegration/Body.js" type="text/javascript"></script>
         <script src="../../../libs/VerletIntegration/VerletIntegration.js" type="text/javascript"></script>
+        <script src="../../../libs/VerletIntegration/Prefabs.js" type="text/javascript"></script>
         <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
         
         <title></title>
 
@@ -62,7 +65,7 @@
                     lastTime = new Date();
                     elapsed = Math.random() * 1000;
                     ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-                    
+
                     console.log("Init");
                     localCtxReference = ctx;
                     ctx.fillStyle = "white";
@@ -147,22 +150,6 @@
             ctx.stroke();
         }
 
-        function generateScene() {
-
-            // this requires very little accuracy
-            verlet.iterations = 1;
-
-            // drop 300 ropes
-            for (let i = 0; i < 400; i++)
-                genRope(
-                    375 + (Math.random() * (CANVAS_WIDTH - 750)), 
-                    225 + (Math.random() * (CANVAS_HEIGHT - 450)), 
-                    Math.ceil(Math.random() * 25) + 5, 
-                    Math.ceil(Math.random() * 3) + 4,
-                    1,
-                    true);
-        }
-
         function updateVerlet() {
 
             verlet.runTimeStep();
@@ -190,42 +177,124 @@
 
         }
 
-        function genRope(startX, startY, links, linkLength, elasticity, pinFirst) {
+        function generateScene() {
 
-            let lastParticle = null;
+            // this is an extreme test so we scale things back for alittle extra speed
+            verlet.iterations = 4;
+            VERLET_FPS = 60;
+            var objectID = 0;
+            let objectSize = 60;
 
-            for (var i = 0; i < links; i++) {
+            for (var x = 0; x < 9; x ++) {
 
-                let pin =
-                    (!lastParticle && pinFirst) ?
-                        new Vector2D(startX, startY) :
-                        null;
+                for (var y = 0; y < 6; y ++) {
+                        
+                    let shape = Math.floor(Math.random() * 4);
 
-                let particle =
-                    new Particle({
-                        vector: new Vector2D(startX, startY),
-                        pinnedTo: pin
-                    });
+                    if (shape == 0) {
+                            
+                        Prefabs.Triangle(
+                            verlet, 
+                            50 + x * (objectSize * 2), 
+                            50 + y * (objectSize * 2), 
+                            objectSize, 
+                            1, 
+                            objectID);
 
-                verlet.addParticle(particle);
+                    } else if (shape == 1) {
+                        
+                        Prefabs.Box(
+                            verlet,
+                            50 + x * (objectSize * 2), 
+                            50 + y * (objectSize * 2), 
+                            objectSize, 
+                            objectSize,
+                            Math.random() * 360,
+                            true,
+                            0.35,
+                            objectID);
 
-                if (lastParticle)
-                    verlet.addConstraint(
-                        new Constraint({
-                            startParticle: particle,
-                            endParticle: lastParticle,
-                            stiffness: elasticity,
-                            tolerance: null,
-                            collides: false,
-                            objectID: Math.floor(Math.random() * 100000),
-                            data: { drawn: true }
-                        }));
+                    } else {
+                        
+                        let particle1 =
+                            new Particle({
+                                vector: new Vector2D(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT),
+                                radius: objectSize / 2,
+                                collides: true,
+                                objectID: objectID,
+                                data: { drawn: true }
+                            });
+                            
+                        verlet.addParticle(particle1);
+                    }
 
-                startX += linkLength;
-                lastParticle = particle;
+                    objectID ++;
+                }
             }
         }
+        
+        function genTriangle(startX, startY, size, elasticity, objectIndex) {
 
+            let particle1 =
+                new Particle({
+                    vector: new Vector2D(startX, startY)
+                });
+
+            let particle2 =
+                new Particle({
+                    vector: new Vector2D(startX + size, startY)
+                });
+
+            let particle3 =
+                new Particle({
+                    vector: new Vector2D(startX, startY + size)
+                });
+
+            verlet.addParticle(particle1);
+            verlet.addParticle(particle2);
+            verlet.addParticle(particle3);
+
+            let edge1 = new Constraint({
+                startParticle: particle1,
+                endParticle: particle2,
+                stiffness: 1,
+                collides: true,
+                objectID: objectIndex,
+                data: { drawn: true }
+            });
+
+            let edge2 = new Constraint({
+                startParticle: particle2,
+                endParticle: particle3,
+                stiffness: 1,
+                collides: true,
+                objectID: objectIndex,
+                data: { drawn: true }
+            });
+
+            let edge3 = new Constraint({
+                startParticle: particle3,
+                endParticle: particle1,
+                stiffness: 1,
+                collides: true,
+                objectID: objectIndex,
+                data: { drawn: true }
+            });
+
+            verlet.addConstraint(edge1);
+            verlet.addConstraint(edge2);
+            verlet.addConstraint(edge3);
+
+            verlet.addBody(new Body({
+                edges: [
+                    edge1,
+                    edge2,
+                    edge3
+                ],
+                collides: true
+            }));
+        }
+        
         function tilt(e) {
             
             usingTilt = true;
