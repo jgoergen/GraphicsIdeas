@@ -1,0 +1,241 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var CANVAS_WIDTH = 800;
+        var CANVAS_HEIGHT = 800;
+        var FPS = 60;
+        var CIRCLE_COUNT = 500 + Math.floor(Math.random() * 2000);
+        var CIRCLE_MIN_SIZE = 1 + (Math.random() * 10);
+        var CIRCLE_MAX_SIZE = CIRCLE_MIN_SIZE + (Math.random() * 10);
+        var CIRCLE_BORDER_THICKNESS = Math.random() * 5;
+        var MOVE_SPEED_X_MIN = (Math.random() * 10) - 5;
+        var MOVE_SPEED_X_MAX = (MOVE_SPEED_X_MIN + (Math.random() * 10));
+        var MOVE_SPEED_X_MIN_WIGGLE_SPEED = Math.random() * 0.02;
+        var MOVE_SPEED_X_MAX_WIGGLE_SPEED = MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
+        var MOVE_SPEED_X_MIN_WIGGLE_STRENGTH = Math.random() * 5;
+        var MOVE_SPEED_X_MAX_WIGGLE_STRENGTH = MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
+        var MOVE_SPEED_Y_MIN = (Math.random() * 10) - 5;
+        var MOVE_SPEED_Y_MAX = (MOVE_SPEED_Y_MIN + (Math.random() * 10));
+        var MOVE_SPEED_Y_MIN_WIGGLE_SPEED = Math.random() * 0.02;
+        var MOVE_SPEED_Y_MAX_WIGGLE_SPEED = MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
+        var MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH = Math.random() * 5;
+        var MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH = MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
+        var CIRCLE_MIN_FLICKER_AMOUNT = Math.random() * 0.2;
+        var CIRCLE_MAX_FLICKER_AMOUNT = CIRCLE_MIN_FLICKER_AMOUNT + (Math.random() * 0.8);
+        var CIRCLE_FLICKER_SPEED_BASE = Math.random() * 0.01;
+        var CIRLCE_FLICKER_SPEED_VARIANCE = CIRCLE_FLICKER_SPEED_BASE + (Math.random() * 0.04);
+        var START_POSITIONS_ON_GRID = Math.random() > 0.5;
+        var USE_COLOR = Math.random() > 0.5;
+        var RED_MIN_RANGE = Math.random() * 125;
+        var RED_MAX_RANGE = RED_MIN_RANGE + Math.random() * 130;
+        var GREEN_MIN_RANGE = Math.random() * 125;
+        var GREEN_MAX_RANGE = GREEN_MIN_RANGE + Math.random() * 130;
+        var BLUE_MIN_RANGE = Math.random() * 125;
+        var BLUE_MAX_RANGE = BLUE_MIN_RANGE + Math.random() * 130;
+        var DRAW_MODES = ["source-over", "hard-light", "luminosity"];
+        var MAX_LENGTH = (Math.random() * 400) + 400;
+
+        /////////////////////////////////////////////////////////
+
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+        var circles = [];
+
+        // code to run before update looping starts.
+
+        function init(ctx) {
+
+            ctx.lineWidth = CIRCLE_BORDER_THICKNESS;
+            ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
+            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
+            console.log(ctx.globalCompositeOperation);
+            return new Promise(
+                function(resolve, reject) {
+                            
+                    lastTime = new Date();
+                    elapsed = Math.random() * 1000;
+
+                    var gridCols = Math.floor(Math.sqrt(CIRCLE_COUNT));
+                    var gridColSpacing = CANVAS_WIDTH / gridCols;
+                    var gridRowSpacing = CANVAS_HEIGHT / gridCols;
+                    
+                    for (var i = 0; i < CIRCLE_COUNT; i++) {
+
+                        var x = Math.random() * CANVAS_WIDTH;
+                        var y = Math.random() * CANVAS_HEIGHT;
+
+                        if (START_POSITIONS_ON_GRID) {
+
+                            var gridPos = MathHelperFunctions.IndexToXY(i, gridCols);
+                            x = gridPos[0] * gridColSpacing;
+                            y = gridPos[1] * gridRowSpacing;
+                        }
+
+                        circles.push({
+                            baseX: x,
+                            x: 0,
+                            baseY: y,
+                            y: 0,
+                            xWiggleSpeed: MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_X_MAX_WIGGLE_SPEED - MOVE_SPEED_X_MIN_WIGGLE_SPEED)),
+                            xWiggleStrength: MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_X_MAX_WIGGLE_STRENGTH - MOVE_SPEED_X_MIN_WIGGLE_STRENGTH)),
+                            yWiggleSpeed: MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_Y_MAX_WIGGLE_SPEED - MOVE_SPEED_Y_MIN_WIGGLE_SPEED)),
+                            yWiggleStrength: MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH - MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH)),
+                            xSpeed: MOVE_SPEED_X_MIN + (Math.random() * (MOVE_SPEED_X_MAX - MOVE_SPEED_X_MIN)),
+                            ySpeed: MOVE_SPEED_Y_MIN + (Math.random() * (MOVE_SPEED_Y_MAX - MOVE_SPEED_Y_MIN)),
+                            radius: CIRCLE_MIN_SIZE + (Math.random() * (CIRCLE_MAX_SIZE - CIRCLE_MIN_SIZE)),
+                            flicker: CIRCLE_MIN_FLICKER_AMOUNT + (Math.random() * (CIRCLE_MAX_FLICKER_AMOUNT - CIRCLE_MIN_FLICKER_AMOUNT)),
+                            flickerSpeed: CIRCLE_FLICKER_SPEED_BASE + (Math.random() * CIRLCE_FLICKER_SPEED_VARIANCE) 
+                        });
+                    }
+                    
+                    resolve(FPS);
+                });
+        }
+
+        // code to run every frame.
+
+        function update(ctx, canvas) {
+
+            //ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+            var point1 = undefined;
+            var point2 = undefined;
+
+            for (var i = 0; i < circles.length; i+=2) {
+
+                var circle = circles[i];
+                circle.baseX += circle.xSpeed;
+                circle.baseY += circle.ySpeed;
+                circle.x = circle.baseX + (Math.cos(circle.baseY * circle.xWiggleSpeed) * circle.xWiggleStrength);
+                circle.y = circle.baseY + (Math.cos(circle.baseX * circle.yWiggleSpeed) * circle.yWiggleStrength);
+                circle.flicker += circle.flickerSpeed;
+
+                circle.x = MathHelperFunctions.WrapVal(circle.x, 0, CANVAS_WIDTH);
+                circle.y = MathHelperFunctions.WrapVal(circle.y, 0, CANVAS_HEIGHT);
+
+                if (circle.flicker < 0) {
+
+                    circle.flicker = 0;
+                    circle.flickerSpeed *= -1;
+                }
+
+                if (circle.flicker > 1) {
+                    
+                    circle.flicker = 1;
+                    circle.flickerSpeed *= -1;
+                }
+
+                if (point1 == undefined) {
+                    
+                    point1 = circle;
+                
+                } else {
+
+                    if (Math.abs(point1.x - circle.x) + Math.abs(point1.y - circle.y) < MAX_LENGTH) {
+
+                        if (USE_COLOR)
+                            ctx.strokeStyle = 
+                                "rgba(" + 
+                                MathHelperFunctions.WrapVal(circle.x / circle.yWiggleStrength, RED_MIN_RANGE, RED_MAX_RANGE) + ", " + 
+                                MathHelperFunctions.WrapVal(circle.flicker * circle.xWiggleStrength, GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " + 
+                                MathHelperFunctions.WrapVal(circle.y * circle.xWiggleStrength, BLUE_MIN_RANGE, BLUE_MAX_RANGE) + ", " + 
+                                circle.flicker + ")";
+                        else
+                            ctx.strokeStyle = "rgba(255, 255, 255, " + circle.flicker + ")";
+
+                        ctx.beginPath();
+                        ctx.moveTo(point1.x, point1.y);
+                        ctx.lineTo(circle.x, circle.y);
+                        ctx.stroke();
+                    }
+
+                    point1 = undefined;
+                }
+
+                
+            }
+        }
+
+        // code to run when the user tilts a device ( where available )
+
+        function tilt(e) {
+            
+            // x = e.gamma, y = e.beta, z = e.alpha
+        }
+
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+            //e.x e.y e.speed
+        }
+
+    </script>
+</html>
