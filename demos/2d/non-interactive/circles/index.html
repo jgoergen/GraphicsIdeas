@@ -75,7 +75,7 @@
             ctx.lineWidth = CIRCLE_BORDER_THICKNESS;
             ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
             ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
-            console.log(ctx.globalCompositeOperation);
+            
             return new Promise(
                 function(resolve, reject) {
                             

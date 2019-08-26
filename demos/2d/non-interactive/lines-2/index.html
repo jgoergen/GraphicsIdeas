@@ -30,19 +30,19 @@
 
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 800;
-        var FPS = 60;
-        var POINT_COUNT = 500 + Math.floor(Math.random() * 2000);
+        var FPS = 120;
+        var POINT_COUNT = 100 + Math.floor(Math.random() * 200);
         var POINT_MIN_SIZE = 1 + (Math.random() * 10);
         var POINT_MAX_SIZE = POINT_MIN_SIZE + (Math.random() * 10);
         var POINT_BORDER_THICKNESS = Math.random() * 5;
-        var MOVE_SPEED_X_MIN = (Math.random() * 10) - 5;
-        var MOVE_SPEED_X_MAX = (MOVE_SPEED_X_MIN + (Math.random() * 10));
+        var MOVE_SPEED_X_MIN = (Math.random() * 4) - 2;
+        var MOVE_SPEED_X_MAX = (MOVE_SPEED_X_MIN + (Math.random() * 2));
         var MOVE_SPEED_X_MIN_WIGGLE_SPEED = Math.random() * 0.02;
         var MOVE_SPEED_X_MAX_WIGGLE_SPEED = MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
         var MOVE_SPEED_X_MIN_WIGGLE_STRENGTH = Math.random() * 5;
         var MOVE_SPEED_X_MAX_WIGGLE_STRENGTH = MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
-        var MOVE_SPEED_Y_MIN = (Math.random() * 10) - 5;
-        var MOVE_SPEED_Y_MAX = (MOVE_SPEED_Y_MIN + (Math.random() * 10));
+        var MOVE_SPEED_Y_MIN = (Math.random() * 4) - 2;
+        var MOVE_SPEED_Y_MAX = (MOVE_SPEED_Y_MIN + (Math.random() * 2));
         var MOVE_SPEED_Y_MIN_WIGGLE_SPEED = Math.random() * 0.02;
         var MOVE_SPEED_Y_MAX_WIGGLE_SPEED = MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
         var MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH = Math.random() * 5;
@@ -52,7 +52,6 @@
         var POINT_FLICKER_SPEED_BASE = Math.random() * 0.05;
         var CIRLCE_FLICKER_SPEED_VARIANCE = POINT_FLICKER_SPEED_BASE + (Math.random() * 0.1);
         var START_POSITIONS_ON_GRID = Math.random() > 0.5;
-        var USE_COLOR = Math.random() > 0.5;
         var RED_MIN_RANGE = Math.random() * 125;
         var RED_MAX_RANGE = RED_MIN_RANGE + Math.random() * 130;
         var GREEN_MIN_RANGE = Math.random() * 125;
@@ -60,7 +59,8 @@
         var BLUE_MIN_RANGE = Math.random() * 125;
         var BLUE_MAX_RANGE = BLUE_MIN_RANGE + Math.random() * 130;
         var DRAW_MODES = ["source-over", "hard-light", "luminosity"];
-        var MAX_LENGTH = (Math.random() * (CANVAS_WIDTH / 2)) + (CANVAS_WIDTH / 4);
+        var MAX_LENGTH = (Math.random() * (CANVAS_WIDTH / 2)) + (CANVAS_WIDTH / 2);
+        var BG_ALPHA = Math.random() * 0.01;
 
         /////////////////////////////////////////////////////////
 
@@ -75,7 +75,7 @@
 
             ctx.lineWidth = POINT_BORDER_THICKNESS;
             ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
-            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
+            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ", " + BG_ALPHA + ")";
             
             return new Promise(
                 function(resolve, reject) {
@@ -124,7 +124,6 @@
 
         function update(ctx, canvas) {
 
-            //ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             date = new Date();
@@ -165,15 +164,12 @@
 
                     if (Math.abs(point1.x - point.x) + Math.abs(point1.y - point.y) < MAX_LENGTH) {
 
-                        if (USE_COLOR)
-                            ctx.strokeStyle = 
-                                "rgba(" + 
-                                MathHelperFunctions.WrapVal(point.x / point.yWiggleStrength, RED_MIN_RANGE, RED_MAX_RANGE) + ", " + 
-                                MathHelperFunctions.WrapVal(point.flicker * point.xWiggleStrength, GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " + 
-                                MathHelperFunctions.WrapVal(point.y * point.xWiggleStrength, BLUE_MIN_RANGE, BLUE_MAX_RANGE) + ", " + 
-                                point.flicker + ")";
-                        else
-                            ctx.strokeStyle = "rgba(255, 255, 255, " + point.flicker + ")";
+                        ctx.strokeStyle = 
+                            "rgba(" + 
+                            MathHelperFunctions.WrapVal(point.x / (point.yWiggleStrength / 50), RED_MIN_RANGE, RED_MAX_RANGE) + ", " + 
+                            MathHelperFunctions.WrapVal(point.flicker * (point.xWiggleStrength / 50), GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " + 
+                            MathHelperFunctions.WrapVal(point.y * (point.xWiggleStrength / 50), BLUE_MIN_RANGE, BLUE_MAX_RANGE) + ", " + 
+                            point.flicker + ")";
 
                         ctx.beginPath();
                         ctx.moveTo(point1.x, point1.y);
