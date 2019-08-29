@@ -1,0 +1,256 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var CANVAS_WIDTH = 800;
+        var CANVAS_HEIGHT = 800;
+        var FPS = 60;
+        var POINT_COUNT = 400 + Math.floor(Math.random() * 400);
+        var POINT_MIN_SIZE = 1 + (Math.random() * 10);
+        var POINT_MAX_SIZE = POINT_MIN_SIZE + (Math.random() * 10);
+        var POINT_BORDER_THICKNESS = Math.random() * 5;
+        var MOVE_SPEED_X_MIN = (Math.random() * 10) - 5;
+        var MOVE_SPEED_X_MAX = (MOVE_SPEED_X_MIN + (Math.random() * 10));
+        var MOVE_SPEED_X_MIN_WIGGLE_SPEED = Math.random() * 0.02;
+        var MOVE_SPEED_X_MAX_WIGGLE_SPEED = MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
+        var MOVE_SPEED_X_MIN_WIGGLE_STRENGTH = Math.random() * 5;
+        var MOVE_SPEED_X_MAX_WIGGLE_STRENGTH = MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
+        var MOVE_SPEED_Y_MIN = (Math.random() * 10) - 5;
+        var MOVE_SPEED_Y_MAX = (MOVE_SPEED_Y_MIN + (Math.random() * 10));
+        var MOVE_SPEED_Y_MIN_WIGGLE_SPEED = Math.random() * 0.02;
+        var MOVE_SPEED_Y_MAX_WIGGLE_SPEED = MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
+        var MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH = Math.random() * 5;
+        var MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH = MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
+        var POINT_MIN_FLICKER_AMOUNT = Math.random() * 0.2;
+        var POINT_MAX_FLICKER_AMOUNT = POINT_MIN_FLICKER_AMOUNT + (Math.random() * 0.8);
+        var POINT_FLICKER_SPEED_BASE = Math.random() * 0.05;
+        var CIRLCE_FLICKER_SPEED_VARIANCE = POINT_FLICKER_SPEED_BASE + (Math.random() * 0.1);
+        var START_POSITIONS_ON_GRID = Math.random() > 0.5;
+        var USE_COLOR = Math.random() > 0.5;
+        var RED_MIN_RANGE = Math.random() * 125;
+        var RED_MAX_RANGE = RED_MIN_RANGE + Math.random() * 130;
+        var GREEN_MIN_RANGE = Math.random() * 125;
+        var GREEN_MAX_RANGE = GREEN_MIN_RANGE + Math.random() * 130;
+        var BLUE_MIN_RANGE = Math.random() * 125;
+        var BLUE_MAX_RANGE = BLUE_MIN_RANGE + Math.random() * 130;
+        var DRAW_MODES = ["source-over", "hard-light", "luminosity"];
+        var MAX_LENGTH = (Math.random() * (CANVAS_WIDTH / 2)) + (CANVAS_WIDTH / 4);
+
+        /////////////////////////////////////////////////////////
+
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+        var points = [];
+
+        // code to run before update looping starts.
+
+        function init(ctx) {
+
+            ctx.lineWidth = POINT_BORDER_THICKNESS;
+            ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
+            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
+            
+            return new Promise(
+                function(resolve, reject) {
+                            
+                    lastTime = new Date();
+                    elapsed = Math.random() * 1000;
+
+                    var gridCols = Math.floor(Math.sqrt(POINT_COUNT));
+                    var gridColSpacing = CANVAS_WIDTH / gridCols;
+                    var gridRowSpacing = CANVAS_HEIGHT / gridCols;
+                    
+                    for (var i = 0; i < POINT_COUNT; i++) {
+
+                        var x = Math.random() * CANVAS_WIDTH;
+                        var y = Math.random() * CANVAS_HEIGHT;
+
+                        if (START_POSITIONS_ON_GRID) {
+
+                            var gridPos = MathHelperFunctions.IndexToXY(i, gridCols);
+                            x = gridPos[0] * gridColSpacing;
+                            y = gridPos[1] * gridRowSpacing;
+                        }
+
+                        points.push({
+                            baseX: x,
+                            x: 0,
+                            baseY: y,
+                            y: 0,
+                            xWiggleSpeed: MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_X_MAX_WIGGLE_SPEED - MOVE_SPEED_X_MIN_WIGGLE_SPEED)),
+                            xWiggleStrength: MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_X_MAX_WIGGLE_STRENGTH - MOVE_SPEED_X_MIN_WIGGLE_STRENGTH)),
+                            yWiggleSpeed: MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_Y_MAX_WIGGLE_SPEED - MOVE_SPEED_Y_MIN_WIGGLE_SPEED)),
+                            yWiggleStrength: MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH - MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH)),
+                            xSpeed: MOVE_SPEED_X_MIN + (Math.random() * (MOVE_SPEED_X_MAX - MOVE_SPEED_X_MIN)),
+                            ySpeed: MOVE_SPEED_Y_MIN + (Math.random() * (MOVE_SPEED_Y_MAX - MOVE_SPEED_Y_MIN)),
+                            radius: POINT_MIN_SIZE + (Math.random() * (POINT_MAX_SIZE - POINT_MIN_SIZE)),
+                            flicker: POINT_MIN_FLICKER_AMOUNT + (Math.random() * (POINT_MAX_FLICKER_AMOUNT - POINT_MIN_FLICKER_AMOUNT)),
+                            flickerSpeed: POINT_FLICKER_SPEED_BASE + (Math.random() * CIRLCE_FLICKER_SPEED_VARIANCE) 
+                        });
+                    }
+                    
+                    resolve(FPS);
+                });
+        }
+
+        // code to run every frame.
+
+        function update(ctx, canvas) {
+
+            //ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+            var point1 = undefined;
+            var point2 = undefined;
+            var point3 = undefined;
+
+            for (var i = 0; i < points.length; i+=2) {
+
+                var point = points[i];
+                point.baseX += point.xSpeed;
+                point.baseY += point.ySpeed;
+                point.x = point.baseX + (Math.cos(point.baseY * point.xWiggleSpeed) * point.xWiggleStrength);
+                point.y = point.baseY + (Math.cos(point.baseX * point.yWiggleSpeed) * point.yWiggleStrength);
+                point.flicker += point.flickerSpeed;
+
+                point.x = MathHelperFunctions.WrapVal(point.x, 0, CANVAS_WIDTH);
+                point.y = MathHelperFunctions.WrapVal(point.y, 0, CANVAS_HEIGHT);
+
+                if (point.flicker < 0) {
+
+                    point.flicker = 0;
+                    point.flickerSpeed *= -1;
+                }
+
+                if (point.flicker > 1) {
+                    
+                    point.flicker = 1;
+                    point.flickerSpeed *= -1;
+                }
+
+                if (point1 == undefined) {
+                    
+                    point1 = point;
+                
+                } else if (point2 == undefined) {
+
+                    point2 = point;
+
+                } else if (point3 == undefined) {
+
+                    point3 = point;
+
+                } else {
+
+                    if (
+                        Math.abs(point1.x - point.x) + Math.abs(point1.y - point.y) < MAX_LENGTH &&
+                        Math.abs(point2.x - point1.x) + Math.abs(point2.y - point1.y) < MAX_LENGTH &&
+                        Math.abs(point3.x - point2.x) + Math.abs(point3.y - point2.y) < MAX_LENGTH) {
+
+                        if (USE_COLOR)
+                            ctx.strokeStyle = 
+                                "rgba(" + 
+                                MathHelperFunctions.WrapVal(point.x / point.yWiggleStrength, RED_MIN_RANGE, RED_MAX_RANGE) + ", " + 
+                                MathHelperFunctions.WrapVal(point.flicker * point.xWiggleStrength, GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " + 
+                                MathHelperFunctions.WrapVal(point.y * point.xWiggleStrength, BLUE_MIN_RANGE, BLUE_MAX_RANGE) + ", " + 
+                                point.flicker + ")";
+                        else
+                            ctx.strokeStyle = "rgba(255, 255, 255, " + point.flicker + ")";
+
+                        ctx.beginPath();
+                        ctx.moveTo(point1.x, point1.y);
+                        ctx.lineTo(point2.x, point2.y);
+                        ctx.lineTo(point3.x, point2.y);
+                        ctx.lineTo(point.x, point.y);
+                        ctx.lineTo(point1.x, point1.y);
+                        ctx.stroke();
+                    }
+
+                    point1 = undefined;
+                    point2 = undefined;
+                    point3 = undefined;
+                }
+            }
+        }
+
+        // code to run when the user tilts a device ( where available )
+
+        function tilt(e) {
+            
+            // x = e.gamma, y = e.beta, z = e.alpha
+        }
+
+        // code to run when user presses primary mouse button ( or first finger. )
+
+        function mouseDown(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user raises primary mouse button ( or first finger. )
+
+        function mouseUp(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user moves primary mouse button ( or first finger. )
+
+        function mouseMove(e, isMouseDown) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user presses secondary mouse button ( or second finger. )
+
+        function secondaryMouseDown(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user raises secondary mouse button ( or second finger. )
+
+        function secondaryMouseUp(e) {
+
+            //e.x e.y e.speed
+        }
+
+        // code to run when user moves secondary mouse button ( or second finger. )
+
+        function secondaryMouseMove(e) {
+
+            //e.x e.y e.speed
+        }
+
+    </script>
+</html>
