@@ -31,7 +31,7 @@
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 1200;
         var FPS = 30;
-        var POINT_COUNT = 50 + Math.floor(Math.random() * 200);
+        var POINT_COUNT = 10 + Math.floor(Math.random() * 200);
         var POINT_MIN_SIZE = 1 + (Math.random() * 10);
         var POINT_MAX_SIZE = 1;
         var POINT_BORDER_THICKNESS = 1;
@@ -62,6 +62,10 @@
         var BLUE_MAX_RANGE = BLUE_MIN_RANGE + Math.random() * 130;
         var MAX_LENGTH_DIVISOR = (Math.random() * 10) + 5;
         var MAX_LENGTH = (Math.random() * (CANVAS_WIDTH / MAX_LENGTH_DIVISOR)) + (CANVAS_WIDTH / MAX_LENGTH_DIVISOR);
+        var PULL_DISTANCE = 50 + (Math.random() * (CANVAS_WIDTH / 2));
+        var PULL_FORCE = 20 + (Math.random() * 100);
+        var PULL_DIRECTION_POSITIVE = Math.random() < 0.5;
+        var FLICKER_BASED_ON_MOUSE = true;// Math.random() < 0.5;
 
         /////////////////////////////////////////////////////////
 
@@ -69,6 +73,9 @@
         var date = undefined;
         var elapsed = 0;
         var points = [];
+        var mouseX = 0;
+        var mouseY = 0;
+        var isMouseDown = false;
 
         // code to run before update looping starts.
 
@@ -137,12 +144,11 @@
                 var point = points[i];
                 point.baseX += point.xSpeed;
                 point.baseY += point.ySpeed;
+                point.baseX = MathHelperFunctions.WrapVal(point.baseX, 0, CANVAS_WIDTH);
+                point.baseY = MathHelperFunctions.WrapVal(point.baseY, 0, CANVAS_HEIGHT);
                 point.x = point.baseX + (Math.cos(point.baseY * point.xWiggleSpeed) * point.xWiggleStrength);
                 point.y = point.baseY + (Math.cos(point.baseX * point.yWiggleSpeed) * point.yWiggleStrength);
                 point.flicker += point.flickerSpeed;
-
-                point.x = MathHelperFunctions.WrapVal(point.x, 0, CANVAS_WIDTH);
-                point.y = MathHelperFunctions.WrapVal(point.y, 0, CANVAS_HEIGHT);
 
                 if (point.flicker < 0) {
 
@@ -155,6 +161,38 @@
                     point.flicker = 1;
                     point.flickerSpeed *= -1;
                 }
+
+                var mouseXDist = (mouseX - point.x); 
+                var mouseYDist = (mouseY - point.y); 
+                var absDist = Math.abs(mouseXDist) + Math.abs(mouseYDist);
+
+                if (absDist < PULL_DISTANCE) {
+
+                    if (isMouseDown) {
+
+                        if (PULL_DIRECTION_POSITIVE) {
+                            
+                            point.baseX += mouseXDist / PULL_FORCE;
+                            point.baseY += mouseYDist / PULL_FORCE;
+                        
+                        } else {
+                            
+                            point.baseX -= mouseXDist / PULL_FORCE;
+                            point.baseY -= mouseYDist / PULL_FORCE;
+                        }
+                    }
+
+                    if (FLICKER_BASED_ON_MOUSE)
+                        point.flicker = 0.05 + (absDist / PULL_DISTANCE);
+
+                } else {
+
+                    if (FLICKER_BASED_ON_MOUSE)
+                        point.flicker = 0.05;
+                }
+
+                point.x = MathHelperFunctions.WrapVal(point.x, 0, CANVAS_WIDTH);
+                point.y = MathHelperFunctions.WrapVal(point.y, 0, CANVAS_HEIGHT);
 
                 if (USE_COLOR) {
 
@@ -199,6 +237,7 @@
         function mouseDown(e) {
 
             //e.x e.y e.speed
+            isMouseDown = true;
         }
 
         // code to run when user raises primary mouse button ( or first finger. )
@@ -206,13 +245,16 @@
         function mouseUp(e) {
 
             //e.x e.y e.speed
+            isMouseDown = false;
         }
 
         // code to run when user moves primary mouse button ( or first finger. )
 
-        function mouseMove(e, isMouseDown) {
+        function mouseMove(e) {
 
             //e.x e.y e.speed
+            mouseX = e.x;
+            mouseY = e.y;
         }
 
         // code to run when user presses secondary mouse button ( or second finger. )
