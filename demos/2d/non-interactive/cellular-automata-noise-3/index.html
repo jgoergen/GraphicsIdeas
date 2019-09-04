@@ -29,14 +29,12 @@
 
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 600;
-        var CELL_SIZE = Math.ceil(Math.random() * 4) + 2;
-        var HORIZONTAL_DIVISIONS = 1;
-        var VERTICAL_DIVISIONS = 1;
-        var CELLS_X = Math.ceil((CANVAS_WIDTH  / HORIZONTAL_DIVISIONS) / CELL_SIZE);
-        var CELLS_Y = Math.ceil((CANVAS_HEIGHT / VERTICAL_DIVISIONS) / CELL_SIZE);
+        var CELL_SIZE = Math.ceil(Math.random() * 3) + 1;
+        var CELLS_X = Math.ceil((CANVAS_WIDTH  / 2) / CELL_SIZE);
+        var CELLS_Y = Math.ceil((CANVAS_HEIGHT / 2) / CELL_SIZE);
         var CELL_FADE = (Math.random() * 0.5);
-        var CELL_DENSITY = 2;
-        var REGENERATE_INTENSITY = (Math.random() * 0.1) + 0.02;
+        var CELL_DENSITY = Math.ceil(Math.random() * 10) + 4;
+        var REGENERATE_INTENSITY = (Math.random() * 0.03) + 0.01;
         var FPS = 30;
 
         /////////////////////////////////////////////////////////
@@ -219,21 +217,30 @@
                 cell.u = false;
                 
             if (newState == 1) {
-                
-                var widthOffset = (CANVAS_WIDTH / HORIZONTAL_DIVISIONS);
-                var heightOffset = (CANVAS_HEIGHT / VERTICAL_DIVISIONS);
 
-                for (var u = 0; u < HORIZONTAL_DIVISIONS; u ++) {
+                ctx.fillRect( 
+                    (_x * CELL_SIZE) + CELL_SIZE, 
+                    (_y * CELL_SIZE) + CELL_SIZE, 
+                    CELL_SIZE, 
+                    CELL_SIZE );
 
-                    for (var o = 0; o < VERTICAL_DIVISIONS; o ++) {
-                    
-                        ctx.fillRect( 
-                            (_x * CELL_SIZE) + (widthOffset * u), 
-                            (_y * CELL_SIZE) + (heightOffset * o), 
-                            CELL_SIZE, 
-                            CELL_SIZE );
-                    }
-                }
+                ctx.fillRect( 
+                    CANVAS_WIDTH - (_x * CELL_SIZE), 
+                    (_y * CELL_SIZE) + CELL_SIZE, 
+                    CELL_SIZE, 
+                    CELL_SIZE );
+
+                ctx.fillRect( 
+                    (_x * CELL_SIZE) + CELL_SIZE, 
+                    CANVAS_HEIGHT - (_y * CELL_SIZE), 
+                    CELL_SIZE, 
+                    CELL_SIZE );
+
+                ctx.fillRect( 
+                    CANVAS_WIDTH - (_x * CELL_SIZE), 
+                    CANVAS_HEIGHT - (_y * CELL_SIZE), 
+                    CELL_SIZE, 
+                    CELL_SIZE );
             }
             
             return newState;

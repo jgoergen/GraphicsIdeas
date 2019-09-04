@@ -11,6 +11,38 @@ var DrawingHelperFunctions = {
         _ctx.stroke();
     },
 
+    SunburstPixelPattern: function (ctx, splits, center, x, y, pixelSize) {
+
+        for (var i = 0; i < splits; i ++) {
+
+            var rads = (Math.PI / 180) * ((360 / splits) * i);
+            var cos = Math.cos(rads);
+            var sin = Math.sin(rads);
+            ctx.fillRect((cos * (x - center)) + (sin * (y - center)) + center, (cos * (y - center)) - (sin * (x - center)) + center, pixelSize, pixelSize);
+/*
+            ctx.beginPath();
+            ctx.moveTo((cos * (oldX - center)) + (sin * (oldY - center)) + center, (cos * (oldY - center)) - (sin * (oldX - center)) + center);
+            ctx.lineTo((cos * (x - center)) + (sin * (y - center)) + center, (cos * (y - center)) - (sin * (x - center)) + center);
+            ctx.stroke();
+            */
+        }
+    },
+
+    SunburstLinePattern: function (ctx, splits, center, x, y, x2, y2, pixelSize) {
+
+        for (var i = 0; i < splits; i ++) {
+
+            var rads = (Math.PI / 180) * ((360 / splits) * i);
+            var cos = Math.cos(rads);
+            var sin = Math.sin(rads);
+
+            ctx.beginPath();
+            ctx.moveTo((cos * (x - center)) + (sin * (y - center)) + center, (cos * (y - center)) - (sin * (x - center)) + center);
+            ctx.lineTo((cos * (x2 - center)) + (sin * (y2 - center)) + center, (cos * (y2 - center)) - (sin * (x2 - center)) + center);
+            ctx.stroke();
+        }
+    },
+
     BreakLineIntoSteps: function (x1, y1, x2, y2, steps) {
 
         var lastParticle = startParticle;

@@ -29,14 +29,14 @@
 
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 600;
-        var CELL_SIZE = Math.ceil(Math.random() * 4) + 2;
-        var HORIZONTAL_DIVISIONS = 1;
-        var VERTICAL_DIVISIONS = 1;
+        var CELL_SIZE = Math.ceil(Math.random() * 3) + 1;
+        var HORIZONTAL_DIVISIONS = Math.ceil(Math.random() * 20);
+        var VERTICAL_DIVISIONS = Math.ceil(Math.random() * 20);
         var CELLS_X = Math.ceil((CANVAS_WIDTH  / HORIZONTAL_DIVISIONS) / CELL_SIZE);
         var CELLS_Y = Math.ceil((CANVAS_HEIGHT / VERTICAL_DIVISIONS) / CELL_SIZE);
         var CELL_FADE = (Math.random() * 0.5);
-        var CELL_DENSITY = 2;
-        var REGENERATE_INTENSITY = (Math.random() * 0.1) + 0.02;
+        var CELL_DENSITY = Math.ceil(Math.random() * 10);
+        var REGENERATE_INTENSITY = (Math.random() * 0.05) + 0.05;
         var FPS = 30;
 
         /////////////////////////////////////////////////////////
