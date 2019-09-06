@@ -30,12 +30,12 @@
 
         var CANVAS_WIDTH = 600;
         var CANVAS_HEIGHT = 600;
-        var CELL_SIZE = Math.ceil(Math.random() * 3) + 2;
+        var CELL_SIZE = Math.ceil(Math.random() * 3) + 1;
         var CELLS_X = Math.ceil((CANVAS_WIDTH  / 2) / CELL_SIZE);
         var CELLS_Y = Math.ceil((CANVAS_HEIGHT / 2) / CELL_SIZE);
         var CELL_FADE = (Math.random() * 0.5);
-        var CELL_DENSITY = Math.ceil(Math.random() * 4);
-        var REGENERATE_INTENSITY = (Math.random() * 0.03) + 0.01;
+        var CELL_DENSITY = Math.ceil(Math.random() * 4) + 2;
+        var REGENERATE_INTENSITY = (Math.random() * 0.03) + 0.005;
         var SPLITS = Math.ceil(Math.random() * 100);
         var FPS = 30;
 

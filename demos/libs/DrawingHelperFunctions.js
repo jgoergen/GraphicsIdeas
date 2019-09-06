@@ -43,6 +43,19 @@ var DrawingHelperFunctions = {
         }
     },
 
+    MirrorPixel: function (ctx, x, y, canvasWidth, canvasHeight, pixelSize, mirrorX, mirrorY) {
+
+        ctx.fillRect(
+            !mirrorX ?
+                (x * pixelSize) + pixelSize :
+                canvasWidth - (x * pixelSize),
+            !mirrorY ?
+                (y * pixelSize) + pixelSize :
+                canvasHeight - (y * pixelSize),
+            pixelSize,
+            pixelSize);
+    },
+
     BreakLineIntoSteps: function (x1, y1, x2, y2, steps) {
 
         var lastParticle = startParticle;
