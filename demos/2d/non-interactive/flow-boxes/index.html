@@ -31,7 +31,8 @@
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 800;
         var FPS = 60;
-        var POINT_COUNT = 400 + Math.floor(Math.random() * 400);
+        var BORDER_EXCEED_AMOUNT = 100;
+        var POINT_COUNT = 400 + Math.floor(Math.random() * 800);
         var POINT_MIN_SIZE = 1 + (Math.random() * 10);
         var POINT_MAX_SIZE = POINT_MIN_SIZE + (Math.random() * 10);
         var POINT_BORDER_THICKNESS = Math.random() * 5;
@@ -84,13 +85,13 @@
                     elapsed = Math.random() * 1000;
 
                     var gridCols = Math.floor(Math.sqrt(POINT_COUNT));
-                    var gridColSpacing = CANVAS_WIDTH / gridCols;
-                    var gridRowSpacing = CANVAS_HEIGHT / gridCols;
+                    var gridColSpacing = (CANVAS_WIDTH / gridCols) + (BORDER_EXCEED_AMOUNT * 2);
+                    var gridRowSpacing = (CANVAS_HEIGHT / gridCols) + (BORDER_EXCEED_AMOUNT * 2);
                     
                     for (var i = 0; i < POINT_COUNT; i++) {
 
-                        var x = Math.random() * CANVAS_WIDTH;
-                        var y = Math.random() * CANVAS_HEIGHT;
+                        var x = (Math.random() * (CANVAS_WIDTH + (BORDER_EXCEED_AMOUNT * 2)) - BORDER_EXCEED_AMOUNT);
+                        var y = (Math.random() * (CANVAS_HEIGHT + (BORDER_EXCEED_AMOUNT * 2)) - BORDER_EXCEED_AMOUNT);
 
                         if (START_POSITIONS_ON_GRID) {
 
@@ -143,8 +144,8 @@
                 point.y = point.baseY + (Math.cos(point.baseX * point.yWiggleSpeed) * point.yWiggleStrength);
                 point.flicker += point.flickerSpeed;
 
-                point.x = MathHelperFunctions.WrapVal(point.x, 0, CANVAS_WIDTH);
-                point.y = MathHelperFunctions.WrapVal(point.y, 0, CANVAS_HEIGHT);
+                point.x = MathHelperFunctions.WrapVal(point.x, (BORDER_EXCEED_AMOUNT * -1), CANVAS_WIDTH + BORDER_EXCEED_AMOUNT);
+                point.y = MathHelperFunctions.WrapVal(point.y, (BORDER_EXCEED_AMOUNT * -1), CANVAS_HEIGHT + BORDER_EXCEED_AMOUNT);
 
                 if (point.flicker < 0) {
 
@@ -203,54 +204,13 @@
             }
         }
 
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-        }
+        function tilt(e) {}
+        function mouseDown(e) {}
+        function mouseUp(e) {}
+        function mouseMove(e, isMouseDown) {}
+        function secondaryMouseDown(e) {}
+        function secondaryMouseUp(e) {}
+        function secondaryMouseMove(e) {}
 
     </script>
 </html>

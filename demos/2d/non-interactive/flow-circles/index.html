@@ -31,6 +31,7 @@
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 800;
         var FPS = 60;
+        var BORDER_EXCEED_AMOUNT = 40;
         var CIRCLE_COUNT = 500 + Math.floor(Math.random() * 2000);
         var CIRCLE_MIN_SIZE = 1 + (Math.random() * 10);
         var CIRCLE_MAX_SIZE = CIRCLE_MIN_SIZE + (Math.random() * 10);
@@ -83,13 +84,13 @@
                     elapsed = Math.random() * 1000;
 
                     var gridCols = Math.floor(Math.sqrt(CIRCLE_COUNT));
-                    var gridColSpacing = CANVAS_WIDTH / gridCols;
-                    var gridRowSpacing = CANVAS_HEIGHT / gridCols;
+                    var gridColSpacing = (CANVAS_WIDTH / gridCols) + (BORDER_EXCEED_AMOUNT * 2);
+                    var gridRowSpacing = (CANVAS_HEIGHT / gridCols) + (BORDER_EXCEED_AMOUNT * 2);
                     
                     for (var i = 0; i < CIRCLE_COUNT; i++) {
 
-                        var x = Math.random() * CANVAS_WIDTH;
-                        var y = Math.random() * CANVAS_HEIGHT;
+                        var x = (Math.random() * (CANVAS_WIDTH + (BORDER_EXCEED_AMOUNT * 2)) - BORDER_EXCEED_AMOUNT);
+                        var y = (Math.random() * (CANVAS_HEIGHT + (BORDER_EXCEED_AMOUNT * 2)) - BORDER_EXCEED_AMOUNT);
 
                         if (START_POSITIONS_ON_GRID) {
 
@@ -139,8 +140,8 @@
                 circle.y = circle.baseY + (Math.cos(circle.baseX * circle.yWiggleSpeed) * circle.yWiggleStrength);
                 circle.flicker += circle.flickerSpeed;
 
-                circle.x = MathHelperFunctions.WrapVal(circle.x, 0, CANVAS_WIDTH);
-                circle.y = MathHelperFunctions.WrapVal(circle.y, 0, CANVAS_HEIGHT);
+                circle.x = MathHelperFunctions.WrapVal(circle.x, (BORDER_EXCEED_AMOUNT * -1), CANVAS_WIDTH + BORDER_EXCEED_AMOUNT);
+                circle.y = MathHelperFunctions.WrapVal(circle.y, (BORDER_EXCEED_AMOUNT * -1), CANVAS_HEIGHT + BORDER_EXCEED_AMOUNT);
 
                 if (circle.flicker < 0) {
 
@@ -177,54 +178,13 @@
             }
         }
 
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-        }
+        function tilt(e) {}
+        function mouseDown(e) {}
+        function mouseUp(e) {}
+        function mouseMove(e, isMouseDown) {}
+        function secondaryMouseDown(e) {}
+        function secondaryMouseUp(e) {}
+        function secondaryMouseMove(e) {}
 
     </script>
 </html>
