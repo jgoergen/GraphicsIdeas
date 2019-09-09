@@ -36,7 +36,7 @@
         var BLOCK_SIZE = Math.floor(Math.random() * 4);
         var OFFSET_SPEED = (Math.floor(Math.random() * 40) - 20);
         var LOOPING = Math.random() > 0.5
-        var FPS = 60;
+        var FPS = 10;
 
         /////////////////////////////////////////////////////////
 
@@ -89,64 +89,13 @@
                 CANVAS_HEIGHT);
         }
 
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Mouse Down");
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-            console.log("Mouse Up");
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-            if (isMouseDown) {
-
-                console.log("Mouse Move");
-                localCtxReference.fillRect(e.x, e.y, e.speed, e.speed);
-            }
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
-        }
+        function tilt(e) {}
+        function mouseDown(e) {}
+        function mouseUp(e) {}
+        function mouseMove(e, isMouseDown) {}
+        function secondaryMouseDown(e) {}
+        function secondaryMouseUp(e) {}
+        function secondaryMouseMove(e) {}
 
     </script>
 </html>
