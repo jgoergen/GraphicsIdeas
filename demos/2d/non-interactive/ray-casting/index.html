@@ -1,0 +1,270 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
+        <script src="../../../libs/2DLib/Vector2D.js" type="text/javascript"></script>
+        <script src="../../../libs/2DLib/Line2D.js" type="text/javascript"></script>
+        <script src="../../../libs/2DLib/VectorHelperFunctions.js" type="text/javascript"></script>
+        <script src="../../../libs/2DLib/CollisionFuncs.js" type="text/javascript"></script>
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var CANVAS_WIDTH = 1600;
+        var CANVAS_HEIGHT = 1200;
+        var FPS = 60;
+        var RAY_COUNT = Math.ceil(Math.random() * 300) + 60;
+        var PARTICLE_COUNT = Math.ceil(Math.random() * 10);
+        var WALL_COUNT = Math.ceil(Math.random() * 20);
+        var RAY_THICKNESS = Math.ceil(Math.random() * 4);
+        var MOVE_SPEED = (Math.random() * 20) + 2;
+        var ROTATE_SPEED = (Math.random() * 1) + 0.1;
+        var CLEAR_STRENGTH = Math.random() * 0.6;
+
+        /////////////////////////////////////////////////////////
+
+        var localCtxReference = undefined;
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+
+        var particles = [];
+        var walls = [];
+        var rotation = 0;
+
+        // code to run before update looping starts.
+
+        function init(ctx) {
+            
+            return new Promise(
+                function(resolve, reject) {
+
+                    localCtxReference = ctx;
+                    lastTime = new Date();
+                    elapsed = Math.random() * 10000;
+
+                    particles = generateParticles(PARTICLE_COUNT);
+                    walls = generateWalls(WALL_COUNT);
+
+                    ctx.fillStyle = "rgba(0, 0, 0, " + CLEAR_STRENGTH + ")";
+                    ctx.lineWidth=RAY_THICKNESS;
+                    ctx.strokeStyle="#fff";
+
+                    resolve(FPS);
+                });
+        }
+
+        // code to run every frame.
+
+        function update(ctx) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+
+            //ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            /*
+            ctx.beginPath();
+
+            ctx.strokeStyle="rgba(255, 255, 255, 1)";
+
+            for (var i = 0; i < walls.length; i ++) {
+
+                ctx.moveTo(
+                    walls[i].ends.startVect2D.x,
+                    walls[i].ends.startVect2D.y);
+
+                ctx.lineTo(
+                    walls[i].ends.endVect2D.x,
+                    walls[i].ends.endVect2D.y);
+            }
+
+            ctx.stroke();
+*/
+            
+            for (var i = 0; i < particles.length; i ++) {
+
+                particles[i].update();
+
+                for (var o = 0; o < particles[i].rays.length; o ++) {
+
+                    // does this ray hit any walls?
+
+                    var shortestDistance = Infinity;
+                    var collisionVector = null;
+                    
+                    for (var j = 0; j < walls.length; j ++) {
+
+                        var collision = 
+                            CollisionFuncs.RayCrossesLine(
+                                walls[j].ends.startVect2D, 
+                                walls[j].ends.endVect2D,
+                                particles[i].position,
+                                particles[i].rays[o]);
+
+                        if (collision) {
+
+                            var dist = particles[i].position.distanceTo(collision);
+                            
+                            if (dist < shortestDistance) {
+
+                                shortestDistance = dist;
+                                collisionVector = collision;
+                            }
+                        }
+                    }
+
+                    ctx.beginPath();
+
+                    ctx.moveTo(
+                        particles[i].position.x,
+                        particles[i].position.y);
+                
+                    if (collisionVector) {
+                
+                        var brightness = 
+                            shortestDistance == Infinity ? 
+                                0 : 
+                                1 - MathHelperFunctions.Map(
+                                    shortestDistance,
+                                    0,
+                                    500,
+                                    0,
+                                    1);
+
+                        CANVAS_WIDTH / 4 / shortestDistance;
+                        ctx.strokeStyle="rgba(" + particles[i].rayColor[0] + ", " + particles[i].rayColor[1] + ", " + particles[i].rayColor[2] + ", " + Math.min(1, brightness) + ")";
+
+                        ctx.lineTo(
+                            collisionVector.x,
+                            collisionVector.y)
+
+                    } else {
+
+                        /*ctx.strokeStyle="rgba(0, 255, 0, 1)";
+                        ctx.lineTo(
+                            (particles[i].position.x) + particles[i].rays[o].x * 200,
+                            (particles[i].position.y) + particles[i].rays[o].y * 200)*/
+                    }
+
+                    ctx.stroke();
+                };
+            }
+        }
+
+        function generateParticles(count) {
+
+            var result = [];
+
+            for (var i = 0; i < count; i ++) {
+
+                var particle = {
+                    position: 
+                        new Vector2D(
+                            Math.random() * CANVAS_WIDTH,
+                            Math.random() * CANVAS_HEIGHT),
+                    rotation: 0,
+                    rays: [],
+                    rayColor: [
+                        Math.floor(Math.random() * 255),
+                        Math.floor(Math.random() * 255),
+                        Math.floor(Math.random() * 255)
+                    ],
+                    update: function() {
+
+                        this.rotation = 
+                            MathHelperFunctions.WrapVal(
+                                rotation + (Math.random() * (ROTATE_SPEED * 2) - ROTATE_SPEED), 
+                                0, 
+                                360);
+
+                        this.position.x = 
+                            MathHelperFunctions.WrapVal(
+                                this.position.x + Math.cos(this.rotation) * (Math.random() * MOVE_SPEED), 
+                                0, 
+                                CANVAS_WIDTH);
+
+                        this.position.y = 
+                            MathHelperFunctions.WrapVal(
+                                this.position.y + Math.sin(this.rotation) * (Math.random() * MOVE_SPEED), 
+                                0, 
+                                CANVAS_HEIGHT);
+                    }
+                };
+                
+                var startDeg = 0;
+                var endDeg = 360;
+
+                for (var o = startDeg; o < endDeg; o += Math.ceil((endDeg - startDeg) / RAY_COUNT)) {
+
+                    var ray = 
+                        new Vector2D(
+                            Math.cos(MathHelperFunctions.DegToRad(o)),
+                            Math.sin(MathHelperFunctions.DegToRad(o))
+                        );
+
+                    particle.rays.push(ray.normalize());
+                }
+
+                result.push(particle);
+            }
+
+            return result;
+        }
+
+        function generateWalls(count) {
+
+            var result = [];
+
+            for (var i = 0; i < count; i++) {
+
+                result.push(
+                    new Line2D(
+                        new Vector2D(
+                            Math.random() * CANVAS_WIDTH,
+                            Math.random() * CANVAS_HEIGHT
+                        ),
+                        new Vector2D(
+                            Math.random() * CANVAS_WIDTH,
+                            Math.random() * CANVAS_HEIGHT
+                        )))
+            }
+
+            return result;
+        }
+
+        function tilt(e) {}
+        function mouseDown(e) {}
+        function mouseUp(e) {}
+        function mouseMove(e, isMouseDown) {}
+        function secondaryMouseDown(e) {}
+        function secondaryMouseUp(e) {}
+        function secondaryMouseMove(e) {}
+
+    </script>
+</html>

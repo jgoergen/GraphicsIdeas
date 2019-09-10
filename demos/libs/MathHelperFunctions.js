@@ -82,5 +82,10 @@ var MathHelperFunctions = {
             ny = (cos * (y - centerY)) - (sin * (x - centerX)) + centerY;
 
         return [nx, ny];
+    },
+
+    Map: function(value, fromStart, fromEnd, toStart, toEnd) {
+        
+        return (value - fromStart) / (fromEnd - fromStart) * (toEnd - toStart) + toStart;
     }
 };

@@ -1,5 +1,71 @@
 let CollisionFuncs = {
 
+    RayCrossesLine: function(lineStartVector, lineEndVector, rayPositionVector, rayDirectionVector) {
+
+        var x1 = lineStartVector.x;
+        var y1 = lineStartVector.y;
+        var x2 = lineEndVector.x;
+        var y2 = lineEndVector.y;
+        var x3 = rayPositionVector.x;
+        var y3 = rayPositionVector.y;
+        var x4 = x3 + rayDirectionVector.x;
+        var y4 = y3 + rayDirectionVector.y;
+
+        var denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        
+        if (denominator === 0) {
+
+            return null;
+        }
+
+        var t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denominator;
+        var u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denominator;
+
+        if (t > 0 && t < 1 && u > 0) {
+
+            return new Vector2D(
+                x1 + t * (x2 - x1),
+                y1 + t * (y2 - y1));
+
+        } else {
+
+            return null;
+        }
+    },
+
+    LineCrossesLine: function(line1StartVector, line1EndVector, line2StartVector, line2EndVector) {
+
+        var x1 = line1StartVector.x;
+        var y1 = line1StartVector.y;
+        var x2 = line1EndVector.x;
+        var y2 = line1EndVector.y;
+        var x3 = line2StartVector.x;
+        var y3 = line2StartVector.y;
+        var x4 = line2EndVector.x;
+        var y4 = line2EndVector.y;
+
+        var denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        
+        if (denominator === 0) {
+
+            return null;
+        }
+
+        var t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denominator;
+        var u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denominator;
+
+        if (t > 0 && t < 1 && u > 0 && u < 1) {
+
+            return new Vector2D(
+                x1 + t * (x2 - x1),
+                y1 + t * (y2 - y1));
+
+        } else {
+
+            return null;
+        }
+    },
+
     PointAndCircle: function () {
 
     },
