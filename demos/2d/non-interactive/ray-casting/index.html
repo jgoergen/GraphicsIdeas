@@ -35,13 +35,14 @@
         var CANVAS_WIDTH = 1600;
         var CANVAS_HEIGHT = 1200;
         var FPS = 60;
-        var RAY_COUNT = Math.ceil(Math.random() * 300) + 60;
+        var RAY_COUNT = Math.ceil(Math.random() * 400) + 200;
         var PARTICLE_COUNT = Math.ceil(Math.random() * 10);
         var WALL_COUNT = Math.ceil(Math.random() * 20);
         var RAY_THICKNESS = Math.ceil(Math.random() * 4);
         var MOVE_SPEED = (Math.random() * 20) + 2;
         var ROTATE_SPEED = (Math.random() * 1) + 0.1;
-        var CLEAR_STRENGTH = Math.random() * 0.6;
+        var CLEAR_STRENGTH = Math.random() * 0.4;
+        var MAX_RAY_BRIGHTNESS = (Math.random() * 0.8) + 0.2;
 
         /////////////////////////////////////////////////////////
 
@@ -88,10 +89,9 @@
 
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             
-            /*
             ctx.beginPath();
 
-            ctx.strokeStyle="rgba(255, 255, 255, 1)";
+            ctx.strokeStyle="rgba(255, 255, 255, 0.02)";
 
             for (var i = 0; i < walls.length; i ++) {
 
@@ -105,7 +105,7 @@
             }
 
             ctx.stroke();
-*/
+
             
             for (var i = 0; i < particles.length; i ++) {
 
@@ -157,23 +157,15 @@
                                     0,
                                     1);
 
-                        CANVAS_WIDTH / 4 / shortestDistance;
-                        ctx.strokeStyle="rgba(" + particles[i].rayColor[0] + ", " + particles[i].rayColor[1] + ", " + particles[i].rayColor[2] + ", " + Math.min(1, brightness) + ")";
+                        ctx.strokeStyle="rgba(" + particles[i].rayColor[0] + ", " + particles[i].rayColor[1] + ", " + particles[i].rayColor[2] + ", " + Math.min(MAX_RAY_BRIGHTNESS, brightness) + ")";
 
                         ctx.lineTo(
                             collisionVector.x,
                             collisionVector.y)
-
-                    } else {
-
-                        /*ctx.strokeStyle="rgba(0, 255, 0, 1)";
-                        ctx.lineTo(
-                            (particles[i].position.x) + particles[i].rays[o].x * 200,
-                            (particles[i].position.y) + particles[i].rays[o].y * 200)*/
                     }
 
                     ctx.stroke();
-                };
+                }
             }
         }
 
@@ -188,7 +180,7 @@
                         new Vector2D(
                             Math.random() * CANVAS_WIDTH,
                             Math.random() * CANVAS_HEIGHT),
-                    rotation: 0,
+                    rotation: Math.random() * 360,
                     rays: [],
                     rayColor: [
                         Math.floor(Math.random() * 255),
@@ -199,7 +191,7 @@
 
                         this.rotation = 
                             MathHelperFunctions.WrapVal(
-                                rotation + (Math.random() * (ROTATE_SPEED * 2) - ROTATE_SPEED), 
+                                this.rotation + (Math.random() * (ROTATE_SPEED * 2) - ROTATE_SPEED), 
                                 0, 
                                 360);
 
