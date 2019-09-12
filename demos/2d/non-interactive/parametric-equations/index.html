@@ -1,0 +1,174 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100%; }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </body>
+
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var CANVAS_WIDTH = 1920;
+        var CANVAS_HEIGHT = 1080;
+        var FPS = 60;
+        var LINE_COUNT = Math.ceil(Math.random() * 100) + 2;
+        var FADE_VALUE = Math.random() * 1;
+        var SCALE_X = 200;
+        var SCALE_Y = 200;
+        var VALUE_TRANSITION_SPEED = 10;
+        var SPEED = (Math.random() * 0.5) + 0.01;
+        var P1_VAL = Math.random() * 1000;
+        var P2_VAL = Math.random() * 1000;
+        var P3_VAL = Math.random() * 10;
+        var P4_VAL = Math.random() * 500;
+        var P5_VAL = Math.random() * 300;
+        var PARAMETRIC_FORMULAS = [
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time / P1) * scaleX + Math.sin(time / P2) * scaleY; },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time / P1) * scaleX; },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time / P1) * scaleX + Math.sin(time) * P3; },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time / P4) * scaleX + Math.cos(time / P5) * scaleY; }
+        ];
+        var FORMULA1 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+        var FORMULA2 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+        var FORMULA3 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+        var FORMULA4 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+
+        /////////////////////////////////////////////////////////
+
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+        var actualP1Val = 0;
+        var actualP2Val = 0;
+        var actualP3Val = 0;
+        var actualP4Val = 0;
+        var actualP5Val = 0;
+        var actualSpeed = 0;
+        var actualLineCount = 0;
+        var actualFadeAmount = 0;
+
+        // code to run before update looping starts.
+
+        function init(ctx) {
+            
+            return new Promise(
+                function(resolve, reject) {
+                            
+                    lastTime = new Date();
+                    elapsed = Math.random() * 10000;
+                    resolve(FPS);
+                });
+        }
+
+        // code to run every frame.
+
+        function update(ctx, canvas) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+
+            ctx.fillStyle = "rgba(0, 0, 0, " + actualFadeAmount + ")";
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.strokeStyle = "#fff";
+
+            for (var i = 0; i < actualLineCount; i++) {
+
+                var x1 = FORMULA1((elapsed * actualSpeed) + i, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val);
+                var y1 = FORMULA2((elapsed * actualSpeed) + i, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val);
+                var x2 = FORMULA3((elapsed * actualSpeed) + i, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val);
+                var y2 = FORMULA4((elapsed * actualSpeed) + i, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val);
+
+                ctx.beginPath();
+                ctx.moveTo(x1 + (CANVAS_WIDTH / 2), y1 + (CANVAS_HEIGHT / 2));
+                ctx.lineTo(x2 + (CANVAS_WIDTH / 2), y2 + (CANVAS_HEIGHT / 2));
+                ctx.stroke();
+            }
+
+            if (Math.random() < 0.01) {
+
+                switch(Math.floor(Math.random() * 8)) {
+                    case 0:
+                        window["FORMULA" + Math.floor(Math.random() * 4)] = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+                        break;
+
+                    case 1:
+                        P1_VAL = Math.random() * 1000;
+                        break;
+
+                    case 2:
+                        P2_VAL = Math.random() * 1000;
+                        break;
+
+                    case 3:
+                        P3_VAL = Math.random() * 10;
+                        break;
+
+                    case 4:
+                        P4_VAL = Math.random() * 500;
+                        break;
+
+                    case 5:
+                        P5_VAL = Math.random() * 300;
+                        break;
+
+                    case 6:
+                        SPEED = (Math.random() * 0.5) + 0.01;
+                        break;
+
+                    case 7:
+                        LINE_COUNT = Math.ceil(Math.random() * 100) + 2
+                        break;
+
+                    case 8:
+                        FADE_VALUE = Math.random() * 1
+                        break;
+                }
+            }
+
+            if (P1_VAL != actualP1Val)
+                actualP1Val += (P1_VAL - actualP1Val) / VALUE_TRANSITION_SPEED;
+
+            if (P2_VAL != actualP2Val)
+                actualP2Val += (P2_VAL - actualP2Val) / VALUE_TRANSITION_SPEED;
+
+            if (P3_VAL != actualP3Val)
+                actualP3Val += (P3_VAL - actualP3Val) / VALUE_TRANSITION_SPEED;
+                
+            if (P4_VAL != actualP4Val)
+                actualP4Val += (P4_VAL - actualP4Val) / VALUE_TRANSITION_SPEED;
+                
+            if (P5_VAL != actualP5Val)
+                actualP5Val += (P5_VAL - actualP5Val) / VALUE_TRANSITION_SPEED;
+
+            if (SPEED != actualSpeed)
+                actualSpeed += (SPEED - actualSpeed) / VALUE_TRANSITION_SPEED;
+
+            if (LINE_COUNT != actualLineCount)
+                actualLineCount += (LINE_COUNT - actualLineCount) / VALUE_TRANSITION_SPEED;
+
+            if (FADE_VALUE != actualFadeAmount)
+                actualFadeAmount += (FADE_VALUE - actualFadeAmount) / VALUE_TRANSITION_SPEED;
+        }
+
+    </script>
+</html>
