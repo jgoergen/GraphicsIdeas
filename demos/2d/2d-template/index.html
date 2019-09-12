@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../libs/DemoFramework2.js" type="text/javascript"></script>
 
         <title></title>
 
@@ -29,6 +29,27 @@
 
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 400;
+        var FPS = 60;
+        var SETTINGS = {
+            SCREEN_FADE_SPEED: {
+                Min: 0,
+                Max: 1,
+                TransitionFrames: 10
+            },
+            RANDOM_X: {
+                Min: 0,
+                Max: CANVAS_WIDTH,
+                TransitionFrames: 10
+            },
+            RANDOM_Y: {
+                Min: 0,
+                Max: CANVAS_HEIGHT,
+                TransitionFrames: 10
+            },
+            COLOR: {
+                Generator: function() { return "rgb(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ")"; }
+            }
+        };
 
         /////////////////////////////////////////////////////////
 
@@ -49,7 +70,11 @@
                     localCtxReference.fillStyle = "white";
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
-                    resolve();
+                    
+                    resolve({
+                        fps: FPS, 
+                        settings: SETTINGS
+                    });
                 });
         }
 
@@ -60,26 +85,19 @@
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
+
+            ctx.fillStyle = "rgba(0, 0, 0, " + settings.SCREEN_FADE_SPEED.Value + ")";
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             
+            ctx.fillStyle = settings.COLOR.Value;
+            ctx.fillRect(
+                settings.RANDOM_X.Value,
+                settings.RANDOM_Y.Value,
+                200,
+                200);
+
             //console.log("Update");
         }
-
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Mouse Down");
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
 
         function mouseUp(e) {
 
@@ -113,6 +131,10 @@
 
             //e.x e.y e.speed
             console.log("Secondary Mouse Up");
+            
+            settings.RANDOM_X.Regenerate();
+            settings.RANDOM_Y.Regenerate();
+            settings.SCREEN_FADE_SPEED.Regenerate();
         }
 
         // code to run when user moves secondary mouse button ( or second finger. )
