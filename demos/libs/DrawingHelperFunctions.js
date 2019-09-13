@@ -79,16 +79,24 @@ var DrawingHelperFunctions = {
         return positions;
     },
 
+    GetImageDataFromURL: function(url, callback) {
+
+        var img = document.createElement("img");
+        img.onload = function() { callback(DrawingHelperFunctions.GetImageDataFromIMG(this)); }
+        img.crossOrigin = "Anonymous";
+        img.src = url;
+    },
+
     GetImageDataFromIMG: function (_img, _newWidth, _newHeight) {
 
         var canvas = document.createElement('canvas');
-        canvas.width = _newWidth;
-        canvas.height = _newHeight;
+        canvas.width = _newWidth || _img.width;
+        canvas.height = _newHeight || _img.height;
 
         var context = canvas.getContext('2d');
-        context.drawImage(_img, 0, 0, _img.width, _img.height, 0, 0, _newWidth, _newHeight);
+        context.drawImage(_img, 0, 0, _img.width, _img.height, 0, 0, canvas.width, canvas.height);
 
-        return context.getImageData(0, 0, _newWidth, _newHeight);
+        return context.getImageData(0, 0, canvas.width, canvas.height);
     },
 
     GetIMGFromImageData: function (_imageData) {
@@ -104,6 +112,133 @@ var DrawingHelperFunctions = {
         img.src = canvas.toDataURL();
 
         return img;
+    },
+
+    GetPixelDataFromImageData: function(imageData, x, y) {
+        
+        var index = y * (imageData.width * 4) + x * 4;
+
+        return [
+            imageData.data[index],
+            imageData.data[index + 1],
+            imageData.data[index + 2],
+            imageData.data[index + 3]];
+    },
+
+    ReplaceImageDataPixel: function(imageData, x, y, r, g, b, a) {
+        
+        var index = y * (imageData.width * 4) + x * 4;
+        imageData.data[index] = r;
+        imageData.data[index + 1] = g;
+        imageData.data[index + 2] = b;
+        imageData.data[index + 3] = a;
+    },
+
+    ModifyImageDataPixel: function(imageData, x, y, r, g, b, a) {
+        
+        var index = y * (imageData.width * 4) + x * 4;
+        imageData.data[index] += r;
+        imageData.data[index + 1] += g;
+        imageData.data[index + 2] += b;
+        imageData.data[index + 3] += a;
+    },
+
+    CopyImageData: function(ctx, src)
+    {
+        var dst = ctx.createImageData(src.width, src.height);
+        dst.data.set(src.data);
+        return dst;
+    },
+
+    GreyScaleImageData: function(imageData) {
+
+        var pixelData = undefined;
+        var average = 0;
+
+        for (var x = 1; x < imageData.width - 1; x ++) {
+
+            for (var y = 1; y < imageData.height - 1; y ++) {
+
+                pixelData = 
+                    DrawingHelperFunctions.GetPixelDataFromImageData(
+                        imageData, 
+                        x, 
+                        y);
+
+                average = (pixelData[0] + pixelData[1] + pixelData[2]) / 3;
+                
+                DrawingHelperFunctions.ReplaceImageDataPixel(
+                    imageData,
+                    x,
+                    y,
+                    average,
+                    average,
+                    average,
+                    pixelData[3]);
+            }
+        }
+
+        return imageData;
+    },
+
+    ReduceImageDataColors: function(imageData, reductionFactor, useDithering) {
+
+        var pixelData = undefined;
+        var reducedPixelData = undefined;
+
+        for (var x = 1; x < imageData.width - 1; x ++) {
+
+            for (var y = 1; y < imageData.height - 1; y ++) {
+
+                pixelData = 
+                    DrawingHelperFunctions.GetPixelDataFromImageData(
+                        imageData, 
+                        x, 
+                        y);
+
+                reducedPixelData = 
+                    DrawingHelperFunctions.ReduceColor(
+                        pixelData[0], 
+                        pixelData[1],
+                        pixelData[2],
+                        reductionFactor);
+                
+                DrawingHelperFunctions.ReplaceImageDataPixel(
+                    imageData,
+                    x,
+                    y,
+                    reducedPixelData[0],
+                    reducedPixelData[1],
+                    reducedPixelData[2],
+                    pixelData[3]);
+
+                if (useDithering) {
+
+                    // floyd-steinberg dithering
+                    DrawingHelperFunctions.ModifyImageDataPixel(imageData, x + 1, y, reducedPixelData[3] * 7 / 16, reducedPixelData[4] * 7 / 16, reducedPixelData[5] * 7 / 16, 0);
+                    DrawingHelperFunctions.ModifyImageDataPixel(imageData, x - 1, y + 1, reducedPixelData[3] * 3 / 16, reducedPixelData[4] * 3 / 16, reducedPixelData[5] * 3 / 16, 0);
+                    DrawingHelperFunctions.ModifyImageDataPixel(imageData, x, y + 1, reducedPixelData[3] * 5 / 16, reducedPixelData[4] * 5 / 16, reducedPixelData[5] * 5 / 16, 0);
+                    DrawingHelperFunctions.ModifyImageDataPixel(imageData, x + 1, y + 1, reducedPixelData[3] * 1 / 16, reducedPixelData[4] * 1 / 16, reducedPixelData[5] * 1 / 16, 0);
+                }
+            }
+        }
+
+        return imageData;
+    },
+
+    ReduceColor: function(r, g, b, factor) {
+
+        var newR = Math.round(factor * r / 255) * (255 / factor);
+        var newG = Math.round(factor * g / 255) * (255 / factor);
+        var newB = Math.round(factor * b / 255) * (255 / factor);
+
+        return [
+            newR, 
+            newG, 
+            newB,
+            r - newR,
+            g - newG,
+            b - newB];
     },
 
     MakeColorTransparent: function (_image, _color) {
@@ -325,9 +460,31 @@ var DrawingHelperFunctions = {
         return imageData;
     },
 
-    sfb_mul_table: [1, 57, 41, 21, 203, 34, 97, 73, 227, 91, 149, 62, 105, 45, 39, 137, 241, 107, 3, 173, 39, 71, 65, 238, 219, 101, 187, 87, 81, 151, 141, 133, 249, 117, 221, 209, 197, 187, 177, 169, 5, 153, 73, 139, 133, 127, 243, 233, 223, 107, 103, 99, 191, 23, 177, 171, 165, 159, 77, 149, 9, 139, 135, 131, 253, 245, 119, 231, 224, 109, 211, 103, 25, 195, 189, 23, 45, 175, 171, 83, 81, 79, 155, 151, 147, 9, 141, 137, 67, 131, 129, 251, 123, 30, 235, 115, 113, 221, 217, 53, 13, 51, 50, 49, 193, 189, 185, 91, 179, 175, 43, 169, 83, 163, 5, 79, 155, 19, 75, 147, 145, 143, 35, 69, 17, 67, 33, 65, 255, 251, 247, 243, 239, 59, 29, 229, 113, 111, 219, 27, 213, 105, 207, 51, 201, 199, 49, 193, 191, 47, 93, 183, 181, 179, 11, 87, 43, 85, 167, 165, 163, 161, 159, 157, 155, 77, 19, 75, 37, 73, 145, 143, 141, 35, 138, 137, 135, 67, 33, 131, 129, 255, 63, 250, 247, 61, 121, 239, 237, 117, 29, 229, 227, 225, 111, 55, 109, 216, 213, 211, 209, 207, 205, 203, 201, 199, 197, 195, 193, 48, 190, 47, 93, 185, 183, 181, 179, 178, 176, 175, 173, 171, 85, 21, 167, 165, 41, 163, 161, 5, 79, 157, 78, 154, 153, 19, 75, 149, 74, 147, 73, 144, 143, 71, 141, 140, 139, 137, 17, 135, 134, 133, 66, 131, 65, 129, 1],
+    sfb_mul_table: [
+        1, 57, 41, 21, 203, 34, 97, 73, 227, 91, 149, 62, 105, 45, 39, 137, 241, 107, 3, 173, 39, 71, 65, 238, 
+        219, 101, 187, 87, 81, 151, 141, 133, 249, 117, 221, 209, 197, 187, 177, 169, 5, 153, 73, 139, 133, 127, 
+        243, 233, 223, 107, 103, 99, 191, 23, 177, 171, 165, 159, 77, 149, 9, 139, 135, 131, 253, 245, 119, 231, 
+        224, 109, 211, 103, 25, 195, 189, 23, 45, 175, 171, 83, 81, 79, 155, 151, 147, 9, 141, 137, 67, 131, 129, 
+        251, 123, 30, 235, 115, 113, 221, 217, 53, 13, 51, 50, 49, 193, 189, 185, 91, 179, 175, 43, 169, 83, 163, 
+        5, 79, 155, 19, 75, 147, 145, 143, 35, 69, 17, 67, 33, 65, 255, 251, 247, 243, 239, 59, 29, 229, 113, 111, 
+        219, 27, 213, 105, 207, 51, 201, 199, 49, 193, 191, 47, 93, 183, 181, 179, 11, 87, 43, 85, 167, 165, 163, 
+        161, 159, 157, 155, 77, 19, 75, 37, 73, 145, 143, 141, 35, 138, 137, 135, 67, 33, 131, 129, 255, 63, 250, 
+        247, 61, 121, 239, 237, 117, 29, 229, 227, 225, 111, 55, 109, 216, 213, 211, 209, 207, 205, 203, 201, 199, 
+        197, 195, 193, 48, 190, 47, 93, 185, 183, 181, 179, 178, 176, 175, 173, 171, 85, 21, 167, 165, 41, 163, 161, 
+        5, 79, 157, 78, 154, 153, 19, 75, 149, 74, 147, 73, 144, 143, 71, 141, 140, 139, 137, 17, 135, 134, 133, 66, 
+        131, 65, 129, 1],
 
-    sfb_shg_table: [0, 9, 10, 10, 14, 12, 14, 14, 16, 15, 16, 15, 16, 15, 15, 17, 18, 17, 12, 18, 16, 17, 17, 19, 19, 18, 19, 18, 18, 19, 19, 19, 20, 19, 20, 20, 20, 20, 20, 20, 15, 20, 19, 20, 20, 20, 21, 21, 21, 20, 20, 20, 21, 18, 21, 21, 21, 21, 20, 21, 17, 21, 21, 21, 22, 22, 21, 22, 22, 21, 22, 21, 19, 22, 22, 19, 20, 22, 22, 21, 21, 21, 22, 22, 22, 18, 22, 22, 21, 22, 22, 23, 22, 20, 23, 22, 22, 23, 23, 21, 19, 21, 21, 21, 23, 23, 23, 22, 23, 23, 21, 23, 22, 23, 18, 22, 23, 20, 22, 23, 23, 23, 21, 22, 20, 22, 21, 22, 24, 24, 24, 24, 24, 22, 21, 24, 23, 23, 24, 21, 24, 23, 24, 22, 24, 24, 22, 24, 24, 22, 23, 24, 24, 24, 20, 23, 22, 23, 24, 24, 24, 24, 24, 24, 24, 23, 21, 23, 22, 23, 24, 24, 24, 22, 24, 24, 24, 23, 22, 24, 24, 25, 23, 25, 25, 23, 24, 25, 25, 24, 22, 25, 25, 25, 24, 23, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 23, 25, 23, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 24, 22, 25, 25, 23, 25, 25, 20, 24, 25, 24, 25, 25, 22, 24, 25, 24, 25, 24, 25, 25, 24, 25, 25, 25, 25, 22, 25, 25, 25, 24, 25, 24, 25, 18],
+    sfb_shg_table: [
+        0, 9, 10, 10, 14, 12, 14, 14, 16, 15, 16, 15, 16, 15, 15, 17, 18, 17, 12, 18, 16, 17, 17, 19, 19, 18, 19, 
+        18, 18, 19, 19, 19, 20, 19, 20, 20, 20, 20, 20, 20, 15, 20, 19, 20, 20, 20, 21, 21, 21, 20, 20, 20, 21, 18, 
+        21, 21, 21, 21, 20, 21, 17, 21, 21, 21, 22, 22, 21, 22, 22, 21, 22, 21, 19, 22, 22, 19, 20, 22, 22, 21, 21, 
+        21, 22, 22, 22, 18, 22, 22, 21, 22, 22, 23, 22, 20, 23, 22, 22, 23, 23, 21, 19, 21, 21, 21, 23, 23, 23, 22, 
+        23, 23, 21, 23, 22, 23, 18, 22, 23, 20, 22, 23, 23, 23, 21, 22, 20, 22, 21, 22, 24, 24, 24, 24, 24, 22, 21, 
+        24, 23, 23, 24, 21, 24, 23, 24, 22, 24, 24, 22, 24, 24, 22, 23, 24, 24, 24, 20, 23, 22, 23, 24, 24, 24, 24, 
+        24, 24, 24, 23, 21, 23, 22, 23, 24, 24, 24, 22, 24, 24, 24, 23, 22, 24, 24, 25, 23, 25, 25, 23, 24, 25, 25, 
+        24, 22, 25, 25, 25, 24, 23, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 23, 25, 23, 24, 25, 25, 25, 
+        25, 25, 25, 25, 25, 25, 24, 22, 25, 25, 23, 25, 25, 20, 24, 25, 24, 25, 25, 22, 24, 25, 24, 25, 24, 25, 25, 
+        24, 25, 25, 25, 25, 22, 25, 25, 25, 24, 25, 24, 25, 18],
 
     sbb_mul_table: [
         512, 512, 456, 512, 328, 456, 335, 512, 405, 328, 271, 456, 388, 335, 292, 512,

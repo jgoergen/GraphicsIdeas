@@ -87,7 +87,7 @@
                     false);
         }
 
-        init(this.ctx)
+        init(this.ctx, this.canvas)
             .then(
                 function (fpsOverride) {
 
@@ -160,7 +160,7 @@
         }
 
         // if we end up with any tilt values, send them along
-        if (e.gamma && e.beta && e.alpha)
+        if (e.gamma && e.beta && e.alpha && window.hasOwnProperty("tilt"))
             tilt({ gamma: e.gamma, beta: e.beta, alpha: e.alpha });
     }
 
