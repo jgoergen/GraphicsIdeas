@@ -17,7 +17,6 @@
     </head>
     <body>
     </body>
-
     
     <script src="../../../libs/DemoFramework.js"></script>
     <script src="../../../libs/ThreeJS/three.js"></script>
@@ -76,6 +75,8 @@
             
             cube.rotation.x = elapsed / 1000;
             cube.rotation.y = elapsed / 1000;
+            
+            controls.update();
             params.renderer.render( params.scene, params.camera );
         }
 
