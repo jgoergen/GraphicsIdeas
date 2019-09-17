@@ -1,0 +1,186 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100% !important; height: auto !important; }
+
+        </style>
+    </head>
+    <body>
+    </body>
+
+    <script src="../../../libs/DemoFramework.js"></script>
+    <script src="../../../libs/ThreeJS/three.js"></script>
+    <script src="../../../libs/ThreeJS/controls/TrackballControls.js"></script>
+    <script src="../../../libs/ThreeJS/shaders/CopyShader.js"></script>
+    <script src="../../../libs/ThreeJS/postprocessing/EffectComposer.js"></script>
+    <script src="../../../libs/ThreeJS/postprocessing/RenderPass.js"></script>
+    <script src="../../../libs/ThreeJS/postprocessing/MaskPass.js"></script>
+    <script src="../../../libs/ThreeJS/postprocessing/ShaderPass.js"></script>
+    <script src="../../../libs/ThreeJS/postprocessing/DotScreenPass.js"></script>
+    <script src="../../../libs/ThreeJS/shaders/DotScreenShader.js"></script>
+    
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var THREEJS = true;
+        var FPS = 60;
+        var CANVAS_WIDTH = 800;
+        var CANVAS_HEIGHT = 400;
+        const VIEW_ANGLE = 45;
+        const ASPECT_RATIO = CANVAS_WIDTH / CANVAS_HEIGHT;
+        const DRAW_DISTANCE_NEAR = 0.1;
+        const DRAW_DISTANCE_FAR = 10000;
+
+        /////////////////////////////////////////////////////////
+
+        var localCtxReference = undefined;
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+
+        var sphere = undefined;
+        var pointLight = undefined;
+        var composer = undefined;
+
+        // code to run before update looping starts.
+
+        function init(params) {
+            
+            return new Promise(
+                function(resolve, reject) {
+                            
+                    lastTime = new Date();
+                    elapsed = Math.random() * 10000;
+
+                    // https://threejs.org/examples/#webgl_postprocessing_glitch
+                    const sphereMaterial =
+                        new THREE.MeshPhongMaterial({
+                                color: 0x338833,
+                                emissive: 0x0000FF,
+                                emissiveIntensity: 0.2,
+                                shininess: 30,
+                                specular: 0x00AA00
+                            });
+                            
+                    sphere = new THREE.Mesh(
+                        new THREE.SphereGeometry(
+                            60,
+                            16,
+                            16),
+                        sphereMaterial);
+
+                    sphere.position.z = -90;
+                    scene.add(sphere);
+
+                    // scene.add( new THREE.AmbientLight( 0x222222 ) );
+
+                    pointLight =
+                        new THREE.PointLight(
+                            0xFFFFFF, // color
+                            1, // intensity
+                            0, // distance
+                            2); // decay
+
+                    pointLight.position.x = 50;
+                    pointLight.position.y = 0;
+                    pointLight.position.z = 0;
+                    scene.add(pointLight);
+
+                    roughUp(sphere, 10);
+
+                    // http://blog.cjgammon.com/threejs-post-processing
+
+                    // shaders
+
+                    composer = new THREE.EffectComposer( renderer );
+                    composer.addPass( new THREE.RenderPass( scene, camera ) );
+
+                    var dotScreenPass = new THREE.DotScreenPass();
+                    dotScreenPass.renderToScreen = true;
+                    composer.addPass(dotScreenPass);
+
+                    resolve(FPS);
+                });
+        }
+
+        // code to run every frame.
+
+        function update(scene, camera, renderer) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+
+            /*
+            sphere.geometry.vertices // an array with {x, y, z} entries
+            sphere.geometry.faces // also an array
+
+            // its position
+            sphere.position // contains x, y and z
+            sphere.rotation // {x, y, z}
+            sphere.scale 
+
+            // Changes to the vertices
+            sphere.geometry.verticesNeedUpdate = true;
+
+            // Changes to the normals
+            sphere.geometry.normalsNeedUpdate = true;
+            */
+
+            roughUp(sphere, 1, Math.floor(Math.random() * sphere.geometry.vertices.length));
+            
+            sphere.rotation.y = elapsed / 3000;
+            sphere.rotation.x = Math.sin(sphere.rotation.y);
+
+            pointLight.position.x = Math.sin(elapsed / 4000) * 50;
+            pointLight.position.y = Math.cos(elapsed / 3000) * 100;
+            pointLight.position.z = (Math.sin(elapsed / 3000) * 50) + 30;
+
+            //renderer.render(scene, camera);   
+            //renderer.clear();
+            composer.render(0.5);
+        }
+
+        function roughUp(object, amount, verticeIndex) {
+
+            if (verticeIndex) {
+
+                object.geometry.vertices[verticeIndex].x += ((Math.random() * amount) - (amount/ 2));
+                object.geometry.vertices[verticeIndex].y += ((Math.random() * amount) - (amount/ 2));
+                object.geometry.vertices[verticeIndex].z += ((Math.random() * amount) - (amount/ 2));
+            
+            } else {
+
+                for (var index = 0; index < sphere.geometry.vertices.length; index ++) {
+
+                    object.geometry.vertices[index].x += ((Math.random() * amount) - (amount/ 2));
+                    object.geometry.vertices[index].y += ((Math.random() * amount) - (amount/ 2));
+                    object.geometry.vertices[index].z += ((Math.random() * amount) - (amount/ 2));
+                }
+            }
+            
+            object.geometry.verticesNeedUpdate = true;            
+        }
+
+        function mouseDown(e) {}
+        function mouseUp(e) {}
+        function mouseMove(e, isMouseDown) {}
+        function secondaryMouseDown(e) {}
+        function secondaryMouseUp(e) {}
+        function secondaryMouseMove(e) {}
+        
+    </script>
+</html>

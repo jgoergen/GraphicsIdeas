@@ -16,105 +16,141 @@
     this.lastY = undefined;
     this.canvasOffsetX = undefined;
     this.canvasOffsetY = undefined;
+    this.passParams = {};
+    this.stage = undefined;
+
+    // ThreeJS Stuff
+    this.scene = undefined;
+    this.camera = undefined;
+    this.controls = undefined;
+    this.renderer = undefined;
 
     this.initialize = function () {
 
-        this.canvas =
-            document
-                .getElementById(
-                    "canvas");
+        if (window.THREEJS === true) {
 
-        this.canvas.width = CANVAS_WIDTH;
-        this.canvas.height = CANVAS_HEIGHT;
-        this.canvasOffsetX = this.canvas.offsetLeft;
-        this.canvasOffsetY = this.canvas.offsetTop;
-        this.ctx = canvas.getContext("2d");
+            this.scene = new THREE.Scene();
+            this.camera = new THREE.PerspectiveCamera( 75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000 );
+            this.renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( CANVAS_WIDTH, CANVAS_HEIGHT );
+
+            this.controls = new THREE.TrackballControls( camera );
+            this.controls.rotateSpeed = 1.0;
+            this.controls.zoomSpeed = 1.2;
+            this.controls.panSpeed = 0.8;
+            this.controls.noZoom = false;
+            this.controls.noPan = false;
+            this.controls.staticMoving = true;
+            this.controls.dynamicDampingFactor = 0.3;
+
+            this.stage = this.renderer.domElement;
+            document.body.appendChild( this.stage );
+
+            this.passParams = {
+                scene: this.scene,
+                camera: this.camera,
+                renderer: this.renderer
+            };
+
+        } else {
+
+            this.canvas =
+                document
+                    .getElementById(
+                        "canvas");
+
+            this.canvas.width = CANVAS_WIDTH;
+            this.canvas.height = CANVAS_HEIGHT;
+            this.canvasOffsetX = this.canvas.offsetLeft;
+            this.canvasOffsetY = this.canvas.offsetTop;
+            this.ctx = canvas.getContext("2d");
+
+            this.stage = this.canvas;
+
+            this.passParams = {
+                canvas: this.canvas,
+                ctx: this.ctx
+            };
+        }
 
         if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
 
-            this.canvas
-                .addEventListener(
-                    "touchstart",
-                    function (e) { thisRef.touchStartHanlder(e); },
-                    false);
+            this.stage.addEventListener(
+                "touchstart",
+                function (e) { thisRef.touchStartHanlder(e); },
+                false);
 
-            this.canvas
-                .addEventListener(
-                    "touchmove",
-                    function (e) { thisRef.touchMoveHanlder(e); },
-                    false);
+            this.stage.addEventListener(
+                "touchmove",
+                function (e) { thisRef.touchMoveHanlder(e); },
+                false);
 
-            this.canvas
-                .addEventListener(
-                    "touchend",
-                    function (e) { thisRef.touchEndHanlder(e); },
-                    false);
+            this.stage.addEventListener(
+                "touchend",
+                function (e) { thisRef.touchEndHanlder(e); },
+                false);
         }
 
-        this.canvas
-            .addEventListener(
-                "mousemove",
-                function (e) { thisRef.mouseMoveHandler(e); },
-                false);
+        this.stage.addEventListener(
+            "mousemove",
+            function (e) { thisRef.mouseMoveHandler(e); },
+            false);
 
-        this.canvas
-            .addEventListener(
-                "mousedown",
-                function (e) { thisRef.mouseDownHandler(e); },
-                false);
+        this.stage.addEventListener(
+            "mousedown",
+            function (e) { thisRef.mouseDownHandler(e); },
+            false);
 
-        this.canvas
-            .addEventListener(
-                "mouseup",
-                function (e) { thisRef.mouseUpHandler(e); },
-                false);
+        this.stage.addEventListener(
+            "mouseup",
+            function (e) { thisRef.mouseUpHandler(e); },
+            false);
 
         // does the device support tilt events?
         if (window.DeviceOrientationEvent) {
 
-            window
-                .addEventListener(
-                    "deviceorientation",
-                    function (e) { thisRef.tiltHandler(e); },
-                    false);
+            window.addEventListener(
+                "deviceorientation",
+                function (e) { thisRef.tiltHandler(e); },
+                false);
 
         } else if (window.DeviceMotionEvent) {
 
-            window
-                .addEventListener(
-                    "devicemotion",
-                    function (e) { thisRef.tiltHandler(e); },
-                    false);
+            window.addEventListener(
+                "devicemotion",
+                function (e) { thisRef.tiltHandler(e); },
+                false);
         }
 
-        init(this.ctx, this.canvas)
-            .then(
-                function (fpsOverride) {
+        init(this.passParams)
+        .then(
+            function (fpsOverride) {
 
-                    if (fpsOverride) {
+                if (fpsOverride) {
 
-                        if (fpsOverride === -1) {
+                    if (fpsOverride === -1) {
 
-                            waitForAnimationFrame = false;
-                            setInterval(function() { update(this.ctx, this.canvas);}, 0);
-                            return;
+                        waitForAnimationFrame = false;
+                        setInterval(function() { update(this.passParams);}, 0);
+                        return;
 
-                        } else {
+                    } else {
 
-                            this.FPS = fpsOverride;
-                            this.interval = 1000 / fpsOverride;
-                        }
+                        this.FPS = fpsOverride;
+                        this.interval = 1000 / fpsOverride;
                     }
+                }
 
-                    requestAnimationFrame(this.run);
-                });
+                requestAnimationFrame(this.run);
+            });
     };
 
     this.interpolateMove = function (x, y) {
 
         // fix canvas scaling
-        x = x * this.canvas.width / this.canvas.clientWidth;
-        y = y * this.canvas.height / this.canvas.clientHeight;
+        x = x * this.stage.width / this.stage.clientWidth;
+        y = y * this.stage.height / this.stage.clientHeight;
 
         var result = [];
 
@@ -275,7 +311,7 @@
         if (delta > interval) {
 
             then = now - (delta % interval);
-            update(this.ctx, this.canvas);
+            update(this.passParams);
         }
 
         requestAnimationFrame(this.run);
