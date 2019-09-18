@@ -29,6 +29,7 @@
 
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 800;
+        var FPS = 60;
         var RADIUS = Math.ceil(Math.random() * 20) + 4;
         var BLUR = Math.ceil(Math.random() * 100) + 10;
         var WIGGLE_AMOUNT = Math.ceil(Math.random() * 20);
@@ -74,12 +75,12 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
                             
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     localCtxReference.fillStyle = "white";
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
@@ -89,13 +90,13 @@
                     circle = getRadialBlur(RADIUS);
                     gradient = getGradient(GRADIENT_COLORS);
 
-                    resolve();
+                    resolve(FPS);
                 });
         }
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -202,25 +203,6 @@
                 }
             }
         }
-        
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-            
-        }
 
         // code to run when user moves primary mouse button ( or first finger. )
 
@@ -232,24 +214,6 @@
             var quantizedY = Math.round(e.y / RADIUS) * RADIUS;
 
             addPoint(quantizedX, quantizedY, Math.random() * MAX_ADD_VALUE);
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
         }
 
     </script>

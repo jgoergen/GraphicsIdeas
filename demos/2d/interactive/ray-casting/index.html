@@ -53,21 +53,21 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
 
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
                     particles = generateParticles(PARTICLE_COUNT);
                     walls = generateWalls(WALL_COUNT);
 
-                    ctx.fillStyle = "#fff";
-                    ctx.lineWidth="4";
-                    ctx.strokeStyle="#fff";
+                    params.ctx.fillStyle = "#fff";
+                    params.ctx.lineWidth="4";
+                    params.ctx.strokeStyle="#fff";
 
                     resolve(FPS);
                 });
@@ -75,30 +75,30 @@
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
 
-            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             /*
-            ctx.beginPath();
+            params.ctx.beginPath();
 
-            ctx.strokeStyle="rgba(255, 255, 255, 1)";
+            params.ctx.strokeStyle="rgba(255, 255, 255, 1)";
 
             for (var i = 0; i < walls.length; i ++) {
 
-                ctx.moveTo(
+                params.ctx.moveTo(
                     walls[i].ends.startVect2D.x,
                     walls[i].ends.startVect2D.y);
 
-                ctx.lineTo(
+                params.ctx.lineTo(
                     walls[i].ends.endVect2D.x,
                     walls[i].ends.endVect2D.y);
             }
 
-            ctx.stroke();
+            params.ctx.stroke();
 */
             particles[0].position.x = mousePosX;
             particles[0].position.y = mousePosY;
@@ -133,9 +133,9 @@
                         }
                     }
 
-                    ctx.beginPath();
+                    params.ctx.beginPath();
 
-                    ctx.moveTo(
+                    params.ctx.moveTo(
                         particles[i].position.x,
                         particles[i].position.y);
                 
@@ -160,13 +160,13 @@
 
                     } else {
 
-                        /*ctx.strokeStyle="rgba(0, 255, 0, 1)";
-                        ctx.lineTo(
+                        /*params.ctx.strokeStyle="rgba(0, 255, 0, 1)";
+                        params.ctx.lineTo(
                             (particles[i].position.x) + particles[i].rays[o].x * 200,
                             (particles[i].position.y) + particles[i].rays[o].y * 200)*/
                     }
 
-                    ctx.stroke();
+                    params.ctx.stroke();
                 };
             }
         }
@@ -227,19 +227,11 @@
             return result;
         }
 
-        function tilt(e) {}
-        function mouseDown(e) {}
-        function mouseUp(e) {}
-        
         function mouseMove(e, isMouseDown) {
 
             mousePosX = e.x;
             mousePosY = e.y;
         }
-
-        function secondaryMouseDown(e) {}
-        function secondaryMouseUp(e) {}
-        function secondaryMouseMove(e) {}
 
     </script>
 </html>

@@ -34,6 +34,7 @@
 
         var CANVAS_WIDTH = 1920;
         var CANVAS_HEIGHT = 1080;
+        var FPS = 60;
         var X_POINT_COUNT = 15;
         var Y_POINT_COUNT = 7;
         var POINT_VARIATION = 200;
@@ -52,14 +53,14 @@
         var epsilon = 1e-9;
         var invertedEpsilon = 1.0 / epsilon;
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
                             
                     lastTime = new Date();
                     elapsed = Math.random() * 1000;
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    params.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
                     
                     // generate initial points and 'wiggle' them a bit
                     for (var i = 0; i < X_POINT_COUNT; i++) {
@@ -91,7 +92,7 @@
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -144,13 +145,13 @@
                             closestDistance *= 0.1;
                     }
 
-                    ctx.fillStyle = 
+                    params.ctx.fillStyle = 
                         "rgb(" + 
                         points[closestIndex].r / closestDistance + "," + 
                         points[closestIndex].g / closestDistance + "," + 
                         points[closestIndex].b / closestDistance + ")";
 
-                    ctx.fillRect(
+                    params.ctx.fillRect(
                         x, 
                         y, 
                         DRAWN_POINT_SIZE, 
@@ -164,55 +165,6 @@
         function greaterThanOrEqualWithEpsilon(a, b) { return b - a < epsilon; };
         function lessThanWithEpsilon(a, b) { return b - a > epsilon; };
         function lessThanOrEqualWithEpsilon(a, b) { return a - b < epsilon; };
-
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-        }
 
     </script>
 </html>
