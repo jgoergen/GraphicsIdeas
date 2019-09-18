@@ -29,6 +29,7 @@
 
         var CANVAS_WIDTH = 1920;
         var CANVAS_HEIGHT = 1080;
+        var FPS = 60;
 
         /////////////////////////////////////////////////////////
 
@@ -47,7 +48,7 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
 
             return new Promise(
                 function(resolve, reject) {
@@ -61,18 +62,18 @@
                     baseBMultiplier = parseInt(Math.random() * 6);
                     expansionDevisor = Math.random() * 20;
                     alpha = 0.2 + Math.random() * 0.8;
-                    ctx.font = ((Math.random() * 300) + 100) + "px Arial";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
+                    params.ctx.font = ((Math.random() * 300) + 100) + "px Arial";
+                    params.ctx.textAlign = "center";
+                    params.ctx.textBaseline = "middle";
                     char = chars[parseInt(Math.random() * chars.length)];
                     
-                    resolve();
+                    resolve(FPS);
                 });
         }
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -87,84 +88,35 @@
             var c = 
                 Math.sin((elapsed / 1000) / cDevisor) * 100;
 
-            ctx.drawImage(
+            params.ctx.drawImage(
                 canvas, 
                 b, 
                 b, 
                 CANVAS_WIDTH + (b / expansionDevisor), 
                 CANVAS_HEIGHT + (b / expansionDevisor));
 
-            ctx.fillStyle = 
+            params.ctx.fillStyle = 
                 "rgba(" + 
                 parseInt(Math.abs(a) * baseRMultiplier) + ", " + 
                 parseInt(Math.abs(b) * baseGMultiplier) + ", " + 
                 parseInt(Math.abs(c) * baseBMultiplier) + ", " + 
                 alpha + ")";
                 
-            ctx.save();
-            ctx.translate(
+            params.ctx.save();
+            params.ctx.translate(
                 (CANVAS_WIDTH / 2) + (c * 4), 
                 (CANVAS_HEIGHT / 2) + (a * 2));
-            ctx.rotate(b * 2);
+            params.ctx.rotate(b * 2);
 
-            ctx.fillText(
+            params.ctx.fillText(
                 char,
                 0,
                 0);
 
-            ctx.restore();
+            params.ctx.restore();
 
-            ctx.rotate(
+            params.ctx.rotate(
                 b / 4080);
-        }
-
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
         }
 
     </script>

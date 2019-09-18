@@ -29,6 +29,7 @@
 
         var CANVAS_WIDTH = 1600;
         var CANVAS_HEIGHT = 800;
+        var FPS = 60;
         var CELL_SIZE = Math.ceil(Math.random() * 3) + 1;
         var CELLS_X = Math.ceil(CANVAS_WIDTH / CELL_SIZE);
         var CELLS_Y = Math.ceil(CANVAS_HEIGHT / CELL_SIZE);
@@ -69,30 +70,30 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
                             
                     console.log("Init");
 
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
-                    ctx = canvas.getContext("2d");
-                    ctx.lineWidth = 1;
-                    ctx.fillStyle="rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
-                    ctx.fillRect(0,0,CELLS_X * CELL_SIZE,CELLS_Y * CELL_SIZE);        
+                    params.ctx = canvas.getContext("2d");
+                    params.ctx.lineWidth = 1;
+                    params.ctx.fillStyle="rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
+                    params.ctx.fillRect(0,0,CELLS_X * CELL_SIZE,CELLS_Y * CELL_SIZE);        
 
                     map = generateMap();
-                    resolve();
+                    resolve(FPS);
                 });
         }
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -120,9 +121,9 @@
                 for (var x = 0; x < map[0].length; x++)
                     if (map[y][x].u)
                         if (phase == 0)
-                            map[y][x].n = checkCell(x, y);
+                            map[y][x].n = checkCell(params.ctx, x, y);
                         else
-                            map[y][x].c = checkCell(x, y);
+                            map[y][x].c = checkCell(params.ctx, x, y);
                             
             phase = (phase == 0 ? 1 : 0);
         }
@@ -223,7 +224,7 @@
             return tempMap; 
         }
 
-        function checkCell(_x, _y) {
+        function checkCell(_ctx, _x, _y) {
                 
             var cell = map[_y][_x];
             var state = 
@@ -292,9 +293,9 @@
                     cell.a --;
                 
             if (newState == 1)
-                ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ",1)";
+                _ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ",1)";
             else
-                    ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + CELL_FADE + ")";
+                _ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + CELL_FADE + ")";
             
             ctx.fillRect( _x * CELL_SIZE, _y * CELL_SIZE, CELL_SIZE, CELL_SIZE );
             
@@ -312,65 +313,6 @@
             cell.bl.u = true;
             cell.b.u = true;
             cell.br.u = true;
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Mouse Down");
-        }
-
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-        
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-            console.log("Mouse Up");
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-            if (isMouseDown) {
-
-                console.log("Mouse Move");
-                localCtxReference.fillRect(e.x, e.y, e.speed, e.speed);
-            }
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
         }
 
     </script>

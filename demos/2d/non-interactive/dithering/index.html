@@ -47,12 +47,12 @@
 
         // code to run before update looping starts.
 
-        function init(ctx, canvas) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
 
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
@@ -61,29 +61,29 @@
                         function(data) {
 
                             baseImageData = data; //DrawingHelperFunctions.GreyScaleImageData(data);
-                            ctx.putImageData(baseImageData, 0, 0);
+                            params.ctx.putImageData(baseImageData, 0, 0);
                         });
 
                     resolve(FPS);
                 });
         }
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
 
-            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             factor += changeSpeed;
             if (factor > 4 || factor < 1)
                 changeSpeed *= -1;
                 
-            ctx.putImageData(
+            params.ctx.putImageData(
                 DrawingHelperFunctions.ReduceImageDataColors(
                     DrawingHelperFunctions.CopyImageData(
-                        ctx,
+                        params.ctx,
                         baseImageData),
                     factor,
                     true), 
