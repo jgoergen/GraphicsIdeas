@@ -42,6 +42,7 @@
         var elapsed = 0;
         var cubes = [];
         var pointLight;
+        var pointLight2;
 
         // code to run before update looping starts.
 
@@ -66,14 +67,26 @@
 
                     pointLight =
                         new THREE.PointLight(
-                            0xFFFFFF, // color
-                            1.5, // intensity
-                            0, // distance
+                            0x00F00F, // color
+                            2.5, // intensity
+                            14, // distance
                             2); // decay
 
-                    pointLight.position.z = 100;
+                    pointLight.position.z = -4;
 
                     params.scene.add(pointLight);
+
+                    pointLight2 =
+                        new THREE.PointLight(
+                            0x0005F0, // color
+                            2.5, // intensity
+                            14, // distance
+                            2); // decay
+
+                    pointLight2.position.z = -4;
+
+                    params.scene.add(pointLight2);
+
                     params.camera.position.z = 15;
 
                     resolve(FPS);
@@ -88,12 +101,17 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            pointLight.position.x = (Math.cos(elapsed / 5000) * 500);
+            pointLight.position.x = (Math.cos(elapsed / 3000) * 20);
+            pointLight.position.Y = (Math.sin(elapsed / 1500) * 20);
+            
+            pointLight2.position.x = ((Math.cos(elapsed / 3000) * -1) * 20);
+            pointLight2.position.Y = ((Math.sin(elapsed / 1500) * -1) * 20);
+
             params.camera.position.z = (Math.cos(elapsed / 1000) * 2) + 12;
 
             for (var index = 0; index < cubes.length; index ++) {
 
-                cubes[index].position.z = (Math.cos((elapsed / 10000) + (index * (Math.sin(elapsed / 5000)))) * 1);
+                cubes[index].position.z = (Math.cos((elapsed / 100000) + (index * (Math.sin(elapsed / 50000)))) * 1);
                 cubes[index].rotation.z = (Math.cos((elapsed / 10000) + index / 100) * 30);
             }
 

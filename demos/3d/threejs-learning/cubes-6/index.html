@@ -51,7 +51,7 @@
                 function(resolve, reject) {
 
                     var geometry = new THREE.BoxGeometry( CUBE_SIZE, CUBE_SIZE, CUBE_SIZE );
-                    var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+                    var material = new THREE.MeshLambertMaterial( { color: 0xFFFFFF } );
 
                     for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
 
@@ -66,9 +66,9 @@
 
                     pointLight =
                         new THREE.PointLight(
-                            0xFFFFFF, // color
+                            0xF00000, // color
                             1.5, // intensity
-                            0, // distance
+                            20, // distance
                             2); // decay
 
                     pointLight.position.z = 100;
@@ -88,7 +88,8 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            pointLight.position.z = (Math.cos(elapsed / 3000) * 10);
+            pointLight.position.z = (Math.cos(elapsed / 3000) * 6);
+            pointLight.position.y = (Math.cos(elapsed / 2000) * 10);
 
             for (var index = 0; index < cubes.length; index ++) {
 
