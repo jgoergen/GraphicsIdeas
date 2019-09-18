@@ -74,6 +74,7 @@
                     pointLight.position.z = 100;
 
                     params.scene.add(pointLight);
+                    params.camera.position.z = 15;
 
                     resolve(FPS);
                 });
@@ -92,10 +93,7 @@
 
             for (var index = 0; index < cubes.length; index ++) {
 
-                cubes[index].rotation.set(
-                    (Math.cos(elapsed / 10000) * 10), 
-                    (Math.cos(elapsed / 10000) * 10), 
-                    0);
+                cubes[index].position.z = (Math.cos((elapsed / 40000) + (index * (Math.sin(elapsed / 10000)))) * 1);
             }
 
             controls.update();

@@ -51,7 +51,7 @@
                 function(resolve, reject) {
 
                     var geometry = new THREE.BoxGeometry( CUBE_SIZE, CUBE_SIZE, CUBE_SIZE );
-                    var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+                    var material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
 
                     for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
 
@@ -64,17 +64,7 @@
                         }
                     }
 
-                    pointLight =
-                        new THREE.PointLight(
-                            0xFFFFFF, // color
-                            1.5, // intensity
-                            0, // distance
-                            2); // decay
-
-                    pointLight.position.z = 100;
-
                     params.scene.add(pointLight);
-
                     resolve(FPS);
                 });
         }
@@ -87,15 +77,14 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            pointLight.position.x = (Math.cos(elapsed / 5000) * 500);
             params.camera.position.z = (Math.cos(elapsed / 1000) * 2) + 12;
 
             for (var index = 0; index < cubes.length; index ++) {
 
                 cubes[index].rotation.set(
-                    (Math.cos(elapsed / 10000) * 10), 
-                    (Math.cos(elapsed / 10000) * 10), 
-                    0);
+                    0,
+                    0, 
+                    (Math.cos(elapsed / 10000) * 20));
             }
 
             controls.update();
