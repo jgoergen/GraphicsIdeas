@@ -66,12 +66,12 @@
 
                     pointLight =
                         new THREE.PointLight(
-                            0xFFFFFF, // color
+                            0x04F016, // color
                             1.5, // intensity
-                            0, // distance
+                            30, // distance
                             2); // decay
 
-                    pointLight.position.z = 100;
+                    pointLight.position.z = -10;
 
                     params.scene.add(pointLight);
 
@@ -87,7 +87,8 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            pointLight.position.x = (Math.cos(elapsed / 5000) * 500);
+            pointLight.position.z = (Math.cos(elapsed / 3000) * 6);
+            pointLight.position.y = (Math.cos(elapsed / 2000) * 10);
             params.camera.position.z = (Math.cos(elapsed / 1000) * 2) + 12;
 
             for (var index = 0; index < cubes.length; index ++) {
