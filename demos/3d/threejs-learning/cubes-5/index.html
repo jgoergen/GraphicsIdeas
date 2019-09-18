@@ -32,8 +32,8 @@
         var FPS = 60;
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 400;
-        var CUBE_SIZE = Math.random() * 4;
-        var CUBE_GAP = Math.random() * 0.5;
+        var CUBE_SIZE = (Math.random() * 1) + 1;
+        var CUBE_GAP = 1;
 
         /////////////////////////////////////////////////////////
 
@@ -74,6 +74,8 @@
                     pointLight.position.z = 100;
 
                     params.scene.add(pointLight);
+                    params.camera.position.z = 12;
+
                     resolve(FPS);
                 });
         }
@@ -86,14 +88,16 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            params.camera.position.z = (Math.cos(elapsed / 1000) * 1) + 12;
+            pointLight.position.z = (Math.cos(elapsed / 3000) * 7);
 
             for (var index = 0; index < cubes.length; index ++) {
 
-                cubes[index].rotation.set(
-                    0,
-                    0, 
-                    (Math.cos((elapsed / 2000) + index / 100) * 10));
+                cubes[index].position.x = Math.cos((elapsed / 1000) + index / 10) * 6;
+                cubes[index].position.y = Math.sin((elapsed / 1000) + index / 10) * 6;
+                cubes[index].position.z = Math.sin((index / 10) + (elapsed / 10000)) * 2;
+
+                cubes[index].rotation.x = Math.sin((index / 10) + (elapsed / 10000)) * 2;
+                cubes[index].rotation.y = Math.sin((elapsed / 1000) + index / 10) * 1;
             }
 
             controls.update();
