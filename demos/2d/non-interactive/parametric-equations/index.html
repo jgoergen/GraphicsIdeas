@@ -51,10 +51,10 @@
             function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time * P3) * scaleY; },
             function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time / P1) * scaleX + Math.sin(time) * P3; }
         ];
-        var FORMULA1 = PARAMETRIC_FORMULAS_X[Math.floor(Math.random() * PARAMETRIC_FORMULAS_X.length)];
-        var FORMULA2 = PARAMETRIC_FORMULAS_X[Math.floor(Math.random() * PARAMETRIC_FORMULAS_X.length)];
-        var FORMULA3 = PARAMETRIC_FORMULAS_Y[Math.floor(Math.random() * PARAMETRIC_FORMULAS_Y.length)];
-        var FORMULA4 = PARAMETRIC_FORMULAS_Y[Math.floor(Math.random() * PARAMETRIC_FORMULAS_Y.length)];
+        var FORMULA1 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+        var FORMULA2 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+        var FORMULA3 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+        var FORMULA4 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
 
         /////////////////////////////////////////////////////////
 
@@ -72,7 +72,7 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
@@ -85,15 +85,15 @@
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
 
-            ctx.fillStyle = "rgba(0, 0, 0, " + actualFadeAmount + ")";
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            ctx.strokeStyle = "#fff";
+            params.ctx.fillStyle = "rgba(0, 0, 0, " + actualFadeAmount + ")";
+            params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.strokeStyle = "#fff";
 
             for (var i = 0; i < actualLineCount; i++) {
 
@@ -102,10 +102,10 @@
                 var x2 = FORMULA3((elapsed * actualSpeed) + i, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val);
                 var y2 = FORMULA4((elapsed * actualSpeed) + i, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val);
 
-                ctx.beginPath();
-                ctx.moveTo(x1 + (CANVAS_WIDTH / 2), y1 + (CANVAS_HEIGHT / 2));
-                ctx.lineTo(x2 + (CANVAS_WIDTH / 2), y2 + (CANVAS_HEIGHT / 2));
-                ctx.stroke();
+                params.ctx.beginPath();
+                params.ctx.moveTo(x1 + (CANVAS_WIDTH / 2), y1 + (CANVAS_HEIGHT / 2));
+                params.ctx.lineTo(x2 + (CANVAS_WIDTH / 2), y2 + (CANVAS_HEIGHT / 2));
+                params.ctx.stroke();
             }
 
             if (Math.random() < 0.01) {
@@ -120,7 +120,7 @@
                     case 1:
                         var d = (Math.floor(Math.random() * 2) + 2);
                         var f = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
-                        window["FORMULA" + d] = PARAMETRIC_FORMULAS_Y[f];
+                        window["FORMULA" + d] = PARAMETRIC_FORMULAS[f];
                         break;
 
                     case 2:

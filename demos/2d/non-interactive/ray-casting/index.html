@@ -57,21 +57,21 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
 
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
                     particles = generateParticles(PARTICLE_COUNT);
                     walls = generateWalls(WALL_COUNT);
 
-                    ctx.fillStyle = "rgba(0, 0, 0, " + CLEAR_STRENGTH + ")";
-                    ctx.lineWidth=RAY_THICKNESS;
-                    ctx.strokeStyle="#fff";
+                    params.ctx.fillStyle = "rgba(0, 0, 0, " + CLEAR_STRENGTH + ")";
+                    params.ctx.lineWidth=RAY_THICKNESS;
+                    params.ctx.strokeStyle="#fff";
 
                     resolve(FPS);
                 });
@@ -79,32 +79,32 @@
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
 
-            //ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             
-            ctx.beginPath();
+            params.ctx.beginPath();
 
-            ctx.strokeStyle="rgba(255, 255, 255, 0.02)";
+            params.ctx.strokeStyle="rgba(255, 255, 255, 0.02)";
 
             for (var i = 0; i < walls.length; i ++) {
 
-                ctx.moveTo(
+                params.ctx.moveTo(
                     walls[i].ends.startVect2D.x,
                     walls[i].ends.startVect2D.y);
 
-                ctx.lineTo(
+                params.ctx.lineTo(
                     walls[i].ends.endVect2D.x,
                     walls[i].ends.endVect2D.y);
             }
 
-            ctx.stroke();
+            params.ctx.stroke();
 
             
             for (var i = 0; i < particles.length; i ++) {
@@ -139,9 +139,9 @@
                         }
                     }
 
-                    ctx.beginPath();
+                    params.ctx.beginPath();
 
-                    ctx.moveTo(
+                    params.ctx.moveTo(
                         particles[i].position.x,
                         particles[i].position.y);
                 
@@ -157,14 +157,14 @@
                                     0,
                                     1);
 
-                        ctx.strokeStyle="rgba(" + particles[i].rayColor[0] + ", " + particles[i].rayColor[1] + ", " + particles[i].rayColor[2] + ", " + Math.min(MAX_RAY_BRIGHTNESS, brightness) + ")";
+                        params.ctx.strokeStyle="rgba(" + particles[i].rayColor[0] + ", " + particles[i].rayColor[1] + ", " + particles[i].rayColor[2] + ", " + Math.min(MAX_RAY_BRIGHTNESS, brightness) + ")";
 
-                        ctx.lineTo(
+                        params.ctx.lineTo(
                             collisionVector.x,
                             collisionVector.y)
                     }
 
-                    ctx.stroke();
+                    params.ctx.stroke();
                 }
             }
         }
@@ -249,14 +249,6 @@
 
             return result;
         }
-
-        function tilt(e) {}
-        function mouseDown(e) {}
-        function mouseUp(e) {}
-        function mouseMove(e, isMouseDown) {}
-        function secondaryMouseDown(e) {}
-        function secondaryMouseUp(e) {}
-        function secondaryMouseMove(e) {}
 
     </script>
 </html>

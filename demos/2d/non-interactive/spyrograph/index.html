@@ -29,6 +29,7 @@
 
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 800;
+        var FPS = 60;
 
         var MAX_DRAW_ROUNDS = 1100; 
         var MIN_DRAW_ROUNDS = 500;
@@ -68,19 +69,19 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
                             
                     console.log("Init");
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     localCtxReference.fillStyle = "white";
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
-                    ctx.lineStyle = "#fff";
-                    ctx.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+                    params.ctx.lineStyle = "#fff";
+                    params.ctx.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
 
                     r = Math.floor(Math.random() * 255);
                     g = Math.floor(Math.random() * 255);
@@ -103,13 +104,13 @@
 
                     setupNewJoints();
                     
-                    resolve();
+                    resolve(FPS);
                 });
         }
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -151,18 +152,18 @@
 
             //ctx.clearRect(0, 0, 300, 300);
             var alpha = 1;
-            ctx.lineWidth = STARTING_THICKNESS;
+            params.ctx.lineWidth = STARTING_THICKNESS;
 
-            ctx.fillStyle = "rgba(0,0,0," + fadeAmount + ")";
-            ctx.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+            params.ctx.fillStyle = "rgba(0,0,0," + fadeAmount + ")";
+            params.ctx.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
 
-            ctx.fillStyle = "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + alpha + ")";
-            ctx.strokeStyle = "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + alpha + ")";
+            params.ctx.fillStyle = "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + alpha + ")";
+            params.ctx.strokeStyle = "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + alpha + ")";
 
-            ctx.beginPath();
+            params.ctx.beginPath();
 
             for (var i = 0; i < drawRounds; i++)
-                draw(ctx);
+                draw(params.ctx);
 
             ctx.stroke();
         }

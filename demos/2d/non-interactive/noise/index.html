@@ -30,13 +30,13 @@
 
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 800;
+        var FPS = 10;
         var MAP_DIMENSIONS = [32, 64, 128, 256][Math.floor(Math.random() * 4)];
         var ROUGHNESS = Math.random() * 10;
         var UNIT_SIZE = 1;
         var BLOCK_SIZE = Math.floor(Math.random() * 4);
         var OFFSET_SPEED = (Math.floor(Math.random() * 40) - 20);
         var LOOPING = Math.random() > 0.5
-        var FPS = 10;
 
         /////////////////////////////////////////////////////////
 
@@ -49,13 +49,13 @@
 
         // code to run before update looping starts.
         
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
                             
                     console.log("Init");
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     localCtxReference.fillStyle = "white";
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
@@ -67,7 +67,7 @@
         
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -81,21 +81,13 @@
 
             offset += OFFSET_SPEED;
             
-            ctx.drawImage(
+            params.ctx.drawImage(
                 noise.draw(0, 0, offset),
                 0,
                 0,
                 CANVAS_WIDTH,
                 CANVAS_HEIGHT);
         }
-
-        function tilt(e) {}
-        function mouseDown(e) {}
-        function mouseUp(e) {}
-        function mouseMove(e, isMouseDown) {}
-        function secondaryMouseDown(e) {}
-        function secondaryMouseUp(e) {}
-        function secondaryMouseMove(e) {}
 
     </script>
 </html>
