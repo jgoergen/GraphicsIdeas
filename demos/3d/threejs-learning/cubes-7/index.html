@@ -30,10 +30,16 @@
 
         var THREEJS = true;
         var FPS = 60;
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 400;
-        var CUBE_SIZE = (Math.random() * 0.5) + 0.2;
-        var CUBE_GAP = Math.random() * 2;
+        var CANVAS_WIDTH = 1200;
+        var CANVAS_HEIGHT = 800;
+        var CUBE_SIZE = (Math.random() * 0.4) + 0.2;
+        var CUBE_GAP = Math.random() * 1;
+        var LIGHT_R = Math.floor(Math.random() * 255);
+        var LIGHT_G = Math.floor(Math.random() * 255);
+        var LIGHT_B = Math.floor(Math.random() * 255);
+        var CUBE_R = Math.floor(Math.random() * 255);
+        var CUBE_G = Math.floor(Math.random() * 255);
+        var CUBE_B = Math.floor(Math.random() * 255);
 
         /////////////////////////////////////////////////////////
 
@@ -51,7 +57,7 @@
                 function(resolve, reject) {
 
                     var geometry = new THREE.BoxGeometry( CUBE_SIZE, CUBE_SIZE, 10 );
-                    var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+                    var material = new THREE.MeshLambertMaterial( { color: new THREE.Color("rgb(" + CUBE_R + ", " + CUBE_G + ", " + CUBE_B + ")") } );
 
                     for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
 
@@ -66,14 +72,17 @@
 
                     pointLight =
                         new THREE.PointLight(
-                            0xF023F0, // color
+                            new THREE.Color("rgb(" + LIGHT_R + ", " + LIGHT_G + ", " + LIGHT_B + ")"), // color
                             2.0, // intensity
                             30, // distance
                             2); // decay
 
                     pointLight.position.z = -10;
-
                     params.scene.add(pointLight);
+                    
+                    var ambientLight = new THREE.AmbientLight(new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")"));
+                    params.scene.add(ambientLight);
+
                     resolve(FPS);
                 });
         }
@@ -86,7 +95,8 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            params.camera.position.z = (Math.cos(elapsed / 4000) * 6) + 10;
+            params.camera.position.z = (Math.cos(elapsed / 4000) * 4) + 5;
+            params.camera.position.x = (Math.cos(elapsed / 8000) * 3);
 
             pointLight.position.x = (Math.cos(elapsed / 3000) * 6);
             pointLight.position.y = (Math.cos(elapsed / 2000) * 10);

@@ -30,10 +30,19 @@
 
         var THREEJS = true;
         var FPS = 60;
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 400;
+        var CANVAS_WIDTH = 1200;
+        var CANVAS_HEIGHT = 800;
         var CUBE_SIZE = (Math.random() * 1) + 1;
         var CUBE_GAP = Math.random() * 0.5;
+        var LIGHT_R = Math.floor(Math.random() * 155) + 100;
+        var LIGHT_G = Math.floor(Math.random() * 155) + 100;
+        var LIGHT_B = Math.floor(Math.random() * 155) + 100;
+        var LIGHT2_R = Math.floor(Math.random() * 155) + 100;
+        var LIGHT2_G = Math.floor(Math.random() * 155) + 100;
+        var LIGHT2_B = Math.floor(Math.random() * 155) + 100;
+        var CUBE_R = Math.floor(Math.random() * 255);
+        var CUBE_G = Math.floor(Math.random() * 255);
+        var CUBE_B = Math.floor(Math.random() * 255);
 
         /////////////////////////////////////////////////////////
 
@@ -52,7 +61,7 @@
                 function(resolve, reject) {
 
                     var geometry = new THREE.BoxGeometry( CUBE_SIZE, CUBE_SIZE, CUBE_SIZE );
-                    var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+                    var material = new THREE.MeshLambertMaterial( { color: new THREE.Color("rgb(" + CUBE_R + ", " + CUBE_G + ", " + CUBE_B + ")") } );
 
                     for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
 
@@ -67,28 +76,25 @@
 
                     pointLight =
                         new THREE.PointLight(
-                            0x00F00F, // color
+                            new THREE.Color("rgb(" + LIGHT_R + ", " + LIGHT_G + ", " + LIGHT_B + ")"), // color
                             2.5, // intensity
                             14, // distance
                             2); // decay
 
                     pointLight.position.z = -4;
-
                     params.scene.add(pointLight);
 
                     pointLight2 =
                         new THREE.PointLight(
-                            0x0005F0, // color
+                            new THREE.Color("rgb(" + LIGHT2_R + ", " + LIGHT2_G + ", " + LIGHT2_B + ")"), // color
                             2.5, // intensity
                             14, // distance
                             2); // decay
 
                     pointLight2.position.z = -4;
-
                     params.scene.add(pointLight2);
-
+                    
                     params.camera.position.z = 15;
-
                     resolve(FPS);
                 });
         }

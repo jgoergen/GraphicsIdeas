@@ -30,10 +30,19 @@
 
         var THREEJS = true;
         var FPS = 60;
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 400;
-        var CUBE_SIZE = Math.random() * 4;
+        var CANVAS_WIDTH = 1200;
+        var CANVAS_HEIGHT = 800;
+        var CUBE_SIZE = 1 + (Math.random() * 3);
         var CUBE_GAP = Math.random() * 0.5;
+        var LIGHT_R = Math.floor(Math.random() * 255);
+        var LIGHT_G = Math.floor(Math.random() * 255);
+        var LIGHT_B = Math.floor(Math.random() * 255);
+        var CUBE_R = Math.floor(Math.random() * 255);
+        var CUBE_G = Math.floor(Math.random() * 255);
+        var CUBE_B = Math.floor(Math.random() * 255);
+        var BG_R = Math.floor(Math.random() * 255);
+        var BG_G = Math.floor(Math.random() * 255);
+        var BG_B = Math.floor(Math.random() * 255);
 
         /////////////////////////////////////////////////////////
 
@@ -51,7 +60,7 @@
                 function(resolve, reject) {
 
                     var geometry = new THREE.BoxGeometry( CUBE_SIZE, CUBE_SIZE, CUBE_SIZE );
-                    var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+                    var material = new THREE.MeshLambertMaterial( { color: new THREE.Color("rgb(" + CUBE_R + ", " + CUBE_G + ", " + CUBE_B + ")") } );
 
                     for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
 
@@ -66,15 +75,18 @@
 
                     pointLight =
                         new THREE.PointLight(
-                            0x04F016, // color
+                            new THREE.Color("rgb(" + LIGHT_R + ", " + LIGHT_G + ", " + LIGHT_B + ")"), // color
                             1.5, // intensity
                             30, // distance
                             2); // decay
 
                     pointLight.position.z = -10;
-
                     params.scene.add(pointLight);
+                    
+                    var ambientLight = new THREE.AmbientLight(new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")"));
+                    params.scene.add(ambientLight);
 
+                    params.scene.background = new THREE.Color( new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")") );
                     resolve(FPS);
                 });
         }
