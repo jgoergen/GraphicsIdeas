@@ -80,9 +80,6 @@
                     pointLight.position.z = -10;
                     params.scene.add(pointLight);
                     
-                    var ambientLight = new THREE.AmbientLight(new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")"));
-                    params.scene.add(ambientLight);
-
                     resolve(FPS);
                 });
         }
@@ -97,6 +94,7 @@
             
             params.camera.position.z = (Math.cos(elapsed / 4000) * 4) + 5;
             params.camera.position.x = (Math.cos(elapsed / 8000) * 3);
+            params.camera.position.y = (Math.cos(elapsed / 6000) * 2);
 
             pointLight.position.x = (Math.cos(elapsed / 3000) * 6);
             pointLight.position.y = (Math.cos(elapsed / 2000) * 10);
