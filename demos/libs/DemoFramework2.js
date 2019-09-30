@@ -115,10 +115,7 @@
 
                     if (options && options.hasOwnProperty("settings")) {
 
-                        this.settings = this.initSettings(options.settings);
-
-                        // Todo: this needs an actual interface!
-                        window.settings = this.settings;
+                        window.settings = this.settings = this.initSettings(options.settings);
                     }
 
                     requestAnimationFrame(this.run);
@@ -139,7 +136,7 @@
     }
 
     this.setupSettingOverride = function(settingOverride) {
-
+        
         if (!settingOverride.hasOwnProperty("Generator") && settingOverride.hasOwnProperty("Min") && settingOverride.hasOwnProperty("Max")) {
 
             settingOverride.Generator = function() { return (Math.random() * (this.Max - this.Min)) + this.Min; };
@@ -162,9 +159,31 @@
             }
         }
 
-        settingOverride.Regenerate();
-        settingOverride.Value = settingOverride.TargetValue;
-        settingOverride.valueOf = function() { return this.Value; }
+        if (!settingOverride.hasOwnProperty("Value")) {
+
+            settingOverride.Regenerate();
+            settingOverride.Value = settingOverride.TargetValue;
+
+        } else {
+
+            settingOverride.TargetValue = settingOverride.Value;
+        }
+
+        if (!settingOverride.hasOwnProperty("Min")) {
+
+            settingOverride.Min = settingOverride.Value;
+        }  
+
+        if (!settingOverride.hasOwnProperty("Max")) {
+
+            settingOverride.Max = settingOverride.Value;
+        }  
+
+        if (!settingOverride.hasOwnProperty("TransitionFrames")) {
+
+            settingOverride.TransitionFrames = 10;
+        }        
+
         return settingOverride;
     }
 

@@ -30,7 +30,7 @@
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 400;
         var FPS = 60;
-        var SETTINGS = {
+        var SETTINGS_PACKAGE = {
             SCREEN_FADE_SPEED: {
                 Min: 0,
                 Max: 1,
@@ -73,7 +73,7 @@
                     
                     resolve({
                         fps: FPS, 
-                        settings: SETTINGS
+                        settings: SETTINGS_PACKAGE
                     });
                 });
         }
@@ -142,7 +142,6 @@
         function secondaryMouseMove(e) {
 
             //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
         }
 
     </script>

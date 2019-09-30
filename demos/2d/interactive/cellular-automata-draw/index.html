@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
 
         <title></title>
 
@@ -29,13 +29,65 @@
 
         var CANVAS_WIDTH = 1600;
         var CANVAS_HEIGHT = 1200;
-        var CELL_SIZE = Math.ceil(Math.random() * 10) + 2;
-        var CELLS_X = Math.ceil(CANVAS_WIDTH / CELL_SIZE);
-        var CELLS_Y = Math.ceil(CANVAS_HEIGHT / CELL_SIZE);
-        var CELL_FADE = Math.random() / 10;
-        var CELL_DENSITY = 1 + Math.ceil(Math.random() * 10);
-        var CELL_LIFE = 20 + Math.ceil(Math.random() * 50);
-        var MAX_COLOR_CHANGE_SPEED = Math.random() * 5;
+        var FPS = 60;
+        var SETTINGS_PACKAGE = {
+            CELL_SIZE: {
+                Min: 2,
+                Max: Math.ceil(Math.random() * 10)
+            },
+            CELLS_X: {
+                Generator: function() { return Math.ceil(CANVAS_WIDTH / settings.CELL_SIZE.Value); } // todo: some way to refer to other vals from inside a val
+            },
+            CELLS_Y: {
+                Generator: function() { return Math.ceil(CANVAS_HEIGHT / settings.CELL_SIZE.Value); }
+            },
+            CELL_DENSITY: {
+                Min: 1,
+                Max: Math.ceil(Math.random() * 10)
+            },
+            CELL_LIFE: {
+                Min: 20,
+                Max: Math.ceil(Math.random() * 50)
+            },
+            MAX_COLOR_CHANGE_SPEED: {
+                Min: 0,
+                Max: Math.random() * 5
+            },
+            R: {
+                Min: 0,
+                Max: 0,
+                Speed: 0, // todo: increment by this amount on updates
+                EdgeType: "bounce" // todo: do this when the value hits the edges. 'loop', 'bounce', 'clamp'
+            },
+            G: {
+                Min: 0,
+                Max: 0,
+                Speed: 0,
+                EdgeType: "bounce"
+            },
+            B: {
+                Min: 0,
+                Max: 0,
+                Speed: 0,
+                EdgeType: "bounce"
+            }
+        };
+
+        var rChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
+        var gChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
+        var bChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
+        var rLower = Math.floor(Math.random() * 100);
+        var rUpper = Math.floor(Math.random() * (200 - rLower)) + 50;
+        var rVal = rLower + Math.floor(Math.random() * rUpper);
+        var r = rVal;
+        var gLower = Math.floor(Math.random() * 100);
+        var gUpper = Math.floor(Math.random() * (205 - gLower)) + 50;
+        var gVal = rLower + Math.floor(Math.random() * gUpper);
+        var g = gVal;
+        var bLower = Math.floor(Math.random() * 100);
+        var bUpper = Math.floor(Math.random() * (205 - bLower)) + 50;
+        var bVal = rLower + Math.floor(Math.random() * bUpper);
+        var b = bVal;
 
         /////////////////////////////////////////////////////////
 
@@ -48,22 +100,6 @@
         var phase = 0;
         var blackPixel = null;
         var whitePixel = null;
-        var aFix = 255 / CELL_LIFE;
-        var rLower = Math.floor(Math.random() * 100);
-        var rUpper = Math.floor(Math.random() * (200 - rLower)) + 50;
-        var rVal = rLower + Math.floor(Math.random() * rUpper);
-        var r = rVal;
-        var rChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
-        var gLower = Math.floor(Math.random() * 100);
-        var gUpper = Math.floor(Math.random() * (205 - gLower)) + 50;
-        var gVal = rLower + Math.floor(Math.random() * gUpper);
-        var g = gVal;
-        var gChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
-        var bLower = Math.floor(Math.random() * 100);
-        var bUpper = Math.floor(Math.random() * (205 - bLower)) + 50;
-        var bVal = rLower + Math.floor(Math.random() * bUpper);
-        var b = bVal;
-        var bChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
         var drawPoints = new Array();
         var button = 0;
         var cellTop, cellLeft, cellRight, cellBottom, neighbors, state, newState;
@@ -85,7 +121,10 @@
                     ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
                     ctx.fillRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
 
-                    resolve();
+                    resolve({
+                        fps: FPS, 
+                        settings: SETTINGS_PACKAGE
+                    });
                 });
         }
 
@@ -128,65 +167,65 @@
 
         function activeCell(x, y) {
 
-            x = Math.floor(x / CELL_SIZE);
-            y = Math.floor(y / CELL_SIZE);
+            x = Math.floor(x / settings.CELL_SIZE.Value);
+            y = Math.floor(y / settings.CELL_SIZE.Value);
 
             var cell = map[y][x];
             cell.c = 1;
             cell.n = 1;
             cell.u = true;
-            cell.a = Math.floor(Math.random() * CELL_LIFE);
+            cell.a = Math.floor(Math.random() * settings.CELL_LIFE.Value);
 
             cell = cell.t;
             cell.c = 1;
             cell.n = 1;
             cell.u = true;
-            cell.a = Math.floor(Math.random() * CELL_LIFE);
+            cell.a = Math.floor(Math.random() * settings.CELL_LIFE.Value);
 
             cell = cell.br;
             cell.c = 1;
             cell.n = 1;
             cell.u = true;
-            cell.a = Math.floor(Math.random() * CELL_LIFE);
+            cell.a = Math.floor(Math.random() * settings.CELL_LIFE.Value);
         }
 
         function generateMap() {
 
             var tempMap = new Array();
 
-            for (var y = 0; y < CELLS_Y; y++) {
+            for (var y = 0; y < settings.CELLS_Y.Value; y++) {
 
                 var row = new Array();
 
-                for (var x = 0; x < CELLS_X; x++) {
+                for (var x = 0; x < settings.CELLS_X.Value; x++) {
 
                     var state = 0;
-                    row.push({ c: state, n: state, a: Math.floor(Math.random() * CELL_LIFE), u: state == 1, t: null, b: null, l: null, r: null, tl: null, tr: null, bl: null, br: null });
+                    row.push({ c: state, n: state, a: Math.floor(Math.random() * settings.CELL_LIFE.Value), u: state == 1, t: null, b: null, l: null, r: null, tl: null, tr: null, bl: null, br: null });
                 }
 
                 tempMap.push(row);
             }
 
-            for (var y = 0; y < CELLS_Y; y++) {
+            for (var y = 0; y < settings.CELLS_Y.Value; y++) {
 
                 var row = new Array();
 
-                for (var x = 0; x < CELLS_X; x++) {
+                for (var x = 0; x < settings.CELLS_X.Value; x++) {
 
                     cellTop = y - 1;
                     if (cellTop < 0)
-                        cellTop = CELLS_Y - 1;
+                        cellTop = settings.CELLS_Y.Value - 1;
 
                     cellLeft = x - 1;
                     if (cellLeft < 0)
-                        cellLeft = CELLS_X - 1;
+                        cellLeft = settings.CELLS_X.Value - 1;
 
                     cellBottom = y + 1;
-                    if (cellBottom >= CELLS_Y)
+                    if (cellBottom >= settings.CELLS_Y.Value)
                         cellBottom = 0;
 
                     cellRight = x + 1;
-                    if (cellRight >= CELLS_X)
+                    if (cellRight >= settings.CELLS_X.Value)
                         cellRight = 0;
 
                     var cell = tempMap[y][x];
@@ -257,7 +296,7 @@
 
             if (cell.a <= 0) {
 
-                cell.a = Math.floor(Math.random() * CELL_LIFE);
+                cell.a = Math.floor(Math.random() * settings.CELL_LIFE.Value);
                 newState = 0;
                 setupUpdates(cell);
             }
@@ -268,9 +307,13 @@
             if (newState == 1)
                 ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ",1)";
             else
-                ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + CELL_FADE + ")";
+                ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + settings.CELL_FADE.Value + ")";
 
-            ctx.fillRect(_x * CELL_SIZE, _y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            ctx.fillRect(
+                _x * settings.CELL_SIZE.Value, 
+                _y * settings.CELL_SIZE.Value, 
+                settings.CELL_SIZE.Value, 
+                settings.CELL_SIZE.Value);
 
             return newState;
         }
@@ -288,30 +331,17 @@
             cell.br.u = true;
         }
 
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
         function mouseDown(e) {
 
             ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
-    		ctx.fillRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
+    		ctx.fillRect(0, 0, settings.CELLS_X.Value * settings.CELL_SIZE.Value, settings.CELLS_Y.Value * settings.CELL_SIZE.Value);
         }
-
-        // code to run when user raises primary mouse button ( or first finger. )
 
         function mouseUp(e) {
 
             for(var i = 0; i < drawPoints.length; i++)
                 activeCell(drawPoints[i].x, drawPoints[i].y);
         }
-
-        // code to run when user moves primary mouse button ( or first finger. )
 
         function mouseMove(e, isMouseDown) {
 
@@ -321,30 +351,6 @@
                 drawPoints.push({x: e.x, y: e.y});
             }
         }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
-        }
-
+        
     </script>
 </html>
