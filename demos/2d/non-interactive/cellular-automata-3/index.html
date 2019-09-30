@@ -50,16 +50,16 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
 
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
-                    ctx.lineWidth = 1;
+                    params.ctx.lineWidth = 1;
                     map = generateMap();
                     resolve();
                 });
@@ -67,25 +67,25 @@
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
             
             //ctx.clearRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
-            ctx.fillStyle="rgba(255,255,255," + CELL_FADE + ")";
-            ctx.fillRect(0,0,CELLS_X * CELL_SIZE,CELLS_Y * CELL_SIZE);            
-            ctx.fillStyle = "rgba(0,0,0,1)";
+            params.ctx.fillStyle="rgba(255,255,255," + CELL_FADE + ")";
+            params.ctx.fillRect(0,0,CELLS_X * CELL_SIZE,CELLS_Y * CELL_SIZE);            
+            params.ctx.fillStyle = "rgba(0,0,0,1)";
             
             // run step
             for (var y = 0; y < map.length; y++)     
                 for (var x = 0; x < map[0].length; x++)
                     if (map[y][x].u)
                         if (phase == 0)
-                            map[y][x].n = checkCell(x, y);
+                            map[y][x].n = checkCell(params.ctx, x, y);
                         else
-                            map[y][x].c = checkCell(x, y);
+                            map[y][x].c = checkCell(params.ctx, x, y);
                             
             phase = (phase == 0 ? 1 : 0);
         }
@@ -145,7 +145,7 @@
             return tempMap;
         }
 
-        function checkCell(_x, _y) {
+        function checkCell(_ctx, _x, _y) {
                 
             var cell = map[_y][_x];
             var state = 
@@ -212,10 +212,10 @@
             if (newState != state)
                 setupUpdates(cell);
             else 
-                cell.u = false;
+                _ctx.u = false;
                 
             if (newState == 1)
-                ctx.fillRect( _x * CELL_SIZE, _y * CELL_SIZE, CELL_SIZE, CELL_SIZE );
+                _ctx.fillRect( _x * CELL_SIZE, _y * CELL_SIZE, CELL_SIZE, CELL_SIZE );
             
             return newState;
         }
@@ -233,48 +233,9 @@
             cell.br.u = true;
         }
 
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
         function mouseDown(e) {
 
             map = generateMap();
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
         }
 
     </script>

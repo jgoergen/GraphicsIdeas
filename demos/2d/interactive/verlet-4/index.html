@@ -35,6 +35,7 @@
         // put any adjustable settings here that would be interesting to tinker with.
 
         var VERLET_FPS = 120;
+        var FPS = 30;
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 500;
         var GRAVITY_DAMPENING = 0.005;
@@ -54,20 +55,20 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
 
                     lastTime = new Date();
                     elapsed = Math.random() * 1000;
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    params.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
                     
                     console.log("Init");
-                    localCtxReference = ctx;
-                    ctx.fillStyle = "white";
-                    ctx.lineWidth="1";
-                    ctx.strokeStyle="white";
+                    localCtxReference = params.ctx;
+                    params.ctx.fillStyle = "white";
+                    params.ctx.lineWidth="1";
+                    params.ctx.strokeStyle="white";
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
@@ -95,56 +96,56 @@
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
             
-            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             for(var i = 0; i < verlet.particles.length; i ++) {
 
                 if (verlet.particles[i].data.drawn) {
                     
-                    ctx.beginPath();
+                    params.ctx.beginPath();
                     
                     if (verlet.particles[i].radius)
-                        ctx.arc(
+                        params.ctx.arc(
                             verlet.particles[i].vector.x,
                             verlet.particles[i].vector.y,
                             verlet.particles[i].radius,
                             0,
                             2 * Math.PI);
                     else
-                        ctx.rect(
+                        params.ctx.rect(
                             verlet.particles[i].vector.x,
                             verlet.particles[i].vector.y,
                             2,
                             2);
 
-                    ctx.stroke();
+                    params.ctx.stroke();
                 }
             }
 
-            ctx.beginPath();
+            params.ctx.beginPath();
 
             for(var i = 0; i < verlet.constraints.length; i++) {
                 
                 if (verlet.constraints[i].data.drawn) {
 
-                    ctx.moveTo(
+                    params.ctx.moveTo(
                         verlet.constraints[i].ends.startParticle.vector.x,
                         verlet.constraints[i].ends.startParticle.vector.y);
 
-                    ctx.lineTo(
+                    params.ctx.lineTo(
                         verlet.constraints[i].ends.endParticle.vector.x,
                         verlet.constraints[i].ends.endParticle.vector.y,);
                         
                 }
             }
 
-            ctx.stroke();
+            params.ctx.stroke();
         }
 
         function updateVerlet() {

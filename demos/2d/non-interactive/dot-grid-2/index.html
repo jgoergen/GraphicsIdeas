@@ -65,10 +65,10 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
 
-            ctx.lineWidth = POINT_BORDER_THICKNESS;
-            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
+            params.ctx.lineWidth = POINT_BORDER_THICKNESS;
+            params.ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
             
             return new Promise(
                 function(resolve, reject) {
@@ -111,11 +111,11 @@
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
-            //ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
+            params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             date = new Date();
             elapsed += date - lastTime;
@@ -145,7 +145,7 @@
                     point.flickerSpeed *= -1;
                 }
 
-                ctx.fillRect(point.x - (DOT_SIZE / 2), point.y - (DOT_SIZE / 2), DOT_SIZE, DOT_SIZE);
+                params.ctx.fillRect(point.x - (DOT_SIZE / 2), point.y - (DOT_SIZE / 2), DOT_SIZE, DOT_SIZE);
 
                 for (var o = 0; o < points.length; o ++) {
 
@@ -158,7 +158,7 @@
 
                         if (USE_COLOR) {
 
-                            ctx.fillStyle = ctx.strokeStyle = 
+                            params.ctx.fillStyle = params.ctx.strokeStyle = 
                                 "rgba(" + 
                                 MathHelperFunctions.WrapVal(point.x, RED_MIN_RANGE, RED_MAX_RANGE) + ", " + 
                                 MathHelperFunctions.WrapVal(point.flicker, GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " + 
@@ -167,65 +167,16 @@
 
                         } else {
 
-                            ctx.fillStyle = ctx.strokeStyle = "rgba(255, 255, 255, " + flickerAmount + ")";
+                            params.ctx.fillStyle = params.ctx.strokeStyle = "rgba(255, 255, 255, " + flickerAmount + ")";
                         }
 
-                        ctx.beginPath();
-                        ctx.moveTo(point1.x, point1.y);
-                        ctx.lineTo(point.x, point.y);
-                        ctx.stroke();
+                        params.ctx.beginPath();
+                        params.ctx.moveTo(point1.x, point1.y);
+                        params.ctx.lineTo(point.x, point.y);
+                        params.ctx.stroke();
                     }
                 }
             }
-        }
-
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
         }
 
     </script>

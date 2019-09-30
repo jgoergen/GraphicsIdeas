@@ -72,11 +72,11 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
 
-            ctx.lineWidth = POINT_BORDER_THICKNESS;
-            ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
-            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ", " + BG_ALPHA + ")";
+            params.ctx.lineWidth = POINT_BORDER_THICKNESS;
+            params.ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
+            params.ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ", " + BG_ALPHA + ")";
             
             return new Promise(
                 function(resolve, reject) {
@@ -123,9 +123,9 @@
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             date = new Date();
             elapsed += date - lastTime;
@@ -165,17 +165,17 @@
 
                     if (Math.abs(point1.x - point.x) + Math.abs(point1.y - point.y) < MAX_LENGTH) {
 
-                        ctx.strokeStyle = 
+                        params.ctx.strokeStyle = 
                             "rgba(" + 
                             MathHelperFunctions.WrapVal(point.x / (point.yWiggleStrength / 50), RED_MIN_RANGE, RED_MAX_RANGE) + ", " + 
                             MathHelperFunctions.WrapVal(point.flicker * (point.xWiggleStrength / 50), GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " + 
                             MathHelperFunctions.WrapVal(point.y * (point.xWiggleStrength / 50), BLUE_MIN_RANGE, BLUE_MAX_RANGE) + ", " + 
                             point.flicker + ")";
 
-                        ctx.beginPath();
-                        ctx.moveTo(point1.x, point1.y);
-                        ctx.lineTo(point.x, point.y);
-                        ctx.stroke();
+                        params.ctx.beginPath();
+                        params.ctx.moveTo(point1.x, point1.y);
+                        params.ctx.lineTo(point.x, point.y);
+                        params.ctx.stroke();
                     }
 
                     point1 = undefined;
@@ -184,14 +184,6 @@
                 
             }
         }
-
-        function tilt(e) {}
-        function mouseDown(e) {}
-        function mouseUp(e) {}
-        function mouseMove(e, isMouseDown) {}
-        function secondaryMouseDown(e) {}
-        function secondaryMouseUp(e) {}
-        function secondaryMouseMove(e) {}
 
     </script>
 </html>

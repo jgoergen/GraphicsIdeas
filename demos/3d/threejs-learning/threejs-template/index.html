@@ -17,8 +17,10 @@
     </head>
     <body>
     </body>
-
-    <script src="vendor/three.js"></script>
+    
+    <script src="../../../libs/DemoFramework.js"></script>
+    <script src="../../../libs/ThreeJS/three.js"></script>
+    <script src="../../../libs/ThreeJS/controls/TrackballControls.js"></script>
     
     <script type="text/javascript">
 
@@ -26,6 +28,7 @@
 
         // put any adjustable settings here that would be interesting to tinker with.
 
+        var THREEJS = true;
         var FPS = 60;
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 400;
@@ -35,27 +38,36 @@
         var lastTime = 0;
         var date = undefined;
         var elapsed = 0;
+        
         var cube = undefined;
 
         // code to run before update looping starts.
 
-        function init(scene, camera, renderer) {
+        function init(params) {
             
-            console.log("Init");
-            lastTime = new Date();
-            elapsed = Math.random() * 10000;
+            return new Promise(
+                function(resolve, reject) {
+                            
+                    lastTime = new Date();
+                    elapsed = Math.random() * 10000;
+                            
+                    console.log("Init");
+                    lastTime = new Date();
+                    elapsed = Math.random() * 10000;
 
-            var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-            var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-            cube = new THREE.Mesh( geometry, material );
-            scene.add( cube );
-
-            camera.position.z = 5;
+                    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+                    var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+                    cube = new THREE.Mesh( geometry, material );
+                    params.scene.add( cube );
+                    params.camera.position.z = 5;
+        
+                    resolve(FPS);
+                });
         }
 
         // code to run every frame.
 
-        function update(scene, camera, renderer) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -63,266 +75,17 @@
             
             cube.rotation.x = elapsed / 1000;
             cube.rotation.y = elapsed / 1000;
-            renderer.render( scene, camera );
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Mouse Down");
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-            console.log("Mouse Up");
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-            if (isMouseDown) {
-
-                console.log("Mouse Move");
-            }
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
-        }
-
-        // System stuff ////////////////////////////////////////
-
-        (function() {
-
-            var thisRef = this;
-            this.container = undefined;
-            this.scene = undefined;
-            this.camera = undefined;
-            this.renderer = undefined;
-            this.isMouseDown = false;
-            this.isSecondaryMouseDown = false;
-            this.now = undefined;
-            this.then = Date.now();
-            this.interval = 1000 / FPS;
-            this.delta;
-            this.lastX = undefined;
-            this.lastY = undefined;
-            this.canvasOffsetX = undefined;
-            this.canvasOffsetY = undefined;
-
-            this.initialize = function() {
-
-                this.scene = new THREE.Scene();
-                this.camera = new THREE.PerspectiveCamera( 75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000 );
-                this.renderer = new THREE.WebGLRenderer();
-                renderer.setSize( CANVAS_WIDTH, CANVAS_HEIGHT );
-                document.body.appendChild( this.renderer.domElement );
-
-                init(this.scene, this.camera, this.renderer);
-
-                if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
-
-                    this.renderer.domElement
-                    .addEventListener(
-                        "touchstart", 
-                        function(e) { thisRef.touchStartHanlder(e); }, 
-                        false);
-
-                    this.renderer.domElement
-                    .addEventListener(
-                        "touchmove", 
-                        function(e) { thisRef.touchMoveHanlder(e); }, 
-                        false);
-
-                    this.renderer.domElement
-                    .addEventListener(
-                        "touchend", 
-                        function(e) { thisRef.touchEndHanlder(e); }, 
-                        false);
-
-                } 
-
-                this.renderer.domElement
-                .addEventListener(
-                    "mousemove", 
-                    function(e) { thisRef.mouseMoveHandler(e); }, 
-                    false);
-                    
-                    this.renderer.domElement
-                .addEventListener(
-                    "mousedown", 
-                    function(e) { thisRef.mouseDownHandler(e); }, 
-                    false);
-                    
-                    this.renderer.domElement
-                .addEventListener(
-                    "mouseup", 
-                    function(e) { thisRef.mouseUpHandler(e); }, 
-                    false);
-
-                requestAnimationFrame(this.run);
-            };
-
             
-            this.interpolateMove = function(x, y) {
+            controls.update();
+            params.renderer.render( params.scene, params.camera );
+        }
 
-                // fix canvas scaling
-                x = x * CANVAS_WIDTH / this.renderer.domElement.clientWidth;
-                y = y * CANVAS_HEIGHT / this.renderer.domElement.clientHeight;
-
-                var result = [];
-
-                if (!this.lastX) {
-
-                    this.lastX = x;
-                    this.lastY = y;
-                }
-
-                var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
-                var steps = distance / 4;
-                var intervalX = (x - lastX) / steps;
-                var intervalY = (y - lastY) / steps;
-
-                for (var step = 0; step < steps; step ++) {
-
-                    x = lastX + (step * intervalX);
-                    y = lastY + (step * intervalY);
-                    result.push({x: x, y: y, speed: distance});
-                }
-
-                this.lastX = x;
-                this.lastY = y;
-
-                return result;
-            }
-
-            this.touchStartHanlder = function(e) {
-
-                if (e.touches.length == 1)
-                    mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
-                else if (e.touches.length == 2)
-                    secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
-            }
-
-            this.touchEndHanlder = function(e) {
-
-                if (e.touches.length == 0)
-                    mouseUp();
-                else if (e.touches.length == 1)
-                    secondaryMouseUp();
-
-                this.lastX = undefined;
-                this.lastY = undefined;
-            }
-
-            this.touchMoveHanlder = function(e) {
-
-                var steps = 
-                    this.interpolateMove(
-                        e.touches[0].pageX - this.canvasOffsetX, 
-                        e.touches[0].pageY - this.canvasOffsetY);
-                        
-                for (var i = 0; i < steps.length; i++) {
-
-                    if (e.touches.length == 0)
-                        mouseMove(steps[i], false);
-                    else if (e.touches.length == 1)
-                        mouseMove(steps[i], true);
-                    else if (e.touches.length == 2)
-                        secondaryMouseMove(steps[i]);
-                }
-            }
-
-            this.mouseDownHandler = function(e) {
-
-                if ((e.which === 3 || e.button === 2)) {
-
-                    isSecondaryMouseDown = true;
-                    secondaryMouseDown(e);
-                } else {
-
-                    isMouseDown = true;
-                    mouseDown(e);
-                }
-            }
-
-            this.mouseUpHandler = function(e) {
-
-                if ((e.which === 3 || e.button === 2)) {
-
-                    isSecondaryMouseDown = false;
-                    secondaryMouseUp(e);
-                } else {
-
-                    isMouseDown = false;
-                    mouseUp(e);
-                }
-
-                this.lastX = undefined;
-                this.lastY = undefined;
-            }
-
-            this.mouseMoveHandler = function(e) {
-
-                var steps = 
-                    this.interpolateMove(
-                        e.offsetX, 
-                        e.offsetY);
-
-                for (var i = 0; i < steps.length; i++) {
-
-                    if (!isMouseDown && !isSecondaryMouseDown)
-                        mouseMove(steps[i], false);
-                    else if (isMouseDown)
-                        mouseMove(steps[i], true);
-                    else if (isSecondaryMouseDown)
-                        secondaryMouseMove(steps[i]);
-                }
-            }
-
-            this.run = function() {
-
-                now = Date.now();
-                delta = now - then;
-
-                if (delta > interval) {
-                    
-                    then = now - (delta % interval);
-                    update(this.scene, this.camera, this.renderer);
-                }
-
-                requestAnimationFrame(this.run);
-            }
-
-            window.onload = this.initialize;
-        })();
-
+        function mouseDown(e) {}
+        function mouseUp(e) {}
+        function mouseMove(e, isMouseDown) {}
+        function secondaryMouseDown(e) {}
+        function secondaryMouseUp(e) {}
+        function secondaryMouseMove(e) {}
+        
     </script>
 </html>

@@ -106,20 +106,20 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
                             
                     console.log("Init");
 
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
                     map = generateMap();
-                    ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
-                    ctx.fillRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
+                    params.ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
+                    params.ctx.fillRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
 
                     resolve({
                         fps: FPS, 
@@ -130,7 +130,7 @@
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -158,9 +158,9 @@
                 for (var x = 0; x < map[0].length; x++)
                     if (map[y][x].u)
                         if (phase == 0)
-                            map[y][x].n = checkCell(x, y);
+                            map[y][x].n = checkCell(params.ctx, x, y);
                         else
-                            map[y][x].c = checkCell(x, y);
+                            map[y][x].c = checkCell(params.ctx, x, y);
 
             phase = (phase == 0 ? 1 : 0);
         }
@@ -243,7 +243,7 @@
             return tempMap;
         }
 
-        function checkCell(_x, _y) {
+        function checkCell(_ctx, _x, _y) {
 
             var cell = map[_y][_x];
             var state =
@@ -305,7 +305,7 @@
                 cell.a--;
 
             if (newState == 1)
-                ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ",1)";
+                _ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ",1)";
             else
                 ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + settings.CELL_FADE.Value + ")";
 

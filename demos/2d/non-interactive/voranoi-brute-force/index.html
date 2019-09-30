@@ -30,6 +30,7 @@
 
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 500;
+        var FPS = 60;
         var X_POINT_COUNT = 20;
         var Y_POINT_COUNT = Math.ceil(X_POINT_COUNT / 2);
         var POINT_VARIATION = 1;
@@ -86,30 +87,30 @@
             };
         }
 
-        function init(ctx) {
+        function init(params) {
 
             return new Promise(
                 function(resolve, reject) {
                     
                     lastTime = new Date();
                     elapsed = Math.random() * 1000;
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    params.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
                     
                     // generate initial points and 'wiggle' them a bit
                     for (var x = 0; x < X_POINT_COUNT; x++)
                         for (var y = 0; y < Y_POINT_COUNT; y++)
                             points.push(generateNewRandomPoint(x, y));
 
-                    resolve();
+                    resolve(FPS);
                 });
         }
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             if (ALPHA < 1) 
-                ctx.drawImage(
+                params.ctx.drawImage(
                     canvas, 
                     0, 
                     0, 
@@ -118,8 +119,8 @@
 
             if (FADE > 0) {
 
-                ctx.fillStyle = "rgba(0,0,0," + FADE + ")";
-                ctx.fillRect(
+                params.ctx.fillStyle = "rgba(0,0,0," + FADE + ")";
+                params.ctx.fillRect(
                     0, 
                     0, 
                     CANVAS_WIDTH, 
@@ -207,14 +208,14 @@
                     } else {
 
                         if (VOID_BLACK)
-                            ctx.fillStyle = 
+                            params.ctx.fillStyle = 
                                 "rgba(" + 
                                 points[closestIndex].r / shadingDivisor + "," + 
                                 points[closestIndex].g / shadingDivisor + "," + 
                                 points[closestIndex].b / shadingDivisor + "," + 
                                 ALPHA + ")";
                         else
-                            ctx.fillStyle = 
+                            params.ctx.fillStyle = 
                                 "rgba(" + 
                                 points[closestIndex].r + "," + 
                                 points[closestIndex].g + "," + 
@@ -222,62 +223,13 @@
                                 1 / shadingDivisor + ")";
                     }
 
-                    ctx.fillRect(
+                    params.ctx.fillRect(
                         x, 
                         y, 
                         PIXEL_SIZE, 
                         PIXEL_SIZE);
                 }
             }
-        }
-
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
         }
 
     </script>

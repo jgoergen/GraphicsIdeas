@@ -29,9 +29,9 @@
 
         var CANVAS_WIDTH = 1920;
         var CANVAS_HEIGHT = 1920;
+        var FPS = -1;
         var nxMultiplier = 500;
         var nyMultiplier = 500;
-        var FPS = -1;
 
         /////////////////////////////////////////////////////////
 
@@ -47,14 +47,14 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
 
                     lastTime = new Date();
                     elapsed = Math.random() * 1000;
-                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    params.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
                     iLimit = (Math.random() * 100) + 100;
                     qLimit = (Math.random() * 100) + 20;
                     nxMultiplier = (Math.random() * 400) + 100;
@@ -69,7 +69,7 @@
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -86,61 +86,12 @@
                     a += Math.atan(elapsed / atanDevisor) * (Math.sin(i) * aDevisor);
                 }
                 
-                ctx.fillRect(
+                params.ctx.fillRect(
                     nx + (CANVAS_WIDTH / 2),
                     ny + (CANVAS_HEIGHT / 2), 
                     1, 
                     1)
             }
-        }
-
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
         }
 
     </script>

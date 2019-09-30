@@ -30,22 +30,26 @@
         var CANVAS_WIDTH = 1920;
         var CANVAS_HEIGHT = 1080;
         var FPS = 60;
-        var LINE_COUNT = Math.ceil(Math.random() * 100) + 2;
-        var FADE_VALUE = Math.random() * 1;
+        var LINE_COUNT = Math.ceil(Math.random() * 20) + 2;
+        var FADE_VALUE = (Math.random() * 0.3) + 0.01;
         var SCALE_X = 200;
         var SCALE_Y = 200;
-        var VALUE_TRANSITION_SPEED = 10;
-        var SPEED = (Math.random() * 0.5) + 0.01;
+        var VALUE_TRANSITION_SPEED = 100;
+        var SPEED = (Math.random() * 0.3) + 0.01;
         var P1_VAL = Math.random() * 1000;
         var P2_VAL = Math.random() * 1000;
         var P3_VAL = Math.random() * 10;
         var P4_VAL = Math.random() * 500;
         var P5_VAL = Math.random() * 300;
         var PARAMETRIC_FORMULAS = [
-            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time / P1) * scaleX + Math.sin(time / P2) * scaleY; },
             function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time / P1) * scaleX; },
-            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time / P1) * scaleX + Math.sin(time) * P3; },
-            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time / P4) * scaleX + Math.cos(time / P5) * scaleY; }
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.cos(time / P2), P3_VAL); },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time * P1) * scaleX; },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time / P4) * scaleX + Math.cos(time / P5) * scaleY; },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time / P1) * scaleX + Math.sin(time / P2) * scaleY; },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.sin(time / P3), P3_VAL); },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time * P3) * scaleY; },
+            function(time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time / P1) * scaleX + Math.sin(time) * P3; }
         ];
         var FORMULA1 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
         var FORMULA2 = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
@@ -68,7 +72,7 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
@@ -81,15 +85,15 @@
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
 
-            ctx.fillStyle = "rgba(0, 0, 0, " + actualFadeAmount + ")";
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            ctx.strokeStyle = "#fff";
+            params.ctx.fillStyle = "rgba(0, 0, 0, " + actualFadeAmount + ")";
+            params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.strokeStyle = "#fff";
 
             for (var i = 0; i < actualLineCount; i++) {
 
@@ -98,49 +102,57 @@
                 var x2 = FORMULA3((elapsed * actualSpeed) + i, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val);
                 var y2 = FORMULA4((elapsed * actualSpeed) + i, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val);
 
-                ctx.beginPath();
-                ctx.moveTo(x1 + (CANVAS_WIDTH / 2), y1 + (CANVAS_HEIGHT / 2));
-                ctx.lineTo(x2 + (CANVAS_WIDTH / 2), y2 + (CANVAS_HEIGHT / 2));
-                ctx.stroke();
+                params.ctx.beginPath();
+                params.ctx.moveTo(x1 + (CANVAS_WIDTH / 2), y1 + (CANVAS_HEIGHT / 2));
+                params.ctx.lineTo(x2 + (CANVAS_WIDTH / 2), y2 + (CANVAS_HEIGHT / 2));
+                params.ctx.stroke();
             }
 
             if (Math.random() < 0.01) {
 
-                switch(Math.floor(Math.random() * 8)) {
+                switch(Math.floor(Math.random() * 10)) {
                     case 0:
-                        window["FORMULA" + Math.floor(Math.random() * 4)] = PARAMETRIC_FORMULAS[Math.floor(Math.random() * PARAMETRIC_FORMULAS.length)];
+                        var d = Math.floor(Math.random() * 2);
+                        var f = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
+                        window["FORMULA" + d] = PARAMETRIC_FORMULAS[f];
                         break;
 
                     case 1:
-                        P1_VAL = Math.random() * 1000;
+                        var d = (Math.floor(Math.random() * 2) + 2);
+                        var f = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
+                        window["FORMULA" + d] = PARAMETRIC_FORMULAS[f];
                         break;
 
                     case 2:
-                        P2_VAL = Math.random() * 1000;
+                        P1_VAL = Math.random() * 1000;
                         break;
 
                     case 3:
-                        P3_VAL = Math.random() * 10;
+                        P2_VAL = Math.random() * 10;
                         break;
 
                     case 4:
-                        P4_VAL = Math.random() * 500;
+                        P3_VAL = Math.random() * 500;
                         break;
 
                     case 5:
-                        P5_VAL = Math.random() * 300;
+                        P4_VAL = Math.random() * 500;
                         break;
 
                     case 6:
-                        SPEED = (Math.random() * 0.5) + 0.01;
+                        P5_VAL = Math.random() * 300;
                         break;
 
                     case 7:
-                        LINE_COUNT = Math.ceil(Math.random() * 100) + 2
+                        SPEED = (Math.random() * 0.3) + 0.01;
                         break;
 
                     case 8:
-                        FADE_VALUE = Math.random() * 1
+                        LINE_COUNT = Math.ceil(Math.random() * 20) + 2;
+                        break;
+
+                    case 9:
+                        FADE_VALUE = (Math.random() * 0.3) + 0.01;
                         break;
                 }
             }

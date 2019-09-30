@@ -71,11 +71,11 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
 
-            ctx.lineWidth = CIRCLE_BORDER_THICKNESS;
-            ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
-            ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
+            params.ctx.lineWidth = CIRCLE_BORDER_THICKNESS;
+            params.ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
+            params.ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
             
             return new Promise(
                 function(resolve, reject) {
@@ -122,10 +122,10 @@
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
-            //ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             date = new Date();
             elapsed += date - lastTime;
@@ -155,36 +155,28 @@
                     circle.flickerSpeed *= -1;
                 }
 
-                ctx.beginPath();
+                params.ctx.beginPath();
 
                 if (USE_COLOR)
-                    ctx.strokeStyle = 
+                    params.ctx.strokeStyle = 
                         "rgba(" + 
                         MathHelperFunctions.WrapVal(circle.x / circle.yWiggleStrength, RED_MIN_RANGE, RED_MAX_RANGE) + ", " + 
                         MathHelperFunctions.WrapVal(circle.flicker * circle.xWiggleStrength, GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " + 
                         MathHelperFunctions.WrapVal(circle.y * circle.xWiggleStrength, BLUE_MIN_RANGE, BLUE_MAX_RANGE) + ", " + 
                         circle.flicker + ")";
                 else
-                    ctx.strokeStyle = "rgba(255, 255, 255, " + circle.flicker + ")";
+                    params.ctx.strokeStyle = "rgba(255, 255, 255, " + circle.flicker + ")";
 
-                ctx.arc(
+                params.ctx.arc(
                     circle.x, 
                     circle.y, 
                     circle.radius, 
                     0, 
                     2 * Math.PI);
 
-                ctx.stroke();
+                params.ctx.stroke();
             }
         }
-
-        function tilt(e) {}
-        function mouseDown(e) {}
-        function mouseUp(e) {}
-        function mouseMove(e, isMouseDown) {}
-        function secondaryMouseDown(e) {}
-        function secondaryMouseUp(e) {}
-        function secondaryMouseMove(e) {}
 
     </script>
 </html>

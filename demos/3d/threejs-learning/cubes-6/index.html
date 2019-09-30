@@ -1,0 +1,120 @@
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+
+        <title></title>
+
+        <style type="text/css">
+
+            body { background-color: black; }
+            canvas { border: 1px solid #ccc; width: 100% !important; height: auto !important; }
+
+        </style>
+    </head>
+    <body>
+    </body>
+
+    <script src="../../../libs/DemoFramework.js"></script>
+    <script src="../../../libs/ThreeJS/three.js"></script>
+    <script src="../../../libs/ThreeJS/controls/TrackballControls.js"></script>
+    
+    <script type="text/javascript">
+
+        /// Settings ////////////////////////////////////////////
+
+        // put any adjustable settings here that would be interesting to tinker with.
+
+        var THREEJS = true;
+        var FPS = 60;
+        var CANVAS_WIDTH = 1200;
+        var CANVAS_HEIGHT = 800;
+        var CUBE_SIZE = (Math.random() * 1) + 1;
+        var CUBE_GAP = 1;
+        var LIGHT_R = Math.floor(Math.random() * 255);
+        var LIGHT_G = Math.floor(Math.random() * 255);
+        var LIGHT_B = Math.floor(Math.random() * 255);
+        var CUBE_R = Math.floor(Math.random() * 255);
+        var CUBE_G = Math.floor(Math.random() * 255);
+        var CUBE_B = Math.floor(Math.random() * 255);
+        var BG_R = Math.floor(Math.random() * 255);
+        var BG_G = Math.floor(Math.random() * 255);
+        var BG_B = Math.floor(Math.random() * 255);
+
+        /////////////////////////////////////////////////////////
+
+        var lastTime = 0;
+        var date = undefined;
+        var elapsed = 0;
+        var cubes = [];
+        var pointLight;
+
+        // code to run before update looping starts.
+
+        function init(params) {
+            
+            return new Promise(
+                function(resolve, reject) {
+
+                    var geometry = new THREE.BoxGeometry( CUBE_SIZE, CUBE_SIZE, CUBE_SIZE );
+                    var material = new THREE.MeshLambertMaterial( { color: new THREE.Color("rgb(" + CUBE_R + ", " + CUBE_G + ", " + CUBE_B + ")") } );
+
+                    for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
+
+                        for (var y = -10; y < 10; y += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
+                                
+                            var box = new THREE.Mesh( geometry, material );
+                            cubes.push(box);
+                            box.position.set(x, y, 0);
+                            params.scene.add(box);
+                        }
+                    }
+
+                    pointLight =
+                        new THREE.PointLight(
+                            new THREE.Color("rgb(" + LIGHT_R + ", " + LIGHT_G + ", " + LIGHT_B + ")"), // color
+                            1.5, // intensity
+                            20, // distance
+                            2); // decay
+
+                    pointLight.position.z = 100;
+                    params.scene.add(pointLight);
+
+                    var ambientLight = new THREE.AmbientLight(new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")"));
+                    params.scene.add(ambientLight);
+
+                    params.scene.background = new THREE.Color( new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")") );
+                    params.camera.position.z = 12;
+                    resolve(FPS);
+                });
+        }
+
+        // code to run every frame.
+
+        function update(params) {
+
+            date = new Date();
+            elapsed += date - lastTime;
+            lastTime = date;
+            
+            pointLight.position.z = (Math.cos(elapsed / 3000) * 6);
+            pointLight.position.y = (Math.cos(elapsed / 2000) * 10);
+
+            for (var index = 0; index < cubes.length; index ++) {
+
+                cubes[index].position.x = Math.cos((elapsed / 1000) + index / 10) * 6;
+                cubes[index].position.z = Math.sin((index / 10) + (elapsed / 10000)) * 2;
+
+                cubes[index].rotation.x = Math.sin((index / 10) + (elapsed / 10000)) * 2;
+                cubes[index].rotation.z = Math.sin((elapsed / 1000) + index / 5) * 4;
+            }
+
+            controls.update();
+            params.renderer.render( params.scene, params.camera );
+        }
+
+    </script>
+</html>

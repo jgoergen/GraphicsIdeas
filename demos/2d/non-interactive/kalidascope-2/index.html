@@ -29,6 +29,7 @@
 
         var CANVAS_WIDTH = 1600;
         var CANVAS_HEIGHT = 1600;
+        var FPS = 120;
         var MAX_DEGREE_CHANGE = 1 + Math.floor(Math.random() * 90);
         var MOVE_SPEED = 1;
         var ROTATION_CHANCE = (Math.random() * 1) / 2;
@@ -42,7 +43,6 @@
         var QUANTIZE_MOD = (Math.random() * 4) - 2;
         var SPLITS = 1 + Math.floor(Math.random() * 100);
         var STEPS_PER_RUN = 25;
-        var FPS = 120;
 
         /////////////////////////////////////////////////////////
 
@@ -57,19 +57,19 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
                             
                     console.log("Init");
 
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
-                    ctx.lineStyle = "#fff";
-                    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                    params.ctx.lineStyle = "#fff";
+                    params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
                     r = 255; //Math.floor(Math.random() * 255);
                     g = Math.floor(Math.random() * 255);
@@ -82,7 +82,7 @@
                                     y: Math.floor(Math.random() * CANVAS_HEIGHT)
                         });
                         
-                        //ctx.fillRect(deflectors[i].x - 2, deflectors[i].y - 2, 4, 4);
+                        //params.ctx.fillRect(deflectors[i].x - 2, deflectors[i].y - 2, 4, 4);
                     };    
 
                     iterate();
@@ -92,7 +92,7 @@
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
@@ -100,7 +100,7 @@
             
             for (var step = 0; step < STEPS_PER_RUN; step ++) {
 
-                //ctx.clearRect(0, 0, 300, 300);
+                //params.ctx.clearRect(0, 0, 300, 300);
     
                 if (Math.random() < ROTATION_CHANCE)
                     angle += Math.floor((MAX_DEGREE_CHANGE / 2) - (Math.random() * MAX_DEGREE_CHANGE));
@@ -147,9 +147,9 @@
                     (1 - (runtime / MAX_RUNTIME)) * 2 : 
                     (runtime / MAX_RUNTIME) * 2;
                     
-                ctx.fillStyle = "rgba(" + r + "," + g  + "," + b + "," + alpha + ")";
-                ctx.strokeStyle = "rgba(" + r + "," + g  + "," + b + "," + alpha + ")";
-                ctx.lineWidth = STARTING_THICKNESS;
+                params.ctx.fillStyle = "rgba(" + r + "," + g  + "," + b + "," + alpha + ")";
+                params.ctx.strokeStyle = "rgba(" + r + "," + g  + "," + b + "," + alpha + ")";
+                params.ctx.lineWidth = STARTING_THICKNESS;
                 
                 var offset = STARTING_THICKNESS / 2;
                 var qX = Math.round(x / QUANTIZE_SIZE) * QUANTIZE_SIZE;
@@ -163,10 +163,10 @@
                     var cos = Math.cos(rads);
                     var sin = Math.sin(rads);
                     
-                    ctx.beginPath();
-                    ctx.moveTo((cos * (oldQX - (CANVAS_WIDTH / 2))) + (sin * (oldQY - (CANVAS_HEIGHT / 2))) + (CANVAS_HEIGHT / 2), (cos * (oldQY - (CANVAS_HEIGHT / 2))) - (sin * (oldQX - (CANVAS_WIDTH / 2))) + (CANVAS_WIDTH / 2));
-                    ctx.lineTo((cos * (qX - (CANVAS_WIDTH / 2))) + (sin * (qY - (CANVAS_HEIGHT / 2))) + (CANVAS_HEIGHT / 2), (cos * (qY - (CANVAS_HEIGHT / 2))) - (sin * (qX - (CANVAS_WIDTH / 2))) + (CANVAS_WIDTH / 2));
-                    ctx.stroke();
+                    params.ctx.beginPath();
+                    params.ctx.moveTo((cos * (oldQX - (CANVAS_WIDTH / 2))) + (sin * (oldQY - (CANVAS_HEIGHT / 2))) + (CANVAS_HEIGHT / 2), (cos * (oldQY - (CANVAS_HEIGHT / 2))) - (sin * (oldQX - (CANVAS_WIDTH / 2))) + (CANVAS_WIDTH / 2));
+                    params.ctx.lineTo((cos * (qX - (CANVAS_WIDTH / 2))) + (sin * (qY - (CANVAS_HEIGHT / 2))) + (CANVAS_HEIGHT / 2), (cos * (qY - (CANVAS_HEIGHT / 2))) - (sin * (qX - (CANVAS_WIDTH / 2))) + (CANVAS_WIDTH / 2));
+                    params.ctx.stroke();
                 }
                 
                 runtime ++;
@@ -209,49 +209,6 @@
             //set the dynamic image as the background
             document.body.style.background = 
             "transparent url('"+imageDataURL+"') repeat";
-        }
-
-        // code to run when the user tilts a device ( where available )
-
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
-
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-        }
-
-        // code to run when user moves primary mouse button ( or first finger. )
-
-        function mouseMove(e, isMouseDown) {
-
-        }
-
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
         }
 
     </script>
