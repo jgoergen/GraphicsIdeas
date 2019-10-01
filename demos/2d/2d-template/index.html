@@ -64,7 +64,7 @@
             
             return new Promise(
                 function(resolve, reject) {
-                            
+
                     console.log("Init");
                     localCtxReference = ctx;
                     localCtxReference.fillStyle = "white";
@@ -72,31 +72,28 @@
                     elapsed = Math.random() * 10000;
                     
                     resolve({
-                        fps: FPS, 
-                        settings: SETTINGS_PACKAGE
+                        fps: FPS
                     });
                 });
         }
 
         // code to run every frame.
 
-        function update(ctx, canvas) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
 
-            ctx.fillStyle = "rgba(0, 0, 0, " + settings.SCREEN_FADE_SPEED.Value + ")";
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            params.ctx.fillStyle = "rgba(0, 0, 0, " + settings.SCREEN_FADE_SPEED.Value + ")";
+            params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             
-            ctx.fillStyle = settings.COLOR.Value;
-            ctx.fillRect(
+            params.ctx.fillStyle = settings.COLOR.Value;
+            params.ctx.fillRect(
                 settings.RANDOM_X.Value,
                 settings.RANDOM_Y.Value,
                 200,
                 200);
-
-            //console.log("Update");
         }
 
         function mouseUp(e) {

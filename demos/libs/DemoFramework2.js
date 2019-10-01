@@ -17,60 +17,104 @@
     this.canvasOffsetX = undefined;
     this.canvasOffsetY = undefined;
     this.settings = {};
+    this.stage = undefined;
+    this.passParams = {};
+
+    // ThreeJS Stuff
+    this.scene = undefined;
+    this.camera = undefined;
+    this.controls = undefined;
+    this.renderer = undefined;
 
     this.initialize = function () {
 
-        document.oncontextmenu = function(e) {
+        if (window.THREEJS === true) {
+
+            this.scene = new THREE.Scene();
+            this.camera = new THREE.PerspectiveCamera(75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000);
+            this.renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            this.controls = new THREE.TrackballControls(camera);
+            this.controls.rotateSpeed = 1.0;
+            this.controls.zoomSpeed = 1.2;
+            this.controls.panSpeed = 0.8;
+            this.controls.noZoom = false;
+            this.controls.noPan = false;
+            this.controls.staticMoving = true;
+            this.controls.dynamicDampingFactor = 0.3;
+
+            this.stage = this.renderer.domElement;
+            document.body.appendChild(this.stage);
+
+            this.passParams = {
+                scene: this.scene,
+                camera: this.camera,
+                renderer: this.renderer
+            };
+
+        } else {
+
+            this.canvas =
+                document
+                    .getElementById(
+                        "canvas");
+
+            this.canvas.width = CANVAS_WIDTH;
+            this.canvas.height = CANVAS_HEIGHT;
+            this.canvasOffsetX = this.canvas.offsetLeft;
+            this.canvasOffsetY = this.canvas.offsetTop;
+            this.ctx = canvas.getContext("2d");
+
+            this.stage = this.canvas;
+
+            this.passParams = {
+                canvas: this.canvas,
+                ctx: this.ctx
+            };
+        }
+
+        document.oncontextmenu = function (e) {
 
             e.preventDefault();
             e.stopPropagation();
         }
 
-        this.canvas =
-            document
-                .getElementById(
-                    "canvas");
-
-        this.canvas.width = CANVAS_WIDTH;
-        this.canvas.height = CANVAS_HEIGHT;
-        this.canvasOffsetX = this.canvas.offsetLeft;
-        this.canvasOffsetY = this.canvas.offsetTop;
-        this.ctx = canvas.getContext("2d");
-
         if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
 
-            this.canvas
+            this.stage
                 .addEventListener(
                     "touchstart",
                     function (e) { thisRef.touchStartHanlder(e); },
                     false);
 
-            this.canvas
+            this.stage
                 .addEventListener(
                     "touchmove",
                     function (e) { thisRef.touchMoveHanlder(e); },
                     false);
 
-            this.canvas
+            this.stage
                 .addEventListener(
                     "touchend",
                     function (e) { thisRef.touchEndHanlder(e); },
                     false);
         }
 
-        this.canvas
+        this.stage
             .addEventListener(
                 "mousemove",
                 function (e) { thisRef.mouseMoveHandler(e); },
                 false);
 
-        this.canvas
+        this.stage
             .addEventListener(
                 "mousedown",
                 function (e) { thisRef.mouseDownHandler(e); },
                 false);
 
-        this.canvas
+        this.stage
             .addEventListener(
                 "mouseup",
                 function (e) { thisRef.mouseUpHandler(e); },
@@ -94,68 +138,65 @@
                     false);
         }
 
-        init(this.ctx)
-            .then(
-                function (options) {
+        // prepare settings
+        if (window.hasOwnProperty("SETTINGS_PACKAGE")) {
 
-                    if (options && options.hasOwnProperty("fps")) {
+            this.initSettings(window.SETTINGS_PACKAGE);
+        }
 
-                        if (options.fps === -1) {
+        init(this.passParams)
+        .then(
+            function (options) {
 
-                            waitForAnimationFrame = false;
-                            setInterval(function () { update(this.ctx, this.canvas); }, 0);
-                            return;
+                if (options && options.hasOwnProperty("fps")) {
 
-                        } else {
+                    if (options.fps === -1) {
 
-                            this.FPS = options.fps;
-                            this.interval = 1000 / options.fps;
-                        }
+                        waitForAnimationFrame = false;
+                        setInterval(function () { update(this.passParams); }, 0);
+                        return;
+
+                    } else {
+
+                        this.FPS = options.fps;
+                        this.interval = 1000 / options.fps;
                     }
+                }
 
-                    if (options && options.hasOwnProperty("settings")) {
-
-                        window.settings = this.settings = this.initSettings(options.settings);
-                    }
-
-                    requestAnimationFrame(this.run);
-                });
+                requestAnimationFrame(this.run);
+            });
     };
 
-    this.initSettings = function(settingsOverrides) {
-
-        var result = {};
+    this.initSettings = function (settingsOverrides) {
 
         Object.keys(settingsOverrides).forEach(
             function (key) {
 
-                result[key] = this.setupSettingOverride(settingsOverrides[key]);
+                window.settings[key] = this.settings[key] = this.setupSettingOverride(settingsOverrides[key]);
             });
-
-        return result;
     }
 
-    this.setupSettingOverride = function(settingOverride) {
-        
+    this.setupSettingOverride = function (settingOverride) {
+
         if (!settingOverride.hasOwnProperty("Generator") && settingOverride.hasOwnProperty("Min") && settingOverride.hasOwnProperty("Max")) {
 
-            settingOverride.Generator = function() { return (Math.random() * (this.Max - this.Min)) + this.Min; };
+            settingOverride.Generator = function () { return (Math.random() * (this.Max - this.Min)) + this.Min; };
         }
 
         if (!settingOverride.hasOwnProperty("Regenerate")) {
 
-            settingOverride.Regenerate = function() { this.TargetValue = this.Generator(); };
+            settingOverride.Regenerate = function () { this.TargetValue = this.Generator(); };
         }
 
         if (!settingOverride.hasOwnProperty("Update")) {
 
             if (settingOverride.hasOwnProperty("TransitionFrames")) {
 
-                settingOverride.Update = function() { this.Value += (this.TargetValue - this.Value) / this.TransitionFrames; };
+                settingOverride.Update = function () { this.Value += (this.TargetValue - this.Value) / this.TransitionFrames; };
 
             } else {
 
-                settingOverride.Update = function() { this.Value = this.TargetValue; }
+                settingOverride.Update = function () { this.Value = this.TargetValue; }
             }
         }
 
@@ -172,17 +213,17 @@
         if (!settingOverride.hasOwnProperty("Min")) {
 
             settingOverride.Min = settingOverride.Value;
-        }  
+        }
 
         if (!settingOverride.hasOwnProperty("Max")) {
 
             settingOverride.Max = settingOverride.Value;
-        }  
+        }
 
         if (!settingOverride.hasOwnProperty("TransitionFrames")) {
 
             settingOverride.TransitionFrames = 10;
-        }        
+        }
 
         return settingOverride;
     }
@@ -190,8 +231,8 @@
     this.interpolateMove = function (x, y) {
 
         // fix canvas scaling
-        x = x * this.canvas.width / this.canvas.clientWidth;
-        y = y * this.canvas.height / this.canvas.clientHeight;
+        x = x * this.stage.width / this.stage.clientWidth;
+        y = y * this.stage.height / this.stage.clientHeight;
 
         var result = [];
 
@@ -359,7 +400,7 @@
                     this.settings[key].Update();
                 });
 
-            update(this.ctx, this.canvas);
+            update(this.passParams);
         }
 
         requestAnimationFrame(this.run);

@@ -36,10 +36,10 @@
                 Max: Math.ceil(Math.random() * 10)
             },
             CELLS_X: {
-                Generator: function() { return Math.ceil(CANVAS_WIDTH / settings.CELL_SIZE.Value); } // todo: some way to refer to other vals from inside a val
+                Generator: function() { return Math.ceil(CANVAS_WIDTH / window.settings.CELL_SIZE.Value); } // todo: some way to refer to other vals from inside a val
             },
             CELLS_Y: {
-                Generator: function() { return Math.ceil(CANVAS_HEIGHT / settings.CELL_SIZE.Value); }
+                Generator: function() { return Math.ceil(CANVAS_HEIGHT / window.settings.CELL_SIZE.Value); }
             },
             CELL_DENSITY: {
                 Min: 1,
@@ -48,6 +48,10 @@
             CELL_LIFE: {
                 Min: 20,
                 Max: Math.ceil(Math.random() * 50)
+            },
+            CELL_FADE : {
+                Min: 0,
+                Max: Math.random() / 10
             },
             MAX_COLOR_CHANGE_SPEED: {
                 Min: 0,
@@ -73,9 +77,9 @@
             }
         };
 
-        var rChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
-        var gChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
-        var bChange = Math.random() * MAX_COLOR_CHANGE_SPEED;
+        var rChange = 0;
+        var gChange = 0; 
+        var bChange = 0;
         var rLower = Math.floor(Math.random() * 100);
         var rUpper = Math.floor(Math.random() * (200 - rLower)) + 50;
         var rVal = rLower + Math.floor(Math.random() * rUpper);
@@ -110,6 +114,10 @@
             
             return new Promise(
                 function(resolve, reject) {
+
+                    rChange = Math.random() * settings.MAX_COLOR_CHANGE_SPEED.Value;
+                    gChange = Math.random() * settings.MAX_COLOR_CHANGE_SPEED.Value;
+                    bChange = Math.random() * settings.MAX_COLOR_CHANGE_SPEED.Value;
                             
                     console.log("Init");
 
@@ -119,11 +127,10 @@
 
                     map = generateMap();
                     params.ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
-                    params.ctx.fillRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
+                    params.ctx.fillRect(0, 0, settings.CELLS_X.Value * settings.CELL_SIZE.Value, settings.CELLS_Y.Value * settings.CELL_SIZE.Value);
 
                     resolve({
-                        fps: FPS, 
-                        settings: SETTINGS_PACKAGE
+                        fps: FPS
                     });
                 });
         }
@@ -156,7 +163,7 @@
             // run step
             for (var y = 0; y < map.length; y++)
                 for (var x = 0; x < map[0].length; x++)
-                    if (map[y][x].u)
+                    if (map[y][x].u) 
                         if (phase == 0)
                             map[y][x].n = checkCell(params.ctx, x, y);
                         else
@@ -200,7 +207,21 @@
                 for (var x = 0; x < settings.CELLS_X.Value; x++) {
 
                     var state = 0;
-                    row.push({ c: state, n: state, a: Math.floor(Math.random() * settings.CELL_LIFE.Value), u: state == 1, t: null, b: null, l: null, r: null, tl: null, tr: null, bl: null, br: null });
+                    row.push(
+                        { 
+                            c: state, 
+                            n: state, 
+                            a: Math.floor(Math.random() * settings.CELL_LIFE.Value), 
+                            u: state == 1, 
+                            t: null, 
+                            b: null, 
+                            l: null, 
+                            r: null, 
+                            tl: null, 
+                            tr: null, 
+                            bl: null, 
+                            br: null 
+                        });
                 }
 
                 tempMap.push(row);
@@ -307,7 +328,7 @@
             if (newState == 1)
                 _ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ",1)";
             else
-                ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + settings.CELL_FADE.Value + ")";
+                _ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + settings.CELL_FADE.Value + ")";
 
             ctx.fillRect(
                 _x * settings.CELL_SIZE.Value, 
@@ -333,8 +354,7 @@
 
         function mouseDown(e) {
 
-            ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
-    		ctx.fillRect(0, 0, settings.CELLS_X.Value * settings.CELL_SIZE.Value, settings.CELLS_Y.Value * settings.CELL_SIZE.Value);
+            drawPoints = [];
         }
 
         function mouseUp(e) {
