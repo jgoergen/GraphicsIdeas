@@ -185,18 +185,18 @@
 
         if (!settingOverride.hasOwnProperty("Regenerate")) {
 
-            settingOverride.Regenerate = function () { this.TargetValue = this.Generator(); };
+            settingOverride.Regenerate = function () { this.TargetValue = this.Generator(); return this; };
         }
 
         if (!settingOverride.hasOwnProperty("Update")) {
 
             if (settingOverride.hasOwnProperty("TransitionFrames")) {
 
-                settingOverride.Update = function () { this.Value += (this.TargetValue - this.Value) / this.TransitionFrames; };
+                settingOverride.Update = function () { this.Value += (this.TargetValue - this.Value) / this.TransitionFrames; return this; };
 
             } else {
 
-                settingOverride.Update = function () { this.Value = this.TargetValue; }
+                settingOverride.Update = function () { this.Value = this.TargetValue; return this; }
             }
         }
 
@@ -206,7 +206,7 @@
             settingOverride.Value = settingOverride.TargetValue;
 
         } else {
-
+            
             settingOverride.TargetValue = settingOverride.Value;
         }
 

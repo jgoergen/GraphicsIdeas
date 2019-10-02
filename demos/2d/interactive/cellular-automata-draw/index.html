@@ -33,29 +33,29 @@
         var SETTINGS_PACKAGE = {
             CELL_SIZE: {
                 Min: 2,
-                Max: Math.ceil(Math.random() * 10)
+                Max: 10
             },
             CELLS_X: {
-                Generator: function() { return Math.ceil(CANVAS_WIDTH / window.settings.CELL_SIZE.Value); } // todo: some way to refer to other vals from inside a val
+                Generator: function() { return Math.ceil(CANVAS_WIDTH / window.settings.CELL_SIZE.Value); } 
             },
             CELLS_Y: {
                 Generator: function() { return Math.ceil(CANVAS_HEIGHT / window.settings.CELL_SIZE.Value); }
             },
             CELL_DENSITY: {
                 Min: 1,
-                Max: Math.ceil(Math.random() * 10)
+                Max: 10
             },
             CELL_LIFE: {
                 Min: 20,
-                Max: Math.ceil(Math.random() * 50)
+                Max: 50
             },
             CELL_FADE : {
                 Min: 0,
-                Max: Math.random() / 10
+                Max: 0.1
             },
             MAX_COLOR_CHANGE_SPEED: {
                 Min: 0,
-                Max: Math.random() * 5
+                Max: 5
             },
             R: {
                 Min: 0,
@@ -127,7 +127,11 @@
 
                     map = generateMap();
                     params.ctx.fillStyle = "rgba(" + rUpper + "," + gUpper + "," + bUpper + ",1)";
-                    params.ctx.fillRect(0, 0, settings.CELLS_X.Value * settings.CELL_SIZE.Value, settings.CELLS_Y.Value * settings.CELL_SIZE.Value);
+                    params.ctx.fillRect(
+                        0, 
+                        0, 
+                        settings.CELLS_X.Value * Math.ceil(settings.CELL_SIZE.Value), 
+                        settings.CELLS_Y.Value * Math.ceil(settings.CELL_SIZE.Value));
 
                     resolve({
                         fps: FPS
@@ -174,26 +178,26 @@
 
         function activeCell(x, y) {
 
-            x = Math.floor(x / settings.CELL_SIZE.Value);
-            y = Math.floor(y / settings.CELL_SIZE.Value);
+            x = Math.floor(x / Math.ceil(settings.CELL_SIZE.Value));
+            y = Math.floor(y / Math.ceil(settings.CELL_SIZE.Value));
 
             var cell = map[y][x];
             cell.c = 1;
             cell.n = 1;
             cell.u = true;
-            cell.a = Math.floor(Math.random() * settings.CELL_LIFE.Value);
+            cell.a = Math.floor(Math.random() * Math.ceil(settings.CELL_LIFE.Value));
 
             cell = cell.t;
             cell.c = 1;
             cell.n = 1;
             cell.u = true;
-            cell.a = Math.floor(Math.random() * settings.CELL_LIFE.Value);
+            cell.a = Math.floor(Math.random() * Math.ceil(settings.CELL_LIFE.Value));
 
             cell = cell.br;
             cell.c = 1;
             cell.n = 1;
             cell.u = true;
-            cell.a = Math.floor(Math.random() * settings.CELL_LIFE.Value);
+            cell.a = Math.floor(Math.random() * Math.ceil(settings.CELL_LIFE.Value));
         }
 
         function generateMap() {
@@ -211,7 +215,7 @@
                         { 
                             c: state, 
                             n: state, 
-                            a: Math.floor(Math.random() * settings.CELL_LIFE.Value), 
+                            a: Math.floor(Math.random() * Math.ceil(settings.CELL_LIFE.Value)), 
                             u: state == 1, 
                             t: null, 
                             b: null, 
@@ -317,7 +321,7 @@
 
             if (cell.a <= 0) {
 
-                cell.a = Math.floor(Math.random() * settings.CELL_LIFE.Value);
+                cell.a = Math.floor(Math.random() * Math.ceil(settings.CELL_LIFE.Value));
                 newState = 0;
                 setupUpdates(cell);
             }
@@ -331,10 +335,10 @@
                 _ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + "," + settings.CELL_FADE.Value + ")";
 
             ctx.fillRect(
-                _x * settings.CELL_SIZE.Value, 
-                _y * settings.CELL_SIZE.Value, 
-                settings.CELL_SIZE.Value, 
-                settings.CELL_SIZE.Value);
+                _x * Math.ceil(settings.CELL_SIZE.Value), 
+                _y * Math.ceil(settings.CELL_SIZE.Value), 
+                Math.ceil(settings.CELL_SIZE.Value), 
+                Math.ceil(settings.CELL_SIZE.Value));
 
             return newState;
         }
