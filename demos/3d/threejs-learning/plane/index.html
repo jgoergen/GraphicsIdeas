@@ -32,14 +32,17 @@
         var FPS = 60;
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 800;
-        var CUBE_SIZE = (Math.random() * 0.4) + 0.2;
-        var CUBE_GAP = Math.random() * 1;
+        var CUBE_SIZE = 1 + (Math.random() * 3);
+        var CUBE_GAP = Math.random() * 0.5;
         var LIGHT_R = Math.floor(Math.random() * 255);
         var LIGHT_G = Math.floor(Math.random() * 255);
         var LIGHT_B = Math.floor(Math.random() * 255);
         var CUBE_R = Math.floor(Math.random() * 255);
         var CUBE_G = Math.floor(Math.random() * 255);
         var CUBE_B = Math.floor(Math.random() * 255);
+        var BG_R = Math.floor(Math.random() * 255);
+        var BG_G = Math.floor(Math.random() * 255);
+        var BG_B = Math.floor(Math.random() * 255);
 
         /////////////////////////////////////////////////////////
 
@@ -56,7 +59,7 @@
             return new Promise(
                 function(resolve, reject) {
 
-                    var geometry = new THREE.BoxGeometry( CUBE_SIZE, CUBE_SIZE, 10 );
+                    var geometry = new THREE.PlaneGeometry( CUBE_SIZE, CUBE_SIZE, 2, 2 );
                     var material = new THREE.MeshLambertMaterial( { color: new THREE.Color("rgb(" + CUBE_R + ", " + CUBE_G + ", " + CUBE_B + ")") } );
 
                     for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
@@ -65,7 +68,7 @@
                                 
                             var box = new THREE.Mesh( geometry, material );
                             cubes.push(box);
-                            box.position.set(x, y, (Math.cos((x + y) / 10) * -10));
+                            box.position.set(x, y, 0);
                             params.scene.add(box);
                         }
                     }
@@ -73,13 +76,17 @@
                     pointLight =
                         new THREE.PointLight(
                             new THREE.Color("rgb(" + LIGHT_R + ", " + LIGHT_G + ", " + LIGHT_B + ")"), // color
-                            2.0, // intensity
+                            1.5, // intensity
                             30, // distance
                             2); // decay
 
                     pointLight.position.z = -10;
                     params.scene.add(pointLight);
                     
+                    var ambientLight = new THREE.AmbientLight(new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")"));
+                    params.scene.add(ambientLight);
+
+                    params.scene.background = new THREE.Color( new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")") );
                     resolve(FPS);
                 });
         }
@@ -92,19 +99,16 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            params.camera.position.z = (Math.cos(elapsed / 4000) * 4) + 5;
-            params.camera.position.x = (Math.cos(elapsed / 8000) * 3);
-            params.camera.position.y = (Math.cos(elapsed / 6000) * 2);
-
-            pointLight.position.x = (Math.cos(elapsed / 3000) * 6);
+            pointLight.position.z = (Math.cos(elapsed / 3000) * 6);
             pointLight.position.y = (Math.cos(elapsed / 2000) * 10);
+            params.camera.position.z = (Math.cos(elapsed / 1000) * 2) + 12;
 
             for (var index = 0; index < cubes.length; index ++) {
 
                 cubes[index].rotation.set(
-                    0,
-                    0, 
-                    (Math.cos((elapsed / 2000) + index / 100) * 10));
+                    (Math.cos(elapsed / 10000) * 10), 
+                    (Math.cos(elapsed / 10000) * 10), 
+                    0);
             }
 
             controls.update();
