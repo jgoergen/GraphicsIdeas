@@ -174,13 +174,20 @@
 
                 window.settings[key] = this.settings[key] = this.setupSettingOverride(settingsOverrides[key]);
             });
-    }
+    };
 
     this.setupSettingOverride = function (settingOverride) {
 
-        if (!settingOverride.hasOwnProperty("Generator") && settingOverride.hasOwnProperty("Min") && settingOverride.hasOwnProperty("Max")) {
+        if (!settingOverride.hasOwnProperty("Generator")) {
 
-            settingOverride.Generator = function () { return (Math.random() * (this.Max - this.Min)) + this.Min; };
+            if (settingOverride.hasOwnProperty("Min") && settingOverride.hasOwnProperty("Max")) {
+
+                settingOverride.Generator = function () { return (Math.random() * (this.Max - this.Min)) + this.Min; };
+
+            } else if (settingOverride.hasOwnProperty("Array")) {
+
+                settingOverride.Generator = function () { return this.Array[Math.floor(Math.random() * this.Array.length)]; };
+            }
         }
 
         if (!settingOverride.hasOwnProperty("Regenerate")) {
@@ -206,7 +213,7 @@
             settingOverride.Value = settingOverride.TargetValue;
 
         } else {
-            
+
             settingOverride.TargetValue = settingOverride.Value;
         }
 
@@ -226,7 +233,7 @@
         }
 
         return settingOverride;
-    }
+    };
 
     this.interpolateMove = function (x, y) {
 
@@ -258,7 +265,7 @@
         this.lastY = y;
 
         return result;
-    }
+    };
 
     this.tiltHandler = function (e) {
 
@@ -280,7 +287,7 @@
         // if we end up with any tilt values, send them along
         if (e.gamma && e.beta && e.alpha && window.hasOwnProperty("tilt"))
             tilt({ gamma: e.gamma, beta: e.beta, alpha: e.alpha });
-    }
+    };
 
     this.touchStartHanlder = function (e) {
 
@@ -288,7 +295,7 @@
             mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
         else if (e.touches.length == 2 && window.hasOwnProperty("secondaryMouseDown"))
             secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
-    }
+    };
 
     this.touchEndHanlder = function (e) {
 
@@ -299,7 +306,7 @@
 
         this.lastX = undefined;
         this.lastY = undefined;
-    }
+    };
 
     this.touchMoveHanlder = function (e) {
 
@@ -317,7 +324,7 @@
             else if (e.touches.length == 2 && window.hasOwnProperty("secondaryMouseMove"))
                 secondaryMouseMove(steps[i]);
         }
-    }
+    };
 
     this.mouseDownHandler = function (e) {
 
@@ -335,7 +342,7 @@
             if (window.hasOwnProperty("mouseDown"))
                 mouseDown(e);
         }
-    }
+    };
 
     this.mouseUpHandler = function (e) {
 
@@ -356,7 +363,7 @@
 
         this.lastX = undefined;
         this.lastY = undefined;
-    }
+    };
 
     this.mouseMoveHandler = function (e) {
 
@@ -383,7 +390,7 @@
                     secondaryMouseMove(steps[i]);
             }
         }
-    }
+    };
 
     this.run = function () {
 
@@ -404,7 +411,7 @@
         }
 
         requestAnimationFrame(this.run);
-    }
+    };
 
     window.onload = this.initialize;
 })();

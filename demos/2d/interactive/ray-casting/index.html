@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
         <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
         <script src="../../../libs/2DLib/Vector2D.js" type="text/javascript"></script>
         <script src="../../../libs/2DLib/Line2D.js" type="text/javascript"></script>
@@ -35,9 +35,36 @@
         var CANVAS_WIDTH = 1600;
         var CANVAS_HEIGHT = 1200;
         var FPS = 60;
-        var RAY_COUNT = 100;
-        var PARTICLE_COUNT = 1;
-        var WALL_COUNT = 10;
+
+        var SETTINGS_PACKAGE = {
+            RAY_COUNT: {
+                Min: 10,
+                Max: 100
+            },
+            PARTICLE_COUNT: {
+                Value: 1
+            },
+            WALL_COUNT: {
+                Min: 5,
+                Max: 40
+            },
+            R: {
+                Min: 0,
+                Max: 255
+            },
+            G: {
+                Min: 0,
+                Max: 255
+            },
+            B: {
+                Min: 0,
+                Max: 255
+            },
+            LINE_WIDTH: {
+                Min: 0,
+                Max: 10
+            }
+        };
 
         /////////////////////////////////////////////////////////
 
@@ -62,12 +89,11 @@
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
-                    particles = generateParticles(PARTICLE_COUNT);
-                    walls = generateWalls(WALL_COUNT);
+                    particles = generateParticles(settings.PARTICLE_COUNT.Value);
+                    walls = generateWalls(settings.WALL_COUNT.Value);
 
-                    params.ctx.fillStyle = "#fff";
-                    params.ctx.lineWidth="4";
-                    params.ctx.strokeStyle="#fff";
+                    params.ctx.strokeStyle = params.ctx.fillStyle = "rgb(" + settings.R.Value + ", " + settings.G.Value + ", " + settings.B.Value +")";
+                    params.ctx.lineWidth = settings.LINE_WIDTH.Value;
 
                     resolve(FPS);
                 });
@@ -82,24 +108,6 @@
             lastTime = date;
 
             params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            /*
-            params.ctx.beginPath();
-
-            params.ctx.strokeStyle="rgba(255, 255, 255, 1)";
-
-            for (var i = 0; i < walls.length; i ++) {
-
-                params.ctx.moveTo(
-                    walls[i].ends.startVect2D.x,
-                    walls[i].ends.startVect2D.y);
-
-                params.ctx.lineTo(
-                    walls[i].ends.endVect2D.x,
-                    walls[i].ends.endVect2D.y);
-            }
-
-            params.ctx.stroke();
-*/
             particles[0].position.x = mousePosX;
             particles[0].position.y = mousePosY;
 
@@ -152,7 +160,7 @@
                                     1);
 
                         CANVAS_WIDTH / 4 / shortestDistance;
-                        ctx.strokeStyle="rgba(255, 0, 0, " + Math.min(1, brightness) + ")";
+                        ctx.strokeStyle = "rgba(" + settings.R.Value + ", " + settings.G.Value + ", " + settings.B.Value +", " + Math.min(1, brightness) + ")";
 
                         ctx.lineTo(
                             collisionVector.x,
@@ -160,10 +168,10 @@
 
                     } else {
 
-                        /*params.ctx.strokeStyle="rgba(0, 255, 0, 1)";
+                        params.ctx.strokeStyle="rgba(" + settings.B.Value + ", " + settings.G.Value + ", " + settings.R.Value +", 0.3)";
                         params.ctx.lineTo(
-                            (particles[i].position.x) + particles[i].rays[o].x * 200,
-                            (particles[i].position.y) + particles[i].rays[o].y * 200)*/
+                            (particles[i].position.x) + particles[i].rays[o].x * 1000,
+                            (particles[i].position.y) + particles[i].rays[o].y * 1000)
                     }
 
                     params.ctx.stroke();
@@ -189,7 +197,7 @@
                 var startDeg = 0;
                 var endDeg = 360;
 
-                for (var o = startDeg; o < endDeg; o += Math.ceil((endDeg - startDeg) / RAY_COUNT)) {
+                for (var o = startDeg; o < endDeg; o += Math.ceil((endDeg - startDeg) / settings.RAY_COUNT.Value)) {
 
                     var ray = 
                         new Vector2D(

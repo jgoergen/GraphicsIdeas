@@ -6,7 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+        <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
+        <script src="../../../libs/EasingFunctions.js" type="text/javascript"></script>
 
         <title></title>
 
@@ -29,11 +31,40 @@
 
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 600;
-        var GRID_X = 20;
-        var GRID_Y = 20;
-        var GRID_CHANGE_TIME = 20;
-        var GRID_CHANGE_STEP = 0.2;
-        var EXTRA_MOUSE_POSITIONS = 4;
+        var FPS = 60;
+
+        var SETTINGS_PACKAGE = {
+            GRID_SIZE: {
+                Value: 20
+            },
+            GRID_CHANGE_TIME: {
+                Min: 10,
+                Max: 100
+            },
+            GRID_CHANGE_STEP: {
+                Min: 0.1,
+                Max: 1
+            },
+            ROLL_BACK_DISTANCE: {
+                Min: -100,
+                Max: 100
+            },
+            EXTRA_MOUSE_POSITIONS: {
+                Value: 4
+            },
+            R: {
+                Min: 0,
+                Max: 255
+            },
+            G: {
+                Min: 0,
+                Max: 255
+            },
+            B: {
+                Min: 0,
+                Max: 255
+            }
+        };
 
         /////////////////////////////////////////////////////////
 
@@ -42,78 +73,58 @@
         var lastMouseY = 0;
         var drawGridTile = function(){};
 
-        function drawSquares(ctx, x, y, age) {
-
-            if (age > (GRID_CHANGE_TIME - 2))
-                age = GRID_CHANGE_TIME - 2;
-
-            ctx.fillRect(
-                x + (age / 2), 
-                y + (age / 2), 
-                GRID_X - age, 
-                GRID_Y - age);
-        }
-
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
                             
-                    ctx.fillStyle = "white";
+                    params.ctx.fillStyle = "rgba(" + Math.floor(settings.R.Value) + "," + Math.floor(settings.G.Value) + "," + Math.floor(settings.B.Value) + ",1)";
                     drawGridTile = drawSquares;
 
                     // draw initial grid spots
-                    for (var x = 0; x < CANVAS_WIDTH; x += GRID_X) 
-                        for (var y = 0; y < CANVAS_HEIGHT; y += GRID_Y) 
-                            drawGridTile(ctx, x, y, GRID_CHANGE_TIME);
+                    for (var x = 0; x < CANVAS_WIDTH; x += settings.GRID_SIZE.Value) 
+                        for (var y = 0; y < CANVAS_HEIGHT; y += settings.GRID_SIZE.Value) 
+                            drawGridTile(params.ctx, x, y, settings.GRID_CHANGE_TIME.Value);
 
-                    resolve();
+                    resolve(FPS);
                 });
-        }
+        };
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             var index = 0;
+
+            // clear old area
+
+            params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
             while (index < mouseHistory.length) {
 
                 // get quantized grid position
 
-                var qX = Math.round(
-                    mouseHistory[index][0] / GRID_X)
-                     * GRID_X;
-
-                var qY = Math.round(
-                    mouseHistory[index][1] / GRID_Y)
-                     * GRID_Y;
+                var qX = MathHelperFunctions.Quantize(mouseHistory[index][0], settings.GRID_SIZE.Value);
+                var qY = MathHelperFunctions.Quantize(mouseHistory[index][1], settings.GRID_SIZE.Value);
 
                 // 'age' and expire mouse positions.
 
-                mouseHistory[index][2] = mouseHistory[index][2] + GRID_CHANGE_STEP;
+                mouseHistory[index][2] += settings.GRID_CHANGE_STEP.Value;
 
                 // if this mouse position is too old, remove it. otherwise redraw it.
 
-                if (mouseHistory[index][2] > GRID_CHANGE_TIME) {
+                if (mouseHistory[index][2] > settings.GRID_CHANGE_TIME.Value) {
 
                     mouseHistory.splice(index, 1);
                     
                 } else {
 
-                    // clear old area
-
-                    ctx.clearRect(
-                        qX, 
-                        qY, 
-                        GRID_X, 
-                        GRID_Y);
-
                     // draw new symbol based on age
 
                     drawGridTile(
-                        ctx, 
+                        params.ctx, 
                         qX, 
                         qY, 
                         mouseHistory[index][2]);
@@ -121,28 +132,19 @@
                     index ++;
                 }
             }
-        }
+        };
 
-        // code to run when the user tilts a device ( where available )
+        function drawSquares(ctx, x, y, age) {
 
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
-        }
+            var size = EasingFunctions.EaseInOutQuadInterpolationFunc(age, settings.GRID_CHANGE_TIME.Value, settings.GRID_SIZE.Value, 0);
+            var rollback = EasingFunctions.EaseInOutQuadInterpolationFunc(age, settings.GRID_CHANGE_TIME.Value, 0, settings.ROLL_BACK_DISTANCE.Value);
 
-        // code to run when user presses primary mouse button ( or first finger. )
-
-        function mouseDown(e) {
-
-            //e.x e.y e.speed
-        }
-
-        // code to run when user raises primary mouse button ( or first finger. )
-
-        function mouseUp(e) {
-
-            //e.x e.y e.speed
-        }
+            ctx.fillRect(
+                x + rollback, 
+                y + rollback, 
+                size, 
+                size);
+        };
 
         // code to run when user moves primary mouse button ( or first finger. )
 
@@ -150,42 +152,24 @@
 
             // if we haven't moved more then the grid limits away from our last mouse position, don't log it.
 
-            if (Math.abs(e.x - lastMouseX) >= GRID_X || Math.abs(e.y - lastMouseY) >= GRID_Y) {
+            if (Math.abs(e.x - lastMouseX) >= settings.GRID_SIZE.Value || Math.abs(e.y - lastMouseY) >= settings.GRID_SIZE.Value) {
 
                 // limit the size of the speed return.
-                e.speed = Math.min(EXTRA_MOUSE_POSITIONS, e.speed / 10);
+                e.speed = Math.min(settings.EXTRA_MOUSE_POSITIONS.Value, e.speed / 10);
 
                 var xIndex = 0;
                 var yIndex = 0;
 
                 for (var x = 0; x < e.speed; x++) {
+
                     for (var y = 0; y < e.speed; y++) {
 
                         var offsetX = x - Math.round(e.speed / 2);
                         var offsetY = y - Math.round(e.speed / 2);
-                        var actualX = e.x + (GRID_X * offsetX);
-                        var actualY = e.y + (GRID_Y * offsetY);
-                        var startingAge = 0;
+                        var actualX = e.x + (settings.GRID_SIZE.Value * offsetX);
+                        var actualY = e.y + (settings.GRID_SIZE.Value * offsetY);
 
-                        var exists = false;
-                        for (var i = 0; i < mouseHistory.length; i++)
-                            if (mouseHistory[i][0] == actualX && mouseHistory[i][1] == actualY) {
-
-                                if (mouseHistory[i][2] > startingAge)
-                                    mouseHistory[i][2] = startingAge;
-
-                                exists = true;
-                                break;
-                            }
-
-                        if (!exists)
-                            mouseHistory.push(
-                                [
-                                    actualX, 
-                                    actualY, 
-                                    startingAge
-                                ]);
-
+                        addPoint(actualX, actualY);
                         yIndex ++;
                     }
 
@@ -195,28 +179,31 @@
                 lastMouseX = e.x;
                 lastMouseY = e.y;
             }
-        }
+        };
 
-        // code to run when user presses secondary mouse button ( or second finger. )
+        function addPoint(x, y) {
 
-        function secondaryMouseDown(e) {
+            var startingAge = 0;
+            var exists = false;
 
-            //e.x e.y e.speed
-        }
+            for (var i = 0; i < mouseHistory.length; i++)
+                if (mouseHistory[i][0] == x && mouseHistory[i][1] == y) {
 
-        // code to run when user raises secondary mouse button ( or second finger. )
+                    if (mouseHistory[i][2] > startingAge)
+                        mouseHistory[i][2] = startingAge;
 
-        function secondaryMouseUp(e) {
+                    exists = true;
+                    break;
+                }
 
-            //e.x e.y e.speed
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-        }
+            if (!exists)
+                mouseHistory.push(
+                    [
+                        x, 
+                        y, 
+                        startingAge
+                    ]);
+        };
 
     </script>
 </html>

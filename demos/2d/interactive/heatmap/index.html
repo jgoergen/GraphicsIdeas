@@ -6,7 +6,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+        <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
 
         <title></title>
 
@@ -30,10 +31,25 @@
         var CANVAS_WIDTH = 800;
         var CANVAS_HEIGHT = 800;
         var FPS = 60;
-        var RADIUS = Math.ceil(Math.random() * 20) + 4;
-        var BLUR = Math.ceil(Math.random() * 100) + 10;
-        var WIGGLE_AMOUNT = Math.ceil(Math.random() * 20);
-        var MAX_ADD_VALUE = Math.random() / 100;
+
+        var SETTINGS_PACKAGE = {
+            RADIUS: {
+                Min: 4,
+                Max: 20
+            },
+            BLUR: {
+                Min: 10,
+                Max: 100
+            },
+            WIGGLE_AMOUNT: {
+                Min: 0,
+                Max: 20
+            },
+            MAX_ADD_VALUE: {
+                Min: 0,
+                Max: 0.01
+            },
+        };
 
         // TODO: generate these values https://gist.github.com/paulmillr/6205257
         
@@ -87,7 +103,7 @@
 
                     data = new Array();
                     max = 0;
-                    circle = getRadialBlur(RADIUS);
+                    circle = getRadialBlur(Math.ceil(settings.RADIUS.Value));
                     gradient = getGradient(GRADIENT_COLORS);
 
                     resolve(FPS);
@@ -110,8 +126,8 @@
 
             for (var i = 0, len = data.length; i < len; i++) {
                 
-                randomX = Math.random() * WIGGLE_AMOUNT;
-                randomY = Math.random() * WIGGLE_AMOUNT;
+                randomX = Math.random() * settings.WIGGLE_AMOUNT.Value;
+                randomY = Math.random() * settings.WIGGLE_AMOUNT.Value;
 
                 localCtxReference.globalAlpha = Math.max(data[i].data / max, minOpacity);
                 localCtxReference.drawImage(circle, data[i].x - (circle.width / 2) + randomX, data[i].y - (circle.height / 2) + randomY);
@@ -126,11 +142,11 @@
         
             var circle = document.createElement("canvas");
             var ctx = circle.getContext("2d");
-            var r2 = _r + BLUR;
+            var r2 = _r + Math.ceil(settings.BLUR.Value);
             
             circle.width = circle.height = r2 * 2;
             ctx.shadowOffsetX = ctx.shadowOffsetY = 200;
-            ctx.shadowBlur = BLUR;
+            ctx.shadowBlur = Math.ceil(settings.BLUR.Value);
             ctx.shadowColor = "black";
             ctx.beginPath();
             ctx.arc(r2 - 200, r2- 200, _r, 0, Math.PI * 2, true);
@@ -205,15 +221,15 @@
         }
 
         // code to run when user moves primary mouse button ( or first finger. )
-
         function mouseMove(e, isMouseDown) {
 
-            // quantize to reduce the amount of points possible
+            if (isMouseDown) {
 
-            var quantizedX = Math.round(e.x / RADIUS) * RADIUS;
-            var quantizedY = Math.round(e.y / RADIUS) * RADIUS;
-
-            addPoint(quantizedX, quantizedY, Math.random() * MAX_ADD_VALUE);
+                // quantize to reduce the amount of points possible
+                var quantizedX = MathHelperFunctions.Quantize(e.x, Math.ceil(settings.RADIUS.Value));
+                var quantizedY = MathHelperFunctions.Quantize(e.y, Math.ceil(settings.RADIUS.Value));
+                addPoint(quantizedX, quantizedY, Math.random() * settings.MAX_ADD_VALUE.Value);
+            }
         }
 
     </script>

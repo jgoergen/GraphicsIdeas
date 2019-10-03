@@ -1,5 +1,10 @@
 var MathHelperFunctions = {
 
+    Quantize: function(value, interval) {
+
+        return Math.round(value / interval) * interval;
+    },
+
     IndexToXY: function (index, width) {
 
         return [
@@ -85,7 +90,7 @@ var MathHelperFunctions = {
     },
 
     Map: function(value, fromStart, fromEnd, toStart, toEnd) {
-        
+
         return (value - fromStart) / (fromEnd - fromStart) * (toEnd - toStart) + toStart;
     }
 };
