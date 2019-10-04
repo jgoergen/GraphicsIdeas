@@ -29,7 +29,7 @@
         // put any adjustable settings here that would be interesting to tinker with.
 
         var THREEJS = true;
-        var FPS = 60;
+        var FPS = 30;
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 800;
         var CUBE_SIZE = (Math.random() * 2) + 1;
@@ -40,6 +40,9 @@
         var CUBE_R = Math.floor(Math.random() * 255);
         var CUBE_G = Math.floor(Math.random() * 255);
         var CUBE_B = Math.floor(Math.random() * 255);
+        var Z_MOVE_MODIFIER = (Math.random() * 5) + 0.1;
+        var Z_MOVE_COS_SPEED_MODIFIER = (Math.random() * 100000) + 50000;
+        var Z_INDEX_SPEED_MODIFIER = (Math.random() * 100000) + 10000;
 
         /////////////////////////////////////////////////////////
 
@@ -96,12 +99,11 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            pointLight.position.z = (Math.cos(elapsed / 1000) * 5) - 5;
-            //params.camera.position.z = (Math.cos(elapsed / 1000) * 2) + 12;
+            params.camera.position.z = (Math.cos(elapsed / 2000) * 4) + 12;
 
             for (var index = 0; index < cubes.length; index ++) {
 
-                cubes[index].position.z = (Math.cos((elapsed / 100000) + (index * (Math.sin(elapsed / 50000))))) * 10;
+                cubes[index].position.z = (Math.cos((elapsed / Z_MOVE_COS_SPEED_MODIFIER) + (index * (Math.sin(elapsed / Z_INDEX_SPEED_MODIFIER))))) * Z_MOVE_MODIFIER;
             }
 
             controls.update();

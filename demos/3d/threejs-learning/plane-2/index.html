@@ -33,7 +33,7 @@
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 800;
         var CUBE_SIZE = 1 + (Math.random() * 3);
-        var CUBE_GAP = Math.random() * 0.3;
+        var CUBE_GAP = (Math.random() * 0.1);
         var LIGHT_R = Math.floor(Math.random() * 255);
         var LIGHT_G = Math.floor(Math.random() * 255);
         var LIGHT_B = Math.floor(Math.random() * 255);
@@ -43,6 +43,9 @@
         var BG_R = Math.floor(Math.random() * 255);
         var BG_G = Math.floor(Math.random() * 255);
         var BG_B = Math.floor(Math.random() * 255);
+        var ROT_MOVE_MODIFIER = (Math.random() * 3) + 1; 
+        var ROT_INDEX_MODIFIER = Math.random() * 0.05;
+        var ROT_MOVE_COS_SPEED_MODIFIER = Math.random() * 10000;
 
         /////////////////////////////////////////////////////////
 
@@ -100,14 +103,14 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            params.camera.position.z = (Math.cos(elapsed / 10000) * 1) + 12;
+            params.camera.position.z = (Math.cos(elapsed / 10000) * 1) + 10;
 
             for (var index = 0; index < cubes.length; index ++) {
 
                 cubes[index].rotation.set(
                     0,
                     0, 
-                    (Math.cos((elapsed / 2000) + index / 100) * 2));
+                    (Math.cos((elapsed / ROT_MOVE_COS_SPEED_MODIFIER) + Math.sin(index * ROT_INDEX_MODIFIER)) * ROT_MOVE_MODIFIER));  
             }
 
             controls.update();

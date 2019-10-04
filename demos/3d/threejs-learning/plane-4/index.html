@@ -32,8 +32,8 @@
         var FPS = 60;
         var CANVAS_WIDTH = 1200;
         var CANVAS_HEIGHT = 800;
-        var CUBE_SIZE = 1 + (Math.random() * 3);
-        var CUBE_GAP = (Math.random() * 0.2) - 0.1;
+        var CUBE_SIZE = (Math.random() * 2) + 0.1;
+        var CUBE_GAP = Math.random() * 0.05;
         var LIGHT_R = Math.floor(Math.random() * 255);
         var LIGHT_G = Math.floor(Math.random() * 255);
         var LIGHT_B = Math.floor(Math.random() * 255);
@@ -43,10 +43,10 @@
         var BG_R = Math.floor(Math.random() * 255);
         var BG_G = Math.floor(Math.random() * 255);
         var BG_B = Math.floor(Math.random() * 255);
-        var ROT_X_MOVE_MODIFIER = (Math.random() * 5) + 1; 
-        var ROT_X_MOVE_COS_SPEED_MODIFIER = (Math.random() * 20000) + 1000;
-        var ROT_Y_MOVE_MODIFIER = (Math.random() * 5) + 1; 
-        var ROT_Y_MOVE_COS_SPEED_MODIFIER = (Math.random() * 20000) + 1000;
+        var X_MOVE_MODIFIER = Math.random();
+        var Y_MOVE_MODIFIER = Math.random();
+        var X_MOVE_COS_SPEED_MODIFIER = Math.random() * 10000;
+        var Y_MOVE_COS_SPEED_MODIFIER = Math.random() * 10000;
 
         /////////////////////////////////////////////////////////
 
@@ -66,11 +66,13 @@
                     var geometry = new THREE.PlaneGeometry( CUBE_SIZE, CUBE_SIZE, 2, 2 );
                     var material = new THREE.MeshLambertMaterial( { color: new THREE.Color("rgb(" + CUBE_R + ", " + CUBE_G + ", " + CUBE_B + ")") } );
 
-                    for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
+                    for (var x = -10; x < 10; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
 
                         for (var y = -10; y < 10; y += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
                                 
                             var box = new THREE.Mesh( geometry, material );
+                            box.baseX = x;
+                            box.baseY = y;
                             cubes.push(box);
                             box.position.set(x, y, 0);
                             params.scene.add(box);
@@ -80,17 +82,19 @@
                     pointLight =
                         new THREE.PointLight(
                             new THREE.Color("rgb(" + LIGHT_R + ", " + LIGHT_G + ", " + LIGHT_B + ")"), // color
-                            1.5, // intensity
-                            30, // distance
+                            3.5, // intensity
+                            20, // distance
                             2); // decay
 
-                    pointLight.position.z = -10;
+                    pointLight.position.z = 10;
                     params.scene.add(pointLight);
-                    
+
                     var ambientLight = new THREE.AmbientLight(new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")"));
                     params.scene.add(ambientLight);
 
                     params.scene.background = new THREE.Color( new THREE.Color("rgb(" + BG_R + ", " + BG_G + ", " + BG_B + ")") );
+
+                    params.camera.position.z = 5;
                     resolve(FPS);
                 });
         }
@@ -103,17 +107,12 @@
             elapsed += date - lastTime;
             lastTime = date;
             
-            pointLight.position.z = (Math.cos(elapsed / 3000) * 6);
-            pointLight.position.y = (Math.cos(elapsed / 2000) * 10);
-
-            params.camera.position.z = (Math.cos(elapsed / 10000) * 2) + 10;
+            //params.camera.position.z = (Math.cos(elapsed / 2000) * 4) + 12;
 
             for (var index = 0; index < cubes.length; index ++) {
 
-                cubes[index].rotation.set(
-                    (Math.cos(elapsed / ROT_X_MOVE_COS_SPEED_MODIFIER) * ROT_X_MOVE_MODIFIER), 
-                    (Math.cos(elapsed / ROT_Y_MOVE_COS_SPEED_MODIFIER) * ROT_Y_MOVE_MODIFIER), 
-                    0);
+                cubes[index].position.x = cubes[index].baseX + (Math.cos((elapsed / X_MOVE_COS_SPEED_MODIFIER) + (index / 100)) * X_MOVE_MODIFIER);
+                cubes[index].position.y = cubes[index].baseY + (Math.sin((elapsed / Y_MOVE_COS_SPEED_MODIFIER) + (index / 100)) * Y_MOVE_MODIFIER);
             }
 
             controls.update();
