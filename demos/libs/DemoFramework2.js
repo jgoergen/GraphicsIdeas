@@ -28,7 +28,7 @@
 
     this.initialize = function () {
 
-        if (window.THREEJS === true) {
+        if (window.TYPE === "threejs") {
 
             this.scene = new THREE.Scene();
             this.camera = new THREE.PerspectiveCamera(75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000);
@@ -52,6 +52,26 @@
                 scene: this.scene,
                 camera: this.camera,
                 renderer: this.renderer
+            };
+
+        } else if (window.TYPE === "pixijs") {
+            
+            let app = new PIXI.Application({ 
+                width: CANVAS_WIDTH,
+                height: CANVAS_HEIGHT,
+                antialias: true,
+                transparent: false,
+                resolution: 1
+              }
+            );
+
+            app.renderer.autoResize = true;
+            document.body.appendChild(app.view);
+            this.stage = app.view;
+
+            this.passParams = {
+                app: app,
+                stage: app.stage
             };
 
         } else {
