@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <script src="../../libs/DemoFramework2.js" type="text/javascript"></script>
+        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
 
         <title></title>
 
@@ -78,7 +78,7 @@
         }
 
         // code to run every frame.
-
+        var x = 0;
         function update(params) {
 
             date = new Date();
@@ -92,9 +92,14 @@
             // https://www.mathcurve.com/courbes2d.gb/cayleyovale/cayleyovale.shtml
 
             params.ctx.fillStyle = "#fff";
-            var x = ;
-            var y = ;
-
+            var a = 2;
+            var b = 2;
+            var y = elapsed / 100;
+            var x = (Math.pow((elapsed / 100) + a, 2) * Math.pow((elapsed / 100) - a, 2)) / 100000;
+/*
+            (x^2 + y^2 + a^2)^2 - 4a^2 * x^2 = b^4
+            https://study.com/academy/lesson/how-to-plot-cassini-ovals.html
+*/
             params.ctx.fillRect(
                 x,
                 y,
