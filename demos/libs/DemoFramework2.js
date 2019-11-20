@@ -74,6 +74,11 @@
                 stage: app.stage
             };
 
+        } else if (window.TYPE === "none") {
+
+            this.stage = document.querySelector("body");
+            this.passParams = {};
+
         } else {
 
             this.canvas =
