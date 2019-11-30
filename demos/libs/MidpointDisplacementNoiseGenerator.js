@@ -11,7 +11,20 @@ let MidpointDisplacementNoiseGenerator = function (mapDimension, roughness, unit
     this.ctx = this.canvas.getContext("2d");
     this.canvas.width = this.mapDimension * this.blockSize;
     this.canvas.height = this.mapDimension * this.blockSize;
+    this.rendered = false;
+    this.cachedValues = {};
 };
+
+MidpointDisplacementNoiseGenerator.prototype.getValue = function (x, y) {
+
+    if (!this.rendered)
+        this.draw(0, 0, 0);
+
+    if (!this.cachedValues.hasOwnProperty(x + "_" + y))
+        this.cachedValues[x + "_" + y] = this.ctx.getImageData(x, y, 1, 1).data[0];
+        
+    return this.cachedValues[x + "_" + y];
+}
 
 MidpointDisplacementNoiseGenerator.prototype.draw = function (offsetX, offsetY, heightOffset) {
 
@@ -66,6 +79,7 @@ MidpointDisplacementNoiseGenerator.prototype.draw = function (offsetX, offsetY, 
         this.render(0, 0, this.mapDimension, this.mapDimension, offsetX, offsetY, false, false, heightOffset);
     }
 
+    this.rendered = true;
     return this.canvas;
 };
 
