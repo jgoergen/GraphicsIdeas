@@ -50,16 +50,16 @@
 
         // code to run before update looping starts.
 
-        function init(ctx) {
+        function init(params) {
             
             return new Promise(
                 function(resolve, reject) {
 
-                    localCtxReference = ctx;
+                    localCtxReference = params.ctx;
                     lastTime = new Date();
                     elapsed = Math.random() * 10000;
 
-                    ctx.lineWidth = 1;
+                    localCtxReference.lineWidth = 1;
                     map = generateMap();
                     resolve();
                 });
@@ -67,16 +67,16 @@
 
         // code to run every frame.
 
-        function update(ctx) {
+        function update(params) {
 
             date = new Date();
             elapsed += date - lastTime;
             lastTime = date;
             
-            //ctx.clearRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
-            ctx.fillStyle="rgba(255,255,255," + CELL_FADE + ")";
-            ctx.fillRect(0,0,CELLS_X * CELL_SIZE,CELLS_Y * CELL_SIZE);            
-            ctx.fillStyle = "rgba(0,0,0,1)";
+            //localCtxReference.clearRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
+            localCtxReference.fillStyle="rgba(255,255,255," + CELL_FADE + ")";
+            localCtxReference.fillRect(0,0,CELLS_X * CELL_SIZE,CELLS_Y * CELL_SIZE);            
+            localCtxReference.fillStyle = "rgba(0,0,0,1)";
             
             // run step
             for (var y = 0; y < map.length; y++)     

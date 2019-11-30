@@ -1,0 +1,1 @@
+make a function in the noise library ( if there isn't one, make one ) that lets you get random numebrs based on noise. These should support looping, range, number of entries and maybe something involving the x / y movement accross the noise table.

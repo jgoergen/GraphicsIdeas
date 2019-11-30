@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <script src="../../../libs/DemoFramework.js" type="text/javascript"></script>
+        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
         <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
         <script src="../../../libs/2DLib/Vector2D.js" type="text/javascript"></script>
         <script src="../../../libs/2DLib/Line2D.js" type="text/javascript"></script>
@@ -35,14 +35,15 @@
         var CANVAS_WIDTH = 1600;
         var CANVAS_HEIGHT = 1200;
         var FPS = 60;
-        var RAY_COUNT = Math.ceil(Math.random() * 400) + 200;
-        var PARTICLE_COUNT = Math.ceil(Math.random() * 10);
-        var WALL_COUNT = Math.ceil(Math.random() * 20);
+
+        var RAY_COUNT = Math.ceil(Math.random() * 400) + 300;
+        var PARTICLE_COUNT = Math.ceil(Math.random() * 7) + 2;
+        var WALL_COUNT = Math.ceil(Math.random() * 6) + 2;
         var RAY_THICKNESS = Math.ceil(Math.random() * 4);
-        var MOVE_SPEED = (Math.random() * 20) + 2;
+        var MOVE_SPEED = (Math.random() * 5) + 2;
         var ROTATE_SPEED = (Math.random() * 1) + 0.1;
-        var CLEAR_STRENGTH = Math.random() * 0.4;
-        var MAX_RAY_BRIGHTNESS = (Math.random() * 0.8) + 0.2;
+        var CLEAR_STRENGTH = (Math.random() * 0.2) + 0.01;
+        var MAX_RAY_BRIGHTNESS = (Math.random() * 0.2) + 0.1;
 
         /////////////////////////////////////////////////////////
 
