@@ -1,0 +1,13 @@
+Would be nice if the framework had options to automatically add the needed canvas or whatever to the page, this would also let you tell it what element to add your thing inside of.
+
+a fullscreen option would be nice
+
+disabling autorotation: https://stackoverflow.com/questions/5298467/prevent-orientation-change-in-ios-safari
+
+changing it so each demo is ONLY a js file that gets basically 'imported' by the framework so there was no poluting of window
+
+make a PWA SPA page to run the demos and include a demo browser
+    
+    optional dynamic controls for all the dynamic settings 
+
+    export a demo with dynamic settings locked in as a single js file with minified framework and minified demo built in ( so it can be used on a webpage )
