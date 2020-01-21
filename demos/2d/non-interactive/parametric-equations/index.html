@@ -3,12 +3,27 @@
 <head>
 
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="IE=edge"
+    >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+        http-equiv="ScreenOrientation"
+        content="autoRotate:disabled"
+    >
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    />
 
-    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script
+        src="../../../libs/DemoFramework2.js"
+        type="text/javascript"
+    ></script>
 
     <title></title>
 
@@ -25,7 +40,11 @@
 </head>
 
 <body>
-    <canvas id="canvas" width="300" height="300"></canvas>
+    <canvas
+        id="canvas"
+        width="300"
+        height="300"
+    ></canvas>
 </body>
 
 <script type="text/javascript">
@@ -34,14 +53,14 @@
 
     // put any adjustable settings here that would be interesting to tinker with.
 
-    var CANVAS_WIDTH = 1920;
-    var CANVAS_HEIGHT = 1080;
+    var CANVAS_WIDTH = 1000;
+    var CANVAS_HEIGHT = 1000;
     var FPS = 60;
     var LINE_COUNT = Math.ceil(Math.random() * 200) + 2;
     var FADE_VALUE = (Math.random() * 0.2) + 0.005;
     var INCREMENT = Math.random();
-    var SCALE_X = 250;
-    var SCALE_Y = 250;
+    var SCALE_X = CANVAS_WIDTH / 4;
+    var SCALE_Y = CANVAS_HEIGHT / 4;
     var VALUE_TRANSITION_SPEED = 100;
     var SPEED = (Math.random() * 0.1) + 0.05;
     var P1_VAL = Math.floor(Math.random() * 20) + 1;
@@ -55,7 +74,7 @@
         function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time * SPEED) * (scaleX / (P2 / 2)); },
         function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.cos(time * SPEED) * scaleX + Math.cos(time * SPEED) * scaleY) * P4; },
         function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.sin(time * SPEED) * (scaleX / P2) + Math.sin(time * SPEED) * (scaleY / P5)) * P4; },
-        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.sin(time / SPEED) * scaleY, P5 / 3); },
+        //function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.sin(time / SPEED) * scaleY, P5 / 3); },
         function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time * SPEED) * (scaleY * P5); },
         function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time * SPEED) * (scaleX / P4_VAL) + Math.sin(time * SPEED) * P3_VAL; }
     ];
@@ -67,7 +86,8 @@
     var FORMULA2 = PARAMETRIC_FORMULAS[f2Index];
     var FORMULA3 = PARAMETRIC_FORMULAS[f3Index];
     var FORMULA4 = PARAMETRIC_FORMULAS[f4Index];
-    console.log(f1Index, f2Index, f3Index, f4Index);
+    var ROTATION = Math.random() * 360;
+    var SCALE = (Math.random() * 5) + 0.4;
 
     /////////////////////////////////////////////////////////
 
@@ -83,6 +103,8 @@
     var actualLineCount = LINE_COUNT;
     var actualFadeAmount = FADE_VALUE;
     var actualIncrement = INCREMENT;
+    var actualRotation = ROTATION;
+    var actualScale = SCALE;
 
     // code to run before update looping starts.
 
@@ -93,6 +115,12 @@
 
                 lastTime = new Date();
                 elapsed = Math.random() * 10000;
+                params.ctx.save();
+                params.ctx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+                params.ctx.rotate(actualRotation * Math.PI / 180);
+                params.ctx.scale(actualScale, actualScale);
+                params.ctx.translate(-(CANVAS_WIDTH / 2), -(CANVAS_HEIGHT / 2));
+                params.ctx.restore();
                 resolve(FPS);
             });
     }
@@ -109,6 +137,12 @@
         params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         params.ctx.strokeStyle = "#fff";
 
+        params.ctx.save();
+        params.ctx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+        params.ctx.rotate(actualRotation * Math.PI / 180);
+        params.ctx.scale(actualScale, actualScale);
+        params.ctx.translate(-(CANVAS_WIDTH / 2), -(CANVAS_HEIGHT / 2));
+
         for (var i = 0; i < actualLineCount; i++) {
 
             var x1 = FORMULA1((elapsed * actualSpeed) + (i * actualIncrement), SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) + 1;
@@ -122,21 +156,24 @@
             params.ctx.stroke();
         }
 
-        if (Math.random() < 0.01) {
+        params.ctx.restore();
 
-            switch (Math.floor(Math.random() * 11)) {
+        if (Math.random() < 0.02) {
+
+            switch (Math.floor(Math.random() * 13)) {
+
                 case 0:
-                    var d = Math.floor(Math.random() * 2);
+                    var d = Math.floor(Math.random() * 2) + 1;
                     var f = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
                     window["FORMULA" + d] = PARAMETRIC_FORMULAS[f];
-                    console.log("d => " + f);
+                    console.log(d + " => " + f);
                     break;
 
                 case 1:
-                    var d = (Math.floor(Math.random() * 2) + 2);
+                    var d = (Math.floor(Math.random() * 2) + 2) + 1;
                     var f = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
                     window["FORMULA" + d] = PARAMETRIC_FORMULAS[f];
-                    console.log("d => " + f);
+                    console.log(d + " => " + f);
                     break;
 
                 case 2:
@@ -174,6 +211,16 @@
                 case 10:
                     INCREMENT = Math.random();
                     break;
+
+                case 11:
+                    ROTATION = Math.random() * 360;
+                    console.log("ROT ", ROTATION);
+                    break;
+
+                case 12:
+                    SCALE = (Math.random() * 5) + 0.4;
+                    console.log("SCL ", SCALE);
+                    break;
             }
         }
 
@@ -203,6 +250,12 @@
 
         if (INCREMENT != actualIncrement)
             actualIncrement += (INCREMENT - actualIncrement) / VALUE_TRANSITION_SPEED;
+
+        if (ROTATION != actualRotation)
+            actualRotation += (ROTATION - actualRotation) / VALUE_TRANSITION_SPEED;
+
+        if (SCALE != actualScale)
+            actualScale += (SCALE - actualScale) / VALUE_TRANSITION_SPEED;
     }
 
 </script>
