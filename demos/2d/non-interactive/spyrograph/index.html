@@ -1,99 +1,137 @@
 <html>
-    <head>
 
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+<head>
 
-        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <meta charset="utf-8" />
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="IE=edge"
+    >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+        http-equiv="ScreenOrientation"
+        content="autoRotate:disabled"
+    >
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    />
 
-        <title></title>
+    <script
+        src="../../../libs/DemoFramework2.js"
+        type="text/javascript"
+    ></script>
 
-        <style type="text/css">
+    <script
+        src="../../../libs/MathHelperFunctions.js"
+        type="text/javascript"
+    ></script>
 
-            body { background-color: black; }
-            canvas { border: 1px solid #ccc; width: 100%; }
+    <title></title>
 
-        </style>
-    </head>
-    <body>
-        <canvas id="canvas" width="300" height="300"></canvas>
-    </body>
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
 
-    <script type="text/javascript">
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+</head>
 
-        /// Settings ////////////////////////////////////////////
+<body>
+    <canvas
+        id="canvas"
+        width="300"
+        height="300"
+    ></canvas>
+</body>
 
-        // put any adjustable settings here that would be interesting to tinker with.
+<script type="text/javascript">
 
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 800;
-        var FPS = 60;
+    /// Settings ////////////////////////////////////////////
 
-        var MAX_DRAW_ROUNDS = 1100; 
-        var MIN_DRAW_ROUNDS = 500;
-        var MAX_FADE_AMOUNT = 0.1;
-        var MIN_FADE_AMOUNT = 0;
-        var MAX_WIDTH = CANVAS_WIDTH;
-        var MAX_HEIGHT = CANVAS_HEIGHT;
-        var MAX_JOINTS = 3;
-        var MIN_JOINTS = 2;
-        var MAX_ARM_LENGTH = 1000;
-        var MIN_ARM_LENGTH = -1000;
-        var MAX_ANGLE_CHANGE = 10;
-        var MIN_ANGLE_CHANGE = -10;
-        var MOVE_SPEED = 1;
-        var STARTING_THICKNESS = 1;
-        var MAX_ARM_DEVISOR = 0.7;
-        var MIN_ARM_DEVISOR = 0.01;
-        var R_ADJUST = (Math.random() * 2) - 1;
-        var G_ADJUST = (Math.random() * 2) - 1;
-        var B_ADJUST = (Math.random() * 2) - 1;
+    // put any adjustable settings here that would be interesting to tinker with.
 
-        /////////////////////////////////////////////////////////
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 800;
+    var FPS = 60;
 
-        var localCtxReference = undefined;
-        var lastTime = 0;
-        var date = undefined;
-        var elapsed = 0;
+    var MAX_DRAW_ROUNDS = 1100;
+    var MIN_DRAW_ROUNDS = 500;
+    var MAX_FADE_AMOUNT = 0.05;
+    var MIN_FADE_AMOUNT = 0.001;
+    var MAX_WIDTH = CANVAS_WIDTH;
+    var MAX_HEIGHT = CANVAS_HEIGHT;
+    var MAX_JOINTS = 3;
+    var MIN_JOINTS = 2;
+    var MAX_ARM_LENGTH = 1000;
+    var MIN_ARM_LENGTH = -1000;
+    var MAX_ANGLE_CHANGE = 2;
+    var MIN_ANGLE_CHANGE = -2;
+    var MOVE_SPEED = 1;
+    var STARTING_THICKNESS = 4;
+    var MAX_ARM_DEVISOR = 0.7;
+    var MIN_ARM_DEVISOR = 0.01;
+    var R_ADJUST = (Math.random() * 2) - 1;
+    var G_ADJUST = (Math.random() * 2) - 1;
+    var B_ADJUST = (Math.random() * 2) - 1;
+    var MAX_X_MOD = 1;
+    var MIN_X_MOD = -1;
+    var MAX_Y_MOD = 1;
+    var MIN_Y_MOD = -1;
 
-        var baseX, baseY, r, g, b, stopX, stopY;
-        var oldX = undefined, oldY = undefined;
-        var finish = false;
-        var joints = new Array();
-        var drawRounds = 1;
-        var newDrawRounds = 1;
-        var fadeAmount = 1;
-        var newFadeAmount = 1;
+    /////////////////////////////////////////////////////////
 
-        // code to run before update looping starts.
+    var localCtxReference = undefined;
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
 
-        function init(params) {
-            
-            return new Promise(
-                function(resolve, reject) {
-                            
-                    console.log("Init");
-                    localCtxReference = params.ctx;
-                    localCtxReference.fillStyle = "white";
-                    lastTime = new Date();
-                    elapsed = Math.random() * 10000;
+    var baseX, baseY, r, g, b, stopX, stopY;
+    var oldX = undefined, oldY = undefined;
+    var finish = false;
+    var joints = new Array();
+    var drawRounds = 1;
+    var newDrawRounds = 1;
+    var fadeAmount = 1;
+    var newFadeAmount = 1;
+    var xMod = 1;
+    var yMod = 1;
+    var targetXMod = xMod;
+    var targetYMod = yMod;
 
-                    params.ctx.lineStyle = "#fff";
-                    params.ctx.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+    // code to run before update looping starts.
 
-                    r = Math.floor(Math.random() * 255);
-                    g = Math.floor(Math.random() * 255);
-                    b = Math.floor(Math.random() * 255);
+    function init(params) {
 
-                    baseX = MAX_WIDTH / 2;
-                    baseY = MAX_HEIGHT / 2;
+        return new Promise(
+            function (resolve, reject) {
 
-                    for (var i = 0; i <= MAX_JOINTS; i++) {
+                console.log("Init");
+                localCtxReference = params.ctx;
+                localCtxReference.fillStyle = "white";
+                lastTime = new Date();
+                elapsed = Math.random() * 10000;
 
-                        joints
+                params.ctx.lineStyle = "#fff";
+                params.ctx.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+
+                r = Math.floor(Math.random() * 255);
+                g = Math.floor(Math.random() * 255);
+                b = Math.floor(Math.random() * 255);
+
+                baseX = MAX_WIDTH / 2;
+                baseY = MAX_HEIGHT / 2;
+
+                for (var i = 0; i <= MAX_JOINTS; i++) {
+
+                    joints
                         .push({
                             armLength: 0,
                             angleChangeRate: 0,
@@ -101,203 +139,238 @@
                             newArmLength: 0,
                             newAngleChangeRate: 0,
                         });
-                    }
+                }
 
-                    setupNewJoints();
-                    
-                    resolve(FPS);
-                });
-        }
-
-        // code to run every frame.
-
-        function update(params) {
-
-            date = new Date();
-            elapsed += date - lastTime;
-            lastTime = date;
-
-            if (finish == true)
-                return;
-
-            r += R_ADJUST;
-            g += G_ADJUST;
-            b += B_ADJUST;
-
-            if (r < 100 || r > 255)
-                R_ADJUST *= -1;
-
-            if (g < 50 || g > 255)
-                G_ADJUST *= -1;
-
-            if (b < 1 || b > 255)
-                B_ADJUST *= -1;
-
-            if (Math.floor(Math.random() * 600) == 5)
                 setupNewJoints();
 
-            for (var i = 0; i < joints.length; i++) {
+                resolve(FPS);
+            });
+    }
 
-                if (joints[i].armLength != joints[i].newArmLength)
-                    joints[i].armLength += (joints[i].newArmLength - joints[i].armLength) * 0.001;
+    // code to run every frame.
 
-                if (joints[i].angleChangeRate != joints[i].newAngleChangeRate)
-                    joints[i].angleChangeRate += (joints[i].newAngleChangeRate - joints[i].angleChangeRate) / 300;
+    function update(params) {
 
-                if (drawRounds != newDrawRounds)
-                    drawRounds += (newDrawRounds - drawRounds) / 300;
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
 
-                if (fadeAmount != newFadeAmount)
-                    fadeAmount += (newFadeAmount - fadeAmount) / 1000;
-            }
+        if (finish == true)
+            return;
 
-            //ctx.clearRect(0, 0, 300, 300);
-            var alpha = 1;
-            params.ctx.lineWidth = STARTING_THICKNESS;
+        r += R_ADJUST;
+        g += G_ADJUST;
+        b += B_ADJUST;
 
-            params.ctx.fillStyle = "rgba(0,0,0," + fadeAmount + ")";
-            params.ctx.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+        if (r < 100 || r > 255)
+            R_ADJUST *= -1;
 
-            params.ctx.fillStyle = "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + alpha + ")";
-            params.ctx.strokeStyle = "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + alpha + ")";
+        if (g < 50 || g > 255)
+            G_ADJUST *= -1;
 
-            params.ctx.beginPath();
+        if (b < 1 || b > 255)
+            B_ADJUST *= -1;
 
-            for (var i = 0; i < drawRounds; i++)
-                draw(params.ctx);
+        if (Math.floor(Math.random() * 600) == 5)
+            setupNewJoints();
 
-            ctx.stroke();
+        for (var i = 0; i < joints.length; i++) {
+
+            if (joints[i].armLength != joints[i].newArmLength)
+                joints[i].armLength += (joints[i].newArmLength - joints[i].armLength) * 0.001;
+
+            if (joints[i].angleChangeRate != joints[i].newAngleChangeRate)
+                joints[i].angleChangeRate += (joints[i].newAngleChangeRate - joints[i].angleChangeRate) / 300;
+
+            if (drawRounds != newDrawRounds)
+                drawRounds += (newDrawRounds - drawRounds) / 300;
+
+            if (fadeAmount != newFadeAmount)
+                fadeAmount += (newFadeAmount - fadeAmount) / 1000;
         }
 
-        function draw(ctx) {
+        var a = Math.cos((elapsed / 4000) / 2) * 100;
+        var b = Math.cos(elapsed / 3000) * (a / 100);
 
-            // process each joint to get the final x/y
-            var x = baseX;
-            var y = baseY;
-            var lastAngle = 0;
-            var initialMatches = 0;
+        params.ctx.drawImage(
+            canvas,
+            b,
+            b,
+            CANVAS_WIDTH + (b / 10),
+            CANVAS_HEIGHT + (b / 10));
 
-            for (var i = 0; i < joints.length; i++) {
+        //ctx.clearRect(0, 0, 300, 300);
+        var alpha = 1;
+        params.ctx.lineWidth = STARTING_THICKNESS;
+        params.ctx.fillStyle = "rgba(0,0,0," + fadeAmount + ")";
+        params.ctx.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
 
-                joints[i].angle += joints[i].angleChangeRate;
+        params.ctx.fillStyle = "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + alpha + ")";
+        params.ctx.strokeStyle = "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + alpha + ")";
 
-                if (joints[i].angle > 360)
-                    joints[i].angle = 0;
+        params.ctx.beginPath();
 
-                x += Math.cos((joints[i].angle + lastAngle) * (Math.PI / 180)) * joints[i].armLength;
-                y += Math.sin((joints[i].angle + lastAngle) * (Math.PI / 180)) * joints[i].armLength;
+        for (var i = 0; i < drawRounds; i++)
+            draw(params.ctx);
 
-                lastAngle = joints[i].angle;
-            }
+        ctx.stroke();
 
-            drawPoint(ctx, x, y);
+        if (Math.random() < 0.01) {
 
-            if (stopX == undefined) {
+            var newXMod = MathHelperFunctions.GetRandom(MIN_X_MOD, MAX_X_MOD);
+            var newYMod = MathHelperFunctions.GetRandom(MIN_Y_MOD, MAX_Y_MOD);
 
-                stopX = x;
-                stopY = y;
-            } else if (stopX == x && stopY == y) {
-                finish = true;
-            }
+            if (newXMod > 0.5 || newXMod < -0.5)
+                targetXMod = newXMod;
+
+            if (newYMod > 0.5 || newYMod < -0.5)
+                targetYMod = newYMod;
         }
 
-        function drawPoint(ctx, _x, _y) {
+        if (xMod != targetXMod) {
+            xMod += (targetXMod - xMod) / 200;
+        }
 
-            if (!oldX) {
-                oldX = _x;
-                oldY = _y;
-            }
+        if (yMod != targetYMod) {
+            yMod += (targetYMod - yMod) / 200;
+        }
+    }
 
-            //ctx.fillRect(_x - 3, _y - 3, 6, 6);
-            ctx.moveTo(oldX, oldY);
-            ctx.lineTo(_x, _y);
+    function draw(ctx) {
 
+        // process each joint to get the final x/y
+        var x = baseX;
+        var y = baseY;
+        var lastAngle = 0;
+        var initialMatches = 0;
+
+        for (var i = 0; i < joints.length; i++) {
+
+            joints[i].angle += (joints[i].angleChangeRate);
+
+            if (joints[i].angle > 360)
+                joints[i].angle = 0;
+
+            x += Math.cos((joints[i].angle + lastAngle) * (Math.PI / 180)) * joints[i].armLength;
+            y += Math.sin((joints[i].angle + lastAngle) * (Math.PI / 180)) * joints[i].armLength;
+
+            lastAngle = joints[i].angle;
+        }
+
+        drawPoint(ctx, x, y);
+
+        if (stopX == undefined) {
+
+            stopX = x;
+            stopY = y;
+        } else if (stopX == x && stopY == y) {
+            finish = true;
+        }
+    }
+
+    function drawPoint(ctx, _x, _y) {
+
+        if (!oldX) {
             oldX = _x;
             oldY = _y;
         }
-        
-        function setupNewJoints() {
 
-            // build up joints
-            var joinCount = Math.ceil((Math.random() * (MAX_JOINTS - MIN_JOINTS)) + MIN_JOINTS);
-            var armLength = (Math.random() * (MAX_ARM_LENGTH - MIN_ARM_LENGTH)) + MIN_ARM_LENGTH;
-            var devisor = (Math.random() * (MAX_ARM_DEVISOR - MIN_ARM_DEVISOR)) + MIN_ARM_DEVISOR
+        //ctx.fillRect(_x - 3, _y - 3, 6, 6);
+        ctx.moveTo(
+            (oldX * xMod) + ((CANVAS_WIDTH / 2) * (1 - xMod)),
+            (oldY * yMod) + ((CANVAS_HEIGHT / 2) * (1 - yMod)));
 
-            for (var i = 0; i < MAX_JOINTS; i++) {
+        ctx.lineTo(
+            (_x * xMod) + ((CANVAS_WIDTH / 2) * (1 - xMod)),
+            (_y * yMod) + ((CANVAS_HEIGHT / 2) * (1 - yMod)));
 
-                joints[i].newArmLength = i < joinCount ? armLength : 0;
-                joints[i].newAngleChangeRate = i < joinCount ? (Math.random() * (MAX_ANGLE_CHANGE - MIN_ANGLE_CHANGE)) + MIN_ANGLE_CHANGE : 0;
+        oldX = _x;
+        oldY = _y;
+    }
 
-                armLength *= devisor;
-                //armLength = (Math.random() * (MAX_ARM_LENGTH - MIN_ARM_LENGTH)) + MIN_ARM_LENGTH;
-            }
+    function setupNewJoints() {
 
-            R_ADJUST = (Math.random() * 4) - 2;
-            G_ADJUST = (Math.random() * 4) - 2;
-            B_ADJUST = (Math.random() * 4) - 2;
+        // build up joints
+        var joinCount = Math.ceil((Math.random() * (MAX_JOINTS - MIN_JOINTS)) + MIN_JOINTS);
+        var armLength = (Math.random() * (MAX_ARM_LENGTH - MIN_ARM_LENGTH)) + MIN_ARM_LENGTH;
+        var devisor = (Math.random() * (MAX_ARM_DEVISOR - MIN_ARM_DEVISOR)) + MIN_ARM_DEVISOR
 
-            newDrawRounds = (Math.random() * (MAX_DRAW_ROUNDS - MIN_DRAW_ROUNDS)) + MIN_DRAW_ROUNDS;
-            newFadeAmount = (Math.random() * (MAX_FADE_AMOUNT - MIN_FADE_AMOUNT)) + MIN_FADE_AMOUNT;
+        for (var i = 0; i < MAX_JOINTS; i++) {
+
+            joints[i].newArmLength = i < joinCount ? armLength : 0;
+            joints[i].newAngleChangeRate = i < joinCount ? (Math.random() * (MAX_ANGLE_CHANGE - MIN_ANGLE_CHANGE)) + MIN_ANGLE_CHANGE : 0;
+
+            armLength *= devisor;
+            //armLength = (Math.random() * (MAX_ARM_LENGTH - MIN_ARM_LENGTH)) + MIN_ARM_LENGTH;
         }
 
-        // code to run when the user tilts a device ( where available )
+        R_ADJUST = (Math.random() * 4) - 2;
+        G_ADJUST = (Math.random() * 4) - 2;
+        B_ADJUST = (Math.random() * 4) - 2;
 
-        function tilt(e) {
-            
-            // x = e.gamma, y = e.beta, z = e.alpha
+        newDrawRounds = (Math.random() * (MAX_DRAW_ROUNDS - MIN_DRAW_ROUNDS)) + MIN_DRAW_ROUNDS;
+        newFadeAmount = (Math.random() * (MAX_FADE_AMOUNT - MIN_FADE_AMOUNT)) + MIN_FADE_AMOUNT;
+    }
+
+    // code to run when the user tilts a device ( where available )
+
+    function tilt(e) {
+
+        // x = e.gamma, y = e.beta, z = e.alpha
+    }
+
+    // code to run when user presses primary mouse button ( or first finger. )
+
+    function mouseDown(e) {
+
+        //e.x e.y e.speed
+        console.log("Mouse Down");
+    }
+
+    // code to run when user raises primary mouse button ( or first finger. )
+
+    function mouseUp(e) {
+
+        //e.x e.y e.speed
+        console.log("Mouse Up");
+    }
+
+    // code to run when user moves primary mouse button ( or first finger. )
+
+    function mouseMove(e, isMouseDown) {
+
+        //e.x e.y e.speed
+        if (isMouseDown) {
+
+            console.log("Mouse Move");
+            localCtxReference.fillRect(e.x, e.y, e.speed, e.speed);
         }
+    }
 
-        // code to run when user presses primary mouse button ( or first finger. )
+    // code to run when user presses secondary mouse button ( or second finger. )
 
-        function mouseDown(e) {
+    function secondaryMouseDown(e) {
 
-            //e.x e.y e.speed
-            console.log("Mouse Down");
-        }
+        //e.x e.y e.speed
+        console.log("Secondary Mouse Down");
+    }
 
-        // code to run when user raises primary mouse button ( or first finger. )
+    // code to run when user raises secondary mouse button ( or second finger. )
 
-        function mouseUp(e) {
+    function secondaryMouseUp(e) {
 
-            //e.x e.y e.speed
-            console.log("Mouse Up");
-        }
+        //e.x e.y e.speed
+        console.log("Secondary Mouse Up");
+    }
 
-        // code to run when user moves primary mouse button ( or first finger. )
+    // code to run when user moves secondary mouse button ( or second finger. )
 
-        function mouseMove(e, isMouseDown) {
+    function secondaryMouseMove(e) {
 
-            //e.x e.y e.speed
-            if (isMouseDown) {
+        //e.x e.y e.speed
+        console.log("Secondary Mouse Move");
+    }
 
-                console.log("Mouse Move");
-                localCtxReference.fillRect(e.x, e.y, e.speed, e.speed);
-            }
-        }
+</script>
 
-        // code to run when user presses secondary mouse button ( or second finger. )
-
-        function secondaryMouseDown(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Down");
-        }
-
-        // code to run when user raises secondary mouse button ( or second finger. )
-
-        function secondaryMouseUp(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Up");
-        }
-
-        // code to run when user moves secondary mouse button ( or second finger. )
-
-        function secondaryMouseMove(e) {
-
-            //e.x e.y e.speed
-            console.log("Secondary Mouse Move");
-        }
-
-    </script>
 </html>

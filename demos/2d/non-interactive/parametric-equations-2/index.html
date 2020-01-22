@@ -1,0 +1,367 @@
+<html>
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="IE=edge"
+    >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+        http-equiv="ScreenOrientation"
+        content="autoRotate:disabled"
+    >
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    />
+
+    <script
+        src="../../../libs/DemoFramework2.js"
+        type="text/javascript"
+    ></script>
+
+    <title></title>
+
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas
+        id="canvas"
+        width="300"
+        height="300"
+    ></canvas>
+</body>
+
+<script type="text/javascript">
+
+    /// Settings ////////////////////////////////////////////
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var CANVAS_WIDTH = 2000;
+    var CANVAS_HEIGHT = 2000;
+    var FPS = 60;
+    var LINE_COUNT = Math.ceil(Math.random() * 100) + 2;
+    var FADE_VALUE = (Math.random() * 0.01) + 0.005;
+    var INCREMENT = Math.random() / 5;
+    var SCALE_X = CANVAS_WIDTH / 4;
+    var SCALE_Y = CANVAS_HEIGHT / 4;
+    var VALUE_TRANSITION_SPEED = 5000;
+    var SPEED = (Math.random() * 0.001) + 0.00001;
+    var P1_VAL = (Math.random() * 20) - 40;
+    var P2_VAL = (Math.random() * 20) - 40;
+    var P3_VAL = (Math.random() * 20) - 40;
+    var P4_VAL = Math.random() + 1;
+    var P5_VAL = (Math.random() * 5) + 1;
+    var PARAMETRIC_FORMULAS = [
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.sin(time) * (scaleX / P2) * Math.cos(time) * (scaleY / P5)); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.tan(time) * (scaleX / (P2)) / 2; },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.cos(time) * (scaleX / (P3 * 3)), 6) * (scaleX / (P3 * 2)); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.sin(time) * P5, 5); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time) * (scaleX / P1); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.cos(time) * (scaleX / (P3 * 3)), 3); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time) * (scaleX / (P2 / 2)) * P5; },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.cos(time) * scaleX + Math.cos(time) * scaleY) * P4; },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.sin(time) * (scaleX / P2) + Math.sin(time) * (scaleY / P5)) * P4; },
+        //function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.sin(time) * scaleY, P5 / 3); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time) * (scaleY * P5); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time) * (scaleX / P4_VAL) + Math.sin(time) * P3_VAL; }
+    ];
+    var f1Index = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
+    var f2Index = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
+    var f3Index = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
+    var f4Index = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
+    var FORMULA1 = PARAMETRIC_FORMULAS[f1Index];
+    var FORMULA2 = PARAMETRIC_FORMULAS[f2Index];
+    var FORMULA3 = PARAMETRIC_FORMULAS[f3Index];
+    var FORMULA4 = PARAMETRIC_FORMULAS[f4Index];
+    var ROTATION = Math.random() * 360;
+    var SCALE = (Math.random() * 5) + 0.4;
+    var R_SPEED = (Math.random() * 2) - 1;
+    var G_SPEED = (Math.random() * 2) - 1;
+    var B_SPEED = (Math.random() * 2) - 1;
+    var R_DIVISOR = (Math.random() * 0.05) + 0.001;
+    var G_DIVISOR = (Math.random() * 0.05) + 0.001;
+    var B_DIVISOR = (Math.random() * 0.05) + 0.001;
+    var WIDTH_MOD = (Math.random() * 2) - 4;
+    var HEIGHT_MOD = (Math.random() * 2) - 4;
+    var SEPERATION = Math.random();
+
+    /////////////////////////////////////////////////////////
+
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
+    var actualP1Val = P1_VAL;
+    var actualP2Val = P2_VAL;
+    var actualP3Val = P3_VAL;
+    var actualP4Val = P4_VAL;
+    var actualP5Val = P5_VAL;
+    var actualSpeed = SPEED;
+    var actualLineCount = LINE_COUNT;
+    var actualFadeAmount = FADE_VALUE;
+    var actualIncrement = INCREMENT;
+    var actualRotation = ROTATION;
+    var actualScale = SCALE;
+    var r = Math.random() * 255;
+    var g = Math.random() * 255;
+    var b = Math.random() * 255;
+    var actualRColorDivisor = R_DIVISOR;
+    var actualGColorDivisor = G_DIVISOR;
+    var actualBColorDivisor = B_DIVISOR;
+    var actualWMod = WIDTH_MOD;
+    var actualHMod = HEIGHT_MOD;
+    var actualSeperation = SEPERATION;
+
+    // code to run before update looping starts.
+
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                lastTime = new Date();
+                elapsed = Math.random() * 10000;
+                params.ctx.save();
+                params.ctx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+                params.ctx.rotate(actualRotation * Math.PI / 180);
+                params.ctx.scale(actualScale, actualScale);
+                params.ctx.translate(-(CANVAS_WIDTH / 2), -(CANVAS_HEIGHT / 2));
+                params.ctx.restore();
+                resolve(FPS);
+            });
+    }
+
+    // code to run every frame.
+
+    function update(params) {
+
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
+
+        var a = Math.cos((elapsed / 4000) / 2) * 100;
+        var b = Math.cos(elapsed / 3000) * (a / 100);
+
+        params.ctx.drawImage(
+            canvas,
+            b,
+            b,
+            CANVAS_WIDTH + (b / 10),
+            CANVAS_HEIGHT + (b / 10));
+
+        params.ctx.fillStyle = "rgba(0, 0, 0, " + actualFadeAmount + ")";
+        params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        params.ctx.save();
+        params.ctx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+        params.ctx.rotate(actualRotation * Math.PI / 180);
+        params.ctx.scale(actualScale, actualScale);
+        params.ctx.translate(-(CANVAS_WIDTH / 2), -(CANVAS_HEIGHT / 2));
+
+        for (var i = 0; i < actualLineCount; i += actualSeperation) {
+
+            var x1 = FORMULA1(((elapsed * actualSpeed) + (i * actualIncrement)) * actualWMod, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) + 1;
+            var y1 = FORMULA2(((elapsed * actualSpeed) + (i * actualIncrement)) * actualHMod, SCALE_X, SCALE_Y, actualP2Val, actualP3Val, actualP1Val, actualP4Val, actualP5Val) + 1;
+            var x2 = FORMULA3(((elapsed * actualSpeed) + (i * actualIncrement)) * actualWMod, SCALE_X, SCALE_Y, actualP3Val, actualP1Val, actualP2Val, actualP4Val, actualP5Val) - 1;
+            var y2 = FORMULA4(((elapsed * actualSpeed) + (i * actualIncrement)) * actualHMod, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) - 1;
+
+            params.ctx.strokeStyle = "rgba(" + (r - (i * actualRColorDivisor)) + "," + (g - (i * actualGColorDivisor)) + "," + (b - (i * actualBColorDivisor)) + ", 0.4)";
+
+            params.ctx.beginPath();
+
+            params.ctx.moveTo(
+                x1 + (CANVAS_WIDTH / 2),
+                y1 + (CANVAS_HEIGHT / 2));
+
+            params.ctx.lineTo(
+                x2 + (CANVAS_WIDTH / 2),
+                y2 + (CANVAS_HEIGHT / 2));
+
+            params.ctx.stroke();
+        }
+
+        params.ctx.restore();
+
+        if (Math.random() < 0.005) {
+
+            switch (Math.floor(Math.random() * 22)) {
+
+                case 0:
+                    var d = Math.floor(Math.random() * 2) + 1;
+                    var f = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
+                    window["FORMULA" + d] = PARAMETRIC_FORMULAS[f];
+                    console.log(d + " => " + f);
+                    break;
+
+                case 1:
+                    var d = (Math.floor(Math.random() * 2) + 2) + 1;
+                    var f = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
+                    window["FORMULA" + d] = PARAMETRIC_FORMULAS[f];
+                    console.log(d + " => " + f);
+                    break;
+
+                case 2:
+                    P1_VAL = (Math.random() * 20) - 40;
+                    break;
+
+                case 3:
+                    P2_VAL = (Math.random() * 20) - 40;
+                    break;
+
+                case 4:
+                    P3_VAL = (Math.random() * 20) - 40;
+                    break;
+
+                case 5:
+                    P4_VAL = Math.random() + 1;
+                    break;
+
+                case 6:
+                    P5_VAL = (Math.random() * 5) + 1;
+                    break;
+
+                case 7:
+                    SPEED = (Math.random() * 0.001) + 0.00001;
+                    break;
+
+                case 8:
+                    LINE_COUNT = Math.ceil(Math.random() * 100) + 2;
+                    break;
+
+                case 9:
+                    FADE_VALUE = (Math.random() * 0.01) + 0.005;
+                    break;
+
+                case 10:
+                    INCREMENT = Math.random() / 5;
+                    break;
+
+                case 11:
+                    ROTATION = Math.random() * 360;
+                    break;
+
+                case 12:
+                    SCALE = (Math.random() * 5) + 0.4;
+                    break;
+
+                case 13:
+                    R_DIVISOR = (Math.random() * 0.05) + 0.001;
+                    break;
+
+                case 14:
+                    G_DIVISOR = (Math.random() * 0.05) + 0.001;
+                    break;
+
+                case 15:
+                    B_DIVISOR = (Math.random() * 0.05) + 0.001;
+                    break;
+
+                case 16:
+                    R_SPEED = (Math.random() * 2) - 1;
+                    break;
+
+                case 17:
+                    G_SPEED = (Math.random() * 2) - 1;
+                    break;
+
+                case 18:
+                    B_SPEED = (Math.random() * 2) - 1;
+                    break;
+
+                case 19:
+                    WIDTH_MOD = (Math.random() * 2) - 4;
+                    break;
+
+                case 20:
+                    HEIGHT_MOD = (Math.random() * 2) - 4;
+                    break;
+
+                case 21:
+                    SEPERATION = Math.random();
+                    break;
+            }
+        }
+
+        r += R_SPEED;
+        if (r > 255 || r < 0)
+            R_SPEED *= -1;
+
+        g += G_SPEED;
+        if (g > 255 || g < 0)
+            G_SPEED *= -1;
+
+        b += B_SPEED;
+        if (b > 255 || b < 0)
+            B_SPEED *= -1;
+
+        if (P1_VAL != actualP1Val)
+            actualP1Val += (P1_VAL - actualP1Val) / VALUE_TRANSITION_SPEED;
+
+        if (P2_VAL != actualP2Val)
+            actualP2Val += (P2_VAL - actualP2Val) / VALUE_TRANSITION_SPEED;
+
+        if (P3_VAL != actualP3Val)
+            actualP3Val += (P3_VAL - actualP3Val) / VALUE_TRANSITION_SPEED;
+
+        if (P4_VAL != actualP4Val)
+            actualP4Val += (P4_VAL - actualP4Val) / VALUE_TRANSITION_SPEED;
+
+        if (P5_VAL != actualP5Val)
+            actualP5Val += (P5_VAL - actualP5Val) / VALUE_TRANSITION_SPEED;
+
+        if (SPEED != actualSpeed)
+            actualSpeed += (SPEED - actualSpeed) / VALUE_TRANSITION_SPEED;
+
+        if (LINE_COUNT != actualLineCount)
+            actualLineCount += (LINE_COUNT - actualLineCount) / VALUE_TRANSITION_SPEED;
+
+        if (FADE_VALUE != actualFadeAmount)
+            actualFadeAmount += (FADE_VALUE - actualFadeAmount) / VALUE_TRANSITION_SPEED;
+
+        if (INCREMENT != actualIncrement)
+            actualIncrement += (INCREMENT - actualIncrement) / VALUE_TRANSITION_SPEED;
+
+        if (ROTATION != actualRotation)
+            actualRotation += (ROTATION - actualRotation) / VALUE_TRANSITION_SPEED;
+
+        if (SCALE != actualScale)
+            actualScale += (SCALE - actualScale) / VALUE_TRANSITION_SPEED;
+
+        if (R_DIVISOR != actualRColorDivisor)
+            actualRColorDivisor += (R_DIVISOR - actualRColorDivisor) / VALUE_TRANSITION_SPEED;
+
+        if (G_DIVISOR != actualGColorDivisor)
+            actualGColorDivisor += (G_DIVISOR - actualGColorDivisor) / VALUE_TRANSITION_SPEED;
+
+        if (B_DIVISOR != actualBColorDivisor)
+            actualBColorDivisor += (B_DIVISOR - actualBColorDivisor) / VALUE_TRANSITION_SPEED;
+
+        if (WIDTH_MOD != actualWMod)
+            actualWMod += (WIDTH_MOD - actualWMod) / VALUE_TRANSITION_SPEED;
+
+        if (HEIGHT_MOD != actualHMod)
+            actualHMod += (HEIGHT_MOD - actualHMod) / VALUE_TRANSITION_SPEED;
+
+        if (SEPERATION != actualSeperation)
+            actualSeperation += (SEPERATION - actualSeperation) / VALUE_TRANSITION_SPEED;
+    }
+
+</script>
+
+</html>
