@@ -56,27 +56,31 @@
     var CANVAS_WIDTH = 1000;
     var CANVAS_HEIGHT = 1000;
     var FPS = 60;
-    var LINE_COUNT = Math.ceil(Math.random() * 200) + 2;
+    var LINE_COUNT = Math.ceil(Math.random() * 3000) + 200;
     var FADE_VALUE = (Math.random() * 0.2) + 0.005;
-    var INCREMENT = Math.random();
+    var INCREMENT = Math.random() / 5;
     var SCALE_X = CANVAS_WIDTH / 4;
     var SCALE_Y = CANVAS_HEIGHT / 4;
-    var VALUE_TRANSITION_SPEED = 100;
-    var SPEED = (Math.random() * 0.1) + 0.05;
-    var P1_VAL = Math.floor(Math.random() * 20) + 1;
-    var P2_VAL = Math.floor(Math.random() * 20) + 1;
-    var P3_VAL = Math.floor(Math.random() * 20) + 1;
+    var VALUE_TRANSITION_SPEED = 500;
+    var SPEED = (Math.random() * 0.01) + 0.001;
+    var P1_VAL = (Math.random() * 20) - 40;
+    var P2_VAL = (Math.random() * 20) - 40;
+    var P3_VAL = (Math.random() * 20) - 40;
     var P4_VAL = Math.random() + 1;
     var P5_VAL = (Math.random() * 5) + 1;
     var PARAMETRIC_FORMULAS = [
-        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time * SPEED) * (scaleX / P1); },
-        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.cos(time * SPEED) * (scaleX / (P3 * 3)), 3); },
-        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time * SPEED) * (scaleX / (P2 / 2)); },
-        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.cos(time * SPEED) * scaleX + Math.cos(time * SPEED) * scaleY) * P4; },
-        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.sin(time * SPEED) * (scaleX / P2) + Math.sin(time * SPEED) * (scaleY / P5)) * P4; },
-        //function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.sin(time / SPEED) * scaleY, P5 / 3); },
-        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time * SPEED) * (scaleY * P5); },
-        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time * SPEED) * (scaleX / P4_VAL) + Math.sin(time * SPEED) * P3_VAL; }
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.sin(time) * (scaleX / P2) * Math.cos(time) * (scaleY / P5)); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.tan(time) * (scaleX / (P2)) / 2; },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.cos(time) * (scaleX / (P3 * 3)), 6) * (scaleX / (P3 * 2)); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.sin(time) * P5, 5); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.cos(time) * (scaleX / P1); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.cos(time) * (scaleX / (P3 * 3)), 3); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time) * (scaleX / (P2 / 2)) * P5; },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.cos(time) * scaleX + Math.cos(time) * scaleY) * P4; },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return (Math.sin(time) * (scaleX / P2) + Math.sin(time) * (scaleY / P5)) * P4; },
+        //function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.pow(Math.sin(time) * scaleY, P5 / 3); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time) * (scaleY * P5); },
+        function (time, scaleX, scaleY, P1, P2, P3, P4, P5) { return Math.sin(time) * (scaleX / P4_VAL) + Math.sin(time) * P3_VAL; }
     ];
     var f1Index = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
     var f2Index = Math.floor(Math.random() * PARAMETRIC_FORMULAS.length);
@@ -88,6 +92,14 @@
     var FORMULA4 = PARAMETRIC_FORMULAS[f4Index];
     var ROTATION = Math.random() * 360;
     var SCALE = (Math.random() * 5) + 0.4;
+    var R_SPEED = (Math.random() * 2) - 1;
+    var G_SPEED = (Math.random() * 2) - 1;
+    var B_SPEED = (Math.random() * 2) - 1;
+    var R_DIVISOR = (Math.random() * 0.05) + 0.001;
+    var G_DIVISOR = (Math.random() * 0.05) + 0.001;
+    var B_DIVISOR = (Math.random() * 0.05) + 0.001;
+    var WIDTH_MOD = (Math.random() * 2) - 4;
+    var HEIGHT_MOD = (Math.random() * 2) - 4;
 
     /////////////////////////////////////////////////////////
 
@@ -105,6 +117,14 @@
     var actualIncrement = INCREMENT;
     var actualRotation = ROTATION;
     var actualScale = SCALE;
+    var r = Math.random() * 255;
+    var g = Math.random() * 255;
+    var b = Math.random() * 255;
+    var actualRColorDivisor = R_DIVISOR;
+    var actualGColorDivisor = G_DIVISOR;
+    var actualBColorDivisor = B_DIVISOR;
+    var actualWMod = WIDTH_MOD;
+    var actualHMod = HEIGHT_MOD;
 
     // code to run before update looping starts.
 
@@ -145,14 +165,23 @@
 
         for (var i = 0; i < actualLineCount; i++) {
 
-            var x1 = FORMULA1((elapsed * actualSpeed) + (i * actualIncrement), SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) + 1;
-            var y1 = FORMULA2((elapsed * actualSpeed) + (i * actualIncrement), SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) + 1;
-            var x2 = FORMULA3((elapsed * actualSpeed) + (i * actualIncrement), SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) - 1;
-            var y2 = FORMULA4((elapsed * actualSpeed) + (i * actualIncrement), SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) - 1;
+            var x1 = FORMULA1(((elapsed * actualSpeed) + (i * actualIncrement)) * actualWMod, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) + 1;
+            var y1 = FORMULA2(((elapsed * actualSpeed) + (i * actualIncrement)) * actualHMod, SCALE_X, SCALE_Y, actualP2Val, actualP3Val, actualP1Val, actualP4Val, actualP5Val) + 1;
+            var x2 = FORMULA3(((elapsed * actualSpeed) + (i * actualIncrement)) * actualWMod, SCALE_X, SCALE_Y, actualP3Val, actualP1Val, actualP2Val, actualP4Val, actualP5Val) - 1;
+            var y2 = FORMULA4(((elapsed * actualSpeed) + (i * actualIncrement)) * actualHMod, SCALE_X, SCALE_Y, actualP1Val, actualP2Val, actualP3Val, actualP4Val, actualP5Val) - 1;
+
+            params.ctx.strokeStyle = "rgb(" + (r - (i * actualRColorDivisor)) + "," + (g - (i * actualGColorDivisor)) + "," + (b - (i * actualBColorDivisor)) + ")";
 
             params.ctx.beginPath();
-            params.ctx.moveTo(x1 + (CANVAS_WIDTH / 2), y1 + (CANVAS_HEIGHT / 2));
-            params.ctx.lineTo(x2 + (CANVAS_WIDTH / 2), y2 + (CANVAS_HEIGHT / 2));
+
+            params.ctx.moveTo(
+                x1 + (CANVAS_WIDTH / 2),
+                y1 + (CANVAS_HEIGHT / 2));
+
+            params.ctx.lineTo(
+                x2 + (CANVAS_WIDTH / 2),
+                y2 + (CANVAS_HEIGHT / 2));
+
             params.ctx.stroke();
         }
 
@@ -160,7 +189,7 @@
 
         if (Math.random() < 0.02) {
 
-            switch (Math.floor(Math.random() * 13)) {
+            switch (Math.floor(Math.random() * 21)) {
 
                 case 0:
                     var d = Math.floor(Math.random() * 2) + 1;
@@ -177,15 +206,15 @@
                     break;
 
                 case 2:
-                    P1_VAL = Math.floor(Math.random() * 20) + 1;
+                    P1_VAL = (Math.random() * 20) - 40;
                     break;
 
                 case 3:
-                    P2_VAL = Math.floor(Math.random() * 20) + 1;
+                    P2_VAL = (Math.random() * 20) - 40;
                     break;
 
                 case 4:
-                    P3_VAL = Math.floor(Math.random() * 20) + 1;
+                    P3_VAL = (Math.random() * 20) - 40;
                     break;
 
                 case 5:
@@ -197,11 +226,11 @@
                     break;
 
                 case 7:
-                    SPEED = (Math.random() * 0.1) + 0.05;
+                    SPEED = (Math.random() * 0.01) + 0.001;
                     break;
 
                 case 8:
-                    LINE_COUNT = Math.ceil(Math.random() * 200) + 2;
+                    LINE_COUNT = Math.ceil(Math.random() * 3000) + 200;
                     break;
 
                 case 9:
@@ -209,20 +238,62 @@
                     break;
 
                 case 10:
-                    INCREMENT = Math.random();
+                    INCREMENT = Math.random() / 5;
                     break;
 
                 case 11:
                     ROTATION = Math.random() * 360;
-                    console.log("ROT ", ROTATION);
                     break;
 
                 case 12:
                     SCALE = (Math.random() * 5) + 0.4;
-                    console.log("SCL ", SCALE);
+                    break;
+
+                case 13:
+                    R_DIVISOR = (Math.random() * 0.05) + 0.001;
+                    break;
+
+                case 14:
+                    G_DIVISOR = (Math.random() * 0.05) + 0.001;
+                    break;
+
+                case 15:
+                    B_DIVISOR = (Math.random() * 0.05) + 0.001;
+                    break;
+
+                case 16:
+                    R_SPEED = (Math.random() * 2) - 1;
+                    break;
+
+                case 17:
+                    G_SPEED = (Math.random() * 2) - 1;
+                    break;
+
+                case 18:
+                    B_SPEED = (Math.random() * 2) - 1;
+                    break;
+
+                case 19:
+                    WIDTH_MOD = (Math.random() * 2) - 4;
+                    break;
+
+                case 20:
+                    HEIGHT_MOD = (Math.random() * 2) - 4;
                     break;
             }
         }
+
+        r += R_SPEED;
+        if (r > 255 || r < 0)
+            R_SPEED *= -1;
+
+        g += G_SPEED;
+        if (g > 255 || g < 0)
+            G_SPEED *= -1;
+
+        b += B_SPEED;
+        if (b > 255 || b < 0)
+            B_SPEED *= -1;
 
         if (P1_VAL != actualP1Val)
             actualP1Val += (P1_VAL - actualP1Val) / VALUE_TRANSITION_SPEED;
@@ -256,6 +327,21 @@
 
         if (SCALE != actualScale)
             actualScale += (SCALE - actualScale) / VALUE_TRANSITION_SPEED;
+
+        if (R_DIVISOR != actualRColorDivisor)
+            actualRColorDivisor += (R_DIVISOR - actualRColorDivisor) / VALUE_TRANSITION_SPEED;
+
+        if (G_DIVISOR != actualGColorDivisor)
+            actualGColorDivisor += (G_DIVISOR - actualGColorDivisor) / VALUE_TRANSITION_SPEED;
+
+        if (B_DIVISOR != actualBColorDivisor)
+            actualBColorDivisor += (B_DIVISOR - actualBColorDivisor) / VALUE_TRANSITION_SPEED;
+
+        if (WIDTH_MOD != actualWMod)
+            actualWMod += (WIDTH_MOD - actualWMod) / VALUE_TRANSITION_SPEED;
+
+        if (HEIGHT_MOD != actualHMod)
+            actualHMod += (HEIGHT_MOD - actualHMod) / VALUE_TRANSITION_SPEED;
     }
 
 </script>
