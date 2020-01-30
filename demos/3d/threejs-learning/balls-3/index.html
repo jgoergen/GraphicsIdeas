@@ -45,8 +45,9 @@
 <script src="../../../libs/ThreeJS/postprocessing/ShaderPass.js"></script>
 <script src="../../../libs/ThreeJS/shaders/CopyShader.js"></script>
 <script src="../../../libs/ThreeJS/shaders/ConvolutionShader.js"></script>
+<script src="../../../libs/ThreeJS/shaders/LuminosityHighPassShader.js"></script>
 <script src="../../../libs/ThreeJS/postprocessing/RenderPass.js"></script>
-<script src="../../../libs/ThreeJS/postprocessing/BloomPass.js"></script>
+<script src="../../../libs/ThreeJS/postprocessing/UnrealBloomPass.js"></script>
 
 <script type="text/javascript">
 
@@ -59,18 +60,18 @@
     var CANVAS_HEIGHT = 800;
     var FPS = 60;
 
-    var CUBE_SIZE = (Math.random() * 1) + 0.4;
-    var CUBE_GAP = (Math.random() * 0.1) + 0.01;
-    var LIGHT_R = Math.floor(Math.random() * 155) + 100;
-    var LIGHT_G = Math.floor(Math.random() * 155) + 100;
-    var LIGHT_B = Math.floor(Math.random() * 155) + 100;
-    var CUBE_R = Math.floor(Math.random() * 150) + 100;
-    var CUBE_G = Math.floor(Math.random() * 150) + 100;
-    var CUBE_B = Math.floor(Math.random() * 150) + 100;
-    var BG_R = CUBE_R - 100;
-    var BG_G = CUBE_G - 100;
-    var BG_B = CUBE_B - 100;
-    var SPEED = (Math.random() * 0.3) + 0.1;
+    var ball_SIZE = (Math.random() * 0.5) + 0.4;
+    var ball_GAP = (Math.random() * 0.4) + 0.01;
+    var LIGHT_R = Math.floor(Math.random() * 5) + 250;
+    var LIGHT_G = Math.floor(Math.random() * 5) + 250;
+    var LIGHT_B = Math.floor(Math.random() * 5) + 250;
+    var ball_R = Math.floor(Math.random() * 50) + 100;
+    var ball_G = Math.floor(Math.random() * 50) + 100;
+    var ball_B = Math.floor(Math.random() * 50) + 100;
+    var BG_R = ball_R - 100;
+    var BG_G = ball_G - 100;
+    var BG_B = ball_B - 100;
+    var SPEED = (Math.random() * 0.2) + 0.1;
 
     /////////////////////////////////////////////////////////
 
@@ -78,7 +79,7 @@
     var date = undefined;
     var elapsed = 0;
     var composer = undefined;
-    var cubes = [];
+    var balls = [];
     var pointLight;
 
     // code to run before update looping starts.
@@ -88,15 +89,15 @@
         return new Promise(
             function (resolve, reject) {
 
-                var geometry = new THREE.BoxGeometry(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
-                var material = new THREE.MeshLambertMaterial({ color: new THREE.Color("rgb(" + CUBE_R + ", " + CUBE_G + ", " + CUBE_B + ")") });
+                var geometry = new THREE.SphereGeometry(ball_SIZE, 14, 14);
+                var material = new THREE.MeshLambertMaterial({ color: new THREE.Color("rgb(" + ball_R + ", " + ball_G + ", " + ball_B + ")") });
 
-                for (var x = -20; x < 20; x += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
+                for (var x = -20; x < 20; x += (ball_SIZE + (ball_SIZE * ball_GAP))) {
 
-                    for (var y = -10; y < 10; y += (CUBE_SIZE + (CUBE_SIZE * CUBE_GAP))) {
+                    for (var y = -10; y < 10; y += (ball_SIZE + (ball_SIZE * ball_GAP))) {
 
                         var box = new THREE.Mesh(geometry, material);
-                        cubes.push(box);
+                        balls.push(box);
                         box.position.set(x, y, 0);
                         params.scene.add(box);
                     }
@@ -105,8 +106,8 @@
                 pointLight =
                     new THREE.PointLight(
                         new THREE.Color("rgb(" + LIGHT_R + ", " + LIGHT_G + ", " + LIGHT_B + ")"), // color
-                        3.5, // intensity
-                        14, // distance
+                        15.5, // intensity
+                        11, // distance
                         2); // decay
 
                 pointLight.position.z = 100;
@@ -121,11 +122,11 @@
                 params.renderer.autoClear = false;
                 composer = new THREE.EffectComposer(params.renderer);
 
-                var bloomPass = new THREE.BloomPass(
-                    1,    // strength
-                    15,   // kernel size
-                    4,    // sigma ?
-                    5,  // blur render target resolution
+                var bloomPass = new THREE.UnrealBloomPass(
+                    new THREE.Vector2(CANVAS_WIDTH, CANVAS_HEIGHT),
+                    1,
+                    1,
+                    0.991
                 );
 
                 var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
@@ -151,14 +152,16 @@
 
         pointLight.position.z = (Math.cos(adjustedElasped / 1000) * 10) - 2;
 
-        for (var index = 0; index < cubes.length; index++) {
+        params.camera.position.z = (Math.cos(adjustedElasped / 1000) * 2) + 12;
 
-            cubes[index].position.x = Math.cos((adjustedElasped / 1000) + index / 10) * 6;
-            cubes[index].position.y = Math.sin((adjustedElasped / 1000) + index / 10) * 6;
-            cubes[index].position.z = Math.sin((index / 100) + (adjustedElasped / 1000)) * 10;
+        for (var index = 0; index < balls.length; index++) {
 
-            cubes[index].rotation.x = Math.sin((index / 100) + (adjustedElasped / 1000)) * 2;
-            cubes[index].rotation.y = Math.sin((adjustedElasped / 1000) + index / 10) * 1;
+            balls[index].position.x = Math.cos((adjustedElasped / 1000) + index / 10) * 6;
+            balls[index].position.y = Math.sin((adjustedElasped / 1000) + index / 10) * 6;
+            balls[index].position.z = Math.tan((index / 100) + (adjustedElasped / 1000)) * 10;
+
+            balls[index].rotation.x = Math.sin((index / 100) + (adjustedElasped / 1000)) * 2;
+            balls[index].rotation.y = Math.sin((adjustedElasped / 1000) + index / 10) * 1;
         }
 
         //params.renderer.render(params.scene, params.camera);
