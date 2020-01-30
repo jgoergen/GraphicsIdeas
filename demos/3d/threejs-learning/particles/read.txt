@@ -1,0 +1,3 @@
+check this out for how they did the particles and shaders
+
+https://codesandbox.io/embed/r3f-sparks-sbf2i

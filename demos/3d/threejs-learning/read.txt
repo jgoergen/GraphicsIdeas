@@ -1,0 +1,15 @@
+checkout the shader that does the glow on this
+https://codesandbox.io/embed/r3f-instanced-colors-8fo01
+
+how did they do the diamond shader on this?
+https://codesandbox.io/embed/r3f-moksha-f1ixt
+
+this shaderrrrr!
+https://codesandbox.io/embed/r3f-floating-diamonds-prb9t
+
+
+jesussss
+https://codesandbox.io/embed/r3f-particles-ii-pjcc1
+
+https://codesandbox.io/embed/r3f-particles-i-q4d2v
+
