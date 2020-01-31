@@ -9,4 +9,10 @@ https://codesandbox.io/embed/r3f-particles-i-q4d2v
 
 do this
 https://tympanus.net/codrops/2019/10/08/creating-a-water-like-distortion-effect-with-three-js/
+https://dev.to/maniflames/creating-a-custom-shader-in-threejs-3bhi
+https://threejsfundamentals.org/threejs/lessons/threejs-shadertoy.html
 
+
+find cool math off shadertoy   
+    this has a cool way of magnifying data towards edges
+        https://www.shadertoy.com/view/XldXRs
