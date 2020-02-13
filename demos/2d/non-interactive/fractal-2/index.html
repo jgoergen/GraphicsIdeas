@@ -1,0 +1,315 @@
+<html>
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="IE=edge"
+    >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+        http-equiv="ScreenOrientation"
+        content="autoRotate:disabled"
+    >
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    />
+
+    <script
+        src="../../../libs/DemoFramework2.js"
+        type="text/javascript"
+    ></script>
+
+    <script
+        src="../../../libs/DrawingHelperFunctions.js"
+        type="text/javascript"
+    ></script>
+
+    <title></title>
+
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas
+        id="canvas"
+        width="4000"
+        height="4000"
+    ></canvas>
+</body>
+
+<script type="text/javascript">
+
+    // https://www.dwitter.net/d/17222
+    // c.style='filter:invert(1';for(a=b=0,i=1e4;i--;a+=.3*(r-a+b*S(a*3.14)),b+=.3*(-a*b+C(a*3.14)))i&1&&(r=i*t/b&1,x.fillRect(a*1920,b*960,.2,1))
+
+    /// Settings ////////////////////////////////////////////
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var AllowContextMenu = true;
+    var CANVAS_WIDTH = 4000;
+    var CANVAS_HEIGHT = 4000;
+    var FPS = -1;
+    var SETTINGS_PACKAGE = {
+        ANIMATION_SPEED_DIVISOR: {
+            Min: 10,
+            Max: 10000
+        },
+        STEM_AMOUNT: {
+            Min: 1,
+            Max: 8,
+            TransitionFrames: 1000
+        },
+        FRACTAL_WIDTH: {
+            Min: 500,
+            Max: 3000,
+            TransitionFrames: 1000
+        },
+        FRACTAL_HEIGHT: {
+            Min: 1000,
+            Max: 5000,
+            TransitionFrames: 1000
+        },
+        FRACTAL_PIXEL_SIZE: {
+            Value: 1
+        },
+        MOD_1: {
+            Min: 0.01,
+            Max: 2,
+            TransitionFrames: 1000
+        },
+        MOD_2: {
+            Min: 0.1,
+            Max: 0.5,
+            TransitionFrames: 1000
+        },
+        POINT_COUNT: {
+            Min: 500,
+            Max: 10000,
+            TransitionFrames: 1000
+        },
+        ALPHA: {
+            Min: 0.1,
+            Max: 1
+        },
+        ROTATION: {
+            Min: 0,
+            Max: 360
+        },
+        R_SPEED: {
+            Min: 0.01,
+            Max: 0.5
+        },
+        G_SPEED: {
+            Min: 0.01,
+            Max: 0.5
+        },
+        B_SPEED: {
+            Min: 0.01,
+            Max: 0.5
+        },
+        ELAPSED_MOD_DIVISOR: {
+            Min: 10,
+            Max: 1000,
+            TransitionFrames: 1000
+        },
+        DRAW_MODE: {
+            Array: [0, 1, 2, 3]
+        }
+    };
+
+    /////////////////////////////////////////////////////////
+
+    var localCtxReference = undefined;
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
+
+    // code to run before update looping starts.
+
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                console.log("Init");
+                lastTime = new Date();
+                elapsed = Math.random() * 10000;
+
+                //params.ctx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+                //params.ctx.rotate(settings.ROTATION.Value * Math.Pi / 180);
+
+                params.ctx.fillStyle = "rgba(255,255,255," + settings.ALPHA.Value + ")";
+
+                //params.ctx.lineWidth = 1
+                //params.ctx.strokeStyle = "rgba(255,255,255," + settings.ALPHA.Value + ")";
+                //params.canvas.style = 'filter:invert(1)';
+
+                console.log(
+                    "STEM_AMOUNT", settings.STEM_AMOUNT.Value,
+                    "FRACTAL_WIDTH", settings.FRACTAL_WIDTH.Value,
+                    "FRACTAL_HEIGHT", settings.FRACTAL_HEIGHT.Value,
+                    "MOD_1", settings.MOD_1.Value,
+                    "MOD_2", settings.MOD_2.Value,
+                    "POINT_COUNT", settings.POINT_COUNT.Value,
+                    "ALPHA", settings.ALPHA.Value,
+                    "ROTATION", settings.ROTATION.Value,
+                    "ELAPSED_MOD_DIVISOR", settings.ELAPSED_MOD_DIVISOR.Value,
+                    "DRAW_MODE", settings.DRAW_MODE.Value);
+
+                resolve({
+                    fps: FPS
+                });
+            });
+    }
+
+    // code to run every frame.
+    function update(params) {
+
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
+
+        adjustedElapsed = elapsed / settings.ANIMATION_SPEED_DIVISOR.Value;
+
+        params.ctx.fillStyle =
+            "rgba(" +
+            ((Math.cos(adjustedElapsed * settings.R_SPEED.Value) + 1) * 122) + "," +
+            ((Math.sin(adjustedElapsed * settings.G_SPEED.Value + 1) + 1) * 122) + "," +
+            ((Math.cos(adjustedElapsed * settings.B_SPEED.Value + 2) + 1) * 122) + "," +
+            settings.ALPHA.Value + ")";
+
+        a = 0;
+        b = 0;
+        r = 0;
+
+        for (i = Math.floor(settings.POINT_COUNT.Value); i--;) {
+
+            a += (settings.MOD_1.Value + (adjustedElapsed / settings.ELAPSED_MOD_DIVISOR.Value)) * (r - a + b * Math.sin(a * Math.PI));
+            b += (settings.MOD_2.Value + (adjustedElapsed / settings.ELAPSED_MOD_DIVISOR.Value)) * (-a * b + Math.cos(a * Math.PI));
+            i & 1 && (r = i * adjustedElapsed / b & settings.STEM_AMOUNT.Value, drawPoint(params));
+        }
+
+        settings.STEM_AMOUNT.Update();
+        settings.FRACTAL_WIDTH.Update();
+        settings.FRACTAL_HEIGHT.Update();
+        settings.MOD_1.Update();
+        settings.MOD_2.Update();
+        settings.POINT_COUNT.Update();
+        settings.ELAPSED_MOD_DIVISOR.Update();
+    }
+
+    function drawPoint(params) {
+
+        var px = a * settings.FRACTAL_WIDTH.Value;
+        var py = b * settings.FRACTAL_HEIGHT.Value;
+
+        DrawingHelperFunctions.MirrorPixel(
+            params.ctx,
+            px,
+            py,
+            CANVAS_WIDTH,
+            CANVAS_HEIGHT,
+            settings.FRACTAL_PIXEL_SIZE.Value,
+            false,
+            false);
+
+        if (settings.DRAW_MODE.Value == 1) {
+
+            DrawingHelperFunctions.MirrorPixel(
+                params.ctx,
+                px,
+                py,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT,
+                settings.FRACTAL_PIXEL_SIZE.Value,
+                true,
+                false);
+
+        } else if (settings.DRAW_MODE.Value == 2) {
+
+            DrawingHelperFunctions.MirrorPixel(
+                params.ctx,
+                px,
+                py,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT,
+                settings.FRACTAL_PIXEL_SIZE.Value,
+                false,
+                true);
+
+        } else if (settings.DRAW_MODE.Value == 3) {
+
+            DrawingHelperFunctions.MirrorPixel(
+                params.ctx,
+                px,
+                py,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT,
+                settings.FRACTAL_PIXEL_SIZE.Value,
+                true,
+                true);
+
+        } else if (settings.DRAW_MODE.Value == 3) {
+
+            DrawingHelperFunctions.MirrorPixel(
+                params.ctx,
+                px,
+                py,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT,
+                settings.FRACTAL_PIXEL_SIZE.Value,
+                true,
+                false);
+
+            DrawingHelperFunctions.MirrorPixel(
+                params.ctx,
+                px,
+                py,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT,
+                settings.FRACTAL_PIXEL_SIZE.Value,
+                false,
+                true);
+
+            DrawingHelperFunctions.MirrorPixel(
+                params.ctx,
+                px,
+                py,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT,
+                settings.FRACTAL_PIXEL_SIZE.Value,
+                true,
+                true);
+        }
+    }
+
+    function mouseUp() {
+
+        settings.STEM_AMOUNT.Regenerate();
+        settings.FRACTAL_WIDTH.Regenerate();
+        settings.FRACTAL_HEIGHT.Regenerate();
+        settings.MOD_1.Regenerate();
+        settings.MOD_2.Regenerate();
+        settings.POINT_COUNT.Regenerate();
+        settings.ELAPSED_MOD_DIVISOR.Regenerate();
+    }
+
+</script>
+
+</html>

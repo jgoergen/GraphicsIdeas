@@ -7,67 +7,72 @@ R: Function that generates rgba-strings, usage ex.: R(255, 255, 255, 0.5)
 c: A 1920x1080 canvas.
 x: A 2D context for that canvas.
 
+https://www.dwitter.net/d/17588
+c.style.filter="blur(1vh)invert(1";for(c.width|=j=21,x.scale(9,9);j--;)for(i=99;i--;)x.arc(0,0,1.3**(j+i%2+t%2),a=(i+j)%24/4,a);x.stroke()
 
-
-
+https://www.dwitter.net/d/17223
+c.style='filter:invert(1';for(a=b=0,i=1e4;i--;a+=.3*(r-a+b*S(a*3.14)),b+=.3*(-a*b+C(a*3.14)))i&8&&(r=i*t/b&1,x.fillRect(a*1920,b*960,.2,1))
 
 https://www.dwitter.net/d/17049
-
 c.width|=0
 x.fillStyle=R(S(t)*255,0,99)
 for(i=0;i<9;)y=i/9+S(i+t+t*i/8),x.lineTo(960+(a=99*(2+S(y)+C(y*2)))*S(p=i++*.7),540+a*C(p))
 x.fill()
 
-
-
+https://www.dwitter.net/d/17584
+c.style.filter=`blur(17px)contrast(2e3%)`
+for(c.width|=i=11;i--;)x.fillRect(960+600*S(t+i),440+400*C(t+i/.6),200,200)
 
 https://www.dwitter.net/d/17035
-
 c.width=1920;for(i=0;i<33;i++)for(j=0;j<9;j++)for(k=0;k<9;k++)x.fillRect(560+99*j+66*S(i+j)*S(2*t+k+i),199+99*k+66*S(i)*C(i+k),9-4*C(t+j),9)
 
-
+https://www.dwitter.net/d/17260
+for(x.beginPath([X,Y=X,r=X]=t?d.shift():d=[666]),i=4;i--;i&&d.push([X+p/2,Y-q/2,r/2]))p=r*S(b=i*2.094),q=r*C(b),x.lineTo(X+p,Y-q);x.stroke()
 
 https://www.dwitter.net/d/16903
-
 for(x.fillRect(0,0,i=2e3,i),v=540;Y=S(b=--i**3);x.clearRect(960+v*X/d,v-v*Y/d,Z*=6,Z))Y/=Z=1.2+C(++t)*C(b),X=S(t)*C(b)/Z,d=X*X+Y*Y+.1
 
-
-
 https://www.dwitter.net/d/16836
-
 for(x.drawImage(c,-40,-22,2e3,1125),x.shadowColor=R(r=Math.random),x.shadowBlur=i=50;i--;x.fillStyle='#FFF')x.fillRect(r()*2e3,r()*1e3,2,2)
 
-
-
+https://www.dwitter.net/d/17385
+for(w=i=125;i--;)for(j=0;j<8;x.fillRect(i*20,j++?w*j+299*C((t*j*j+i/j|0)**3)/j:0,20,3e3))x.fillStyle=`hsl(${j**4-149} ${j*7}%${29*C(j)+39}%`
 
 https://www.dwitter.net/d/16912
-
 for(x.fillRect(x.globalAlpha=.1,0,i=2e3,i);r=--i*S(t/3);x.clearRect(960+r*S(a)*C(i)/z,540-r*S(i)/z,s=z>0&&6/z,s))z=1+r/2e3*C(a=i*i+t/9)*C(i)
 
-
-
+https://www.dwitter.net/d/17224
+c.style='filter:invert(1';for(a=b=0,i=1e4;i--;a+=.3*(r-a+b*S(a*3.1)),b+=.3*(-a*b+C(a*3.1)))i&8&&(r=i*t/b&3,x.fillRect(a*960,b*480+480,.2,1))
 
 https://www.dwitter.net/d/16909
-
 for(x.fillRect(N=0,0,i=2e3,i),v=540;Y=S(b=--i**3);x.clearRect(960+v*X/d,v-v*Y/d,Z*=5,Z))Y/=Z=1+C(++N)*C(b),X=S(N)*C(b)/Z,d=X*X+Y*Y+T(t)
 
-
-
+https://www.dwitter.net/d/17258
+for(i=c.width|=p=355/226;i--;x[i&5?'arc':'moveTo'](960,600-50*z,2e3/z,b=((i>>3)*2+S(i*p)-z)/8%4*p,b))z=2.5-2*t%1+(i>>7)+C(i*p)/2;x.fill()
 
 https://www.dwitter.net/d/16794
-
 for(c.width|=w=950,i=2e3;i--;)X=3*C(U=i/3)+C(V=1e6/U)*C(t),Y=(2+S(U*3+t))*S(U+t)-3,Z=S(U*2+t*9)-C(t*4)-6,x.lineTo(w+w*X/Z,w*Y/Z)
 x.stroke()
 
-
-
+https://www.dwitter.net/d/17389
+for(c.width=k=800;k--;x.fillText('⬤',X-(q=3+S(Math.hypot(393-X,227-Y)/99-t)**3*49)*S(t*6),Y+q*C(t*6)))j=k%23,X=k*1.1+j%2*13-49,Y=j*26-49
 
 https://www.dwitter.net/d/16869
-
 with(x)for(translate(i=960,540);i--;fillRect(K=S(t/3+i*6.5),K,K,K))save(restore()),rotate(i),fillStyle=R(j=S(t/2)*i*2,j*S(i%9),i),scale(j,j)
 
+https://www.dwitter.net/d/17307
+for(A=a=b=0,i=1e4;i--;x.fillRect(a*800-640,b*900,.3,1))
+r=0|(1-~t/2)*Math.random(),
+a+=(r-a/3+b*S(a*2))/1.8,
+b+=.4-b/3+C(A*2)/3-.03,
+A=a
 
-
+https://www.dwitter.net/d/17569
+c.width=99
+d=x.getImageData(0,0,40,30)
+D=d.data
+for(i=D.length;i-->0;D[K+2]=255)D[K=i*4+1]=255*S(t+i**2)
+x.putImageData(d,24,9)
 
 https://www.dwitter.net/d/16933
 
@@ -75,52 +80,74 @@ c.width|=e=144/89
 for(b=frame;n=--b/60;x.fillText(n**n|0,960+b*S(a)*C(t)/z,540+b*C(a)/z))z=1-S(a=e*b)*S(t)/3,x.font=(15/z|0)+'px"'
 throw e
 
-
+https://www.dwitter.net/d/17555
+x.strokeStyle='#2615'
+x.lineWidth=.1
+for(i=480;i-->0;x.beginPath()){x.arc(i%30*65+C(t),20+i*2.2,((t+i**.33)%6)**2,0,7);x.stroke()}
 
 https://www.dwitter.net/d/16867
-
 var s=2;for(var X=1940;X-=20;)for(var Y=1100;Y-=20;x.fillRect(X-20,Y-20,20,20))x.fillStyle=`hsl(${((X-980)**2+(Y-560)**2)**.5*t*s},99%,45% `
 
+https://www.dwitter.net/d/17459
+v=(a,b,Φ,r)=>{for(i=~r;i++;x.fillStyle=R(r/2,1e3/r))x.fillRect(a+=S(Φ),b-=C(Φ),r/59,1)
+while(r>9)v(a,b,Φ+S(b),r*=.7)}
+v(960,1050,S(t)/7,299)
 
-
+https://www.dwitter.net/d/17566
+for(k=99,c.width=i=-7;++i<9;R=a=>x.lineTo(k+a*k/(z=j-t*5%1),k*S(j+t*5&a|9)/z-50*C(t)+k))for(j=k;x.beginPath(x.stroke()),R(i),--j;R(i+1))R(i)
 
 https://www.dwitter.net/d/16798
 
 for(c.width|=w=950,i=7e3;i--;x.lineTo(w+w*X/(Z=S(U*t/i+t*3)-C(t)-7),w*Y/Z))X=9*C(U=i/3)+C(V=1e9/U)*S(t/5)*9,Y=7*S(U*U)*C(V-t)-4
 x.stroke()
 
-
+https://www.dwitter.net/d/17581
+c.style.filter=`blur(.2vh)sepia()hue-rotate(${t*5}rad)invert(`
+for(c.width=198,k=99;k=--k;x.arc(99,56,k*k,a=t*k,a));x.stroke()
 
 https://www.dwitter.net/d/16926
-
 a=t&&1+1/a;b=~~(t*60);d=Math.PI/a*2*b;x.fillText('⬤',b*S(d)+960,b*C(d)+540);throw a
 
-
+https://www.dwitter.net/d/17549
+for(c.width|=s=6,k=720;j=k%4,i=k--/4;s/=.99,x.fillStyle=`hsl(${n*j} 70%${n%9<5?0:50}%`)n=i+t*60,x.fillRect(900+C(j+t+i/99)*s,k+S(t+j)*s,i,i)
 
 
 https://www.dwitter.net/d/16871
-
 for(X=2e3;X-=20;)for(Y=1e3;Y-=20;x.fillRect(X,Y,27,27))x.fillStyle=`hsl(${((X-950)**2+(Y-560)**2)*t*t},99%,45%,.07)`
 
+https://www.dwitter.net/d/17567
+dT=(z,y,a,d)=>{if(d>0){let j=z+C(a)*d*15,k=y+S(a)*d--*15;x.moveTo(z,y);x.lineTo(j,k);dT(j,k,a-.3,d);dT(j,k,a+.3,d)}}
+dT(0,0,.8,9)
+x.stroke()
 
-
+https://www.dwitter.net/d/17412
+with(x)for(c.width|=j=1e3,scale(9,3);j--;j%5?arc(109,52+j/5,j>900?99:25,a=t+j/.63662,a):beginPath(stroke()))setLineDash([j>930?2:j>99?0:6])
 
 https://www.dwitter.net/d/16845
-
 c.width=1960;for(a=i=255;i--;f=i/10,x.fillStyle=R(a*S(f+t),a*C(f+t),a*S(f)))x.fillRect(i*100+S(t+i/5)*a-a,0,50+50*C(t+i/5),2e3)
 
-
-
+https://www.dwitter.net/d/17554
+for(k=99,c.width=i=-8;++i<7;R=a=>x.lineTo(k+a*k/(z=j-t*5%1),k+(k*S(j+t*5&a|9)-a**4)/z))for(j=k;x.beginPath(x.stroke()),R(i),--j;R(i+1))R(i)
 
 https://www.dwitter.net/d/17032
-
 c.width=1920;x.translate(960,590);
 for(i=0;i<t*10;i++){x.fillRect(i*2,i*2,10,(C(t)*30));x.rotate(C(i*t/20))} 
 
+https://www.dwitter.net/d/17596
+for(i=c.width|=f=g=>22/7/(1+1e3**g(2*t+i%32/16));i--;x.fillText('dn',-6,3))x.setTransform(6,0,0,6,6*i+i%2*96,i%32*96-f(S)*61),x.rotate(f(C))
 
+https://www.dwitter.net/d/17572
+c.width=69
+d=x.getImageData(0,0,69,39)
+D=d.data
+for(i=D.length;i--;D[K+1]=255)D[K=i*4+2]=255*S(i*K+t*7)
+x.putImageData(d,0,0)
+
+https://www.dwitter.net/d/17371
+x.fillRect(0,0,2e3,2e3)
+for(i=3e3;i--;)Z=-2.5+i/600,X=C(i+t*2)/Z,Y=S(i+t*2)/Z,x.clearRect(960-Y*150+Z*S(t*3)*59,540+150*(X*C(t)-Z*S(t)),6,6)
 
 https://www.dwitter.net/d/17015
-
 //Xen 99
 for
 (
@@ -162,12 +189,56 @@ z
 4
 )
 
-
+https://www.dwitter.net/d/17433
+for(i=880;i--;x.fillStyle=R(Y/2.5-r/(350+S(t*2)*300),0,r/2000,.8))x.fillRect(X=S(r=i*i)*i*3+i*C(t*3)+900,Y=C(r)*i+390+S(t*2)*i/3,i,i)
 
 https://www.dwitter.net/d/16953
-
 for(i=f=1e3;i--;x.fillRect((S(3*t-i/f))*f*.95+1e3,i,9,1))
 x.fillStyle=`hsla(${i/99+t*99},90%,50%,.2)`
 
+https://www.dwitter.net/d/17235
+for(c.width|=i=9;i--;c.style.transform=`perspective(${90}px)rotateX(${t}rad)rotateY(${t}rad)`)x.fillRect(600+i*100+S(t*3)*300,500,50,200)
 
+https://www.dwitter.net/d/17297
+c.style='filter:invert(1';for(a=b=p=3.14,i=1e4;i--;a+=(r-a+b*S(a*p))/p,b+=(-a*b+C(a*p))/p)i&4&&x.fillRect(900+b*480,60+a*960,1,.2,r=i*t/b&3)
+
+https://www.dwitter.net/d/17508
+for(i=1e4*(t<4);i--;x.fillRect(690+400*a,500+400*b,.2,1))
+S(r=i*t)>0?(a=C(r*t)*C(r*i),b=S(r*i)):b=C(a)+(a+=S(b)*.9)/9,x.fillStyle=R(i/59)
+
+https://www.dwitter.net/d/17386
+for(A=a=b=0,i=1e4*(t<3);i--;){r=0|2*Math.random(),
+a+=r-a/5+b*S(a*2)/2,
+b+=.25-b/3+C(A*2)/4,A=a,
+x.fillRect(a*420-280,b*620+180,.3,1)}
+
+https://www.dwitter.net/d/17351
+for(i=c.width|=k=960;z=--i/9;x.lineWidth=29)x.arc(550+z*S(j=i/k)*7,700-z*C(j)*9,3e3/z,m=k*(C(j)*i**.7/k*9-t/19)/9,m);x.stroke()
+
+https://www.dwitter.net/d/17320
+with(x)for(i=a=1e3;i--;u=C(t+i**3),fillStyle=R(b=S(t/6+u)*190,b,b,1-u),beginPath(),arc(a+a*C(t+i)*u,540+a*S(t+i)*u,i/9*(u+1),0,6))fill()
+
+https://www.dwitter.net/d/17215
+for(c.width|=i=684;i--;)x.fillRect(i%36*55+C(z=i/3+t*3)*7,3+55*~~(i/36)+S(z)*7,s=40+C(z)*2,s)
+
+https://www.dwitter.net/d/17516
+c.style='filter:invert(1'
+for(X=Y=i=1e4*(t<6);i--;x.fillRect(960+900*X,560+300*Y,.1,1)){if(i%99==0)X=S(t*i**8)
+Y=S(X)*+C(Y*2.4)*1.4}
+
+https://www.dwitter.net/d/17287
+for(c.width|=i=9;i--;x.fillRect(400+i*99+S(t)*300,400,50,200))c.style=`border:solid;transform:rotate3d(1,5,2,${t*4}rad)scale(${Z=2/t},${Z})`
+
+https://www.dwitter.net/d/17450
+v=(a,b,Φ,r)=>{for(i=0;i++<r;x.fillStyle=R(0,S(r)*200))x.fillRect(a-=S(Φ*i),b-=C(Φ*i),S(t),1)
+r>9&&v(a,b,S(b)/2,r*=.9)}
+v(960,800,t,99*t)
+
+ https://www.dwitter.net/d/17336
+ c.width+=j=0
+for(i=-t*5;i<1e3;j=i++*2.4)x.beginPath(x.fillStyle=`hsl(${i*t**2},99%,50%`)+x.arc(960+C(j)*i,540+S(j)*i,i**.5,0,7)+x.fill()
+
+https://www.dwitter.net/d/17520
+c.style='filter:invert(1'
+for(a=b=0,i=1e4;i--;x.fillStyle=R(0,b*199,i/50),x.fillRect(a*600+960,b*490+540,.2,1))a=b*C(a*3),b=S(i/99+t)
 

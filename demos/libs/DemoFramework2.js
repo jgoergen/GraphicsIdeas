@@ -55,14 +55,14 @@
             };
 
         } else if (window.TYPE === "pixijs") {
-            
-            let app = new PIXI.Application({ 
+
+            let app = new PIXI.Application({
                 width: CANVAS_WIDTH,
                 height: CANVAS_HEIGHT,
                 antialias: true,
                 transparent: false,
                 resolution: 1
-              }
+            }
             );
 
             app.renderer.autoResize = true;
@@ -100,10 +100,13 @@
             };
         }
 
-        document.oncontextmenu = function (e) {
+        if (!window.AllowContextMenu) {
 
-            e.preventDefault();
-            e.stopPropagation();
+            document.oncontextmenu = function (e) {
+
+                e.preventDefault();
+                e.stopPropagation();
+            }
         }
 
         if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
@@ -170,26 +173,26 @@
         }
 
         init(this.passParams)
-        .then(
-            function (options) {
+            .then(
+                function (options) {
 
-                if (options && options.hasOwnProperty("fps")) {
+                    if (options && options.hasOwnProperty("fps")) {
 
-                    if (options.fps === -1) {
+                        if (options.fps === -1) {
 
-                        waitForAnimationFrame = false;
-                        setInterval(function () { update(this.passParams); }, 0);
-                        return;
+                            waitForAnimationFrame = false;
+                            setInterval(function () { update(this.passParams); }, 0);
+                            return;
 
-                    } else {
+                        } else {
 
-                        this.FPS = options.fps;
-                        this.interval = 1000 / options.fps;
+                            this.FPS = options.fps;
+                            this.interval = 1000 / options.fps;
+                        }
                     }
-                }
 
-                requestAnimationFrame(this.run);
-            });
+                    requestAnimationFrame(this.run);
+                });
     };
 
     this.initSettings = function (settingsOverrides) {
