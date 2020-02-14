@@ -7,9 +7,6 @@ R: Function that generates rgba-strings, usage ex.: R(255, 255, 255, 0.5)
 c: A 1920x1080 canvas.
 x: A 2D context for that canvas.
 
-https://www.dwitter.net/d/17588
-c.style.filter="blur(1vh)invert(1";for(c.width|=j=21,x.scale(9,9);j--;)for(i=99;i--;)x.arc(0,0,1.3**(j+i%2+t%2),a=(i+j)%24/4,a);x.stroke()
-
 https://www.dwitter.net/d/17223
 c.style='filter:invert(1';for(a=b=0,i=1e4;i--;a+=.3*(r-a+b*S(a*3.14)),b+=.3*(-a*b+C(a*3.14)))i&8&&(r=i*t/b&1,x.fillRect(a*1920,b*960,.2,1))
 

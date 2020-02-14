@@ -202,7 +202,12 @@
 
             a += (settings.MOD_1.Value + (adjustedElapsed / settings.ELAPSED_MOD_DIVISOR.Value)) * (r - a + b * Math.sin(a * Math.PI));
             b += (settings.MOD_2.Value + (adjustedElapsed / settings.ELAPSED_MOD_DIVISOR.Value)) * (-a * b + Math.cos(a * Math.PI));
-            i & 1 && (r = i * adjustedElapsed / b & settings.STEM_AMOUNT.Value, drawPoint(params));
+
+            if ((i & 1) == 0) {
+
+                r = i * adjustedElapsed / b & settings.STEM_AMOUNT.Value;
+                drawPoint(params);
+            }
         }
 
         settings.STEM_AMOUNT.Update();
