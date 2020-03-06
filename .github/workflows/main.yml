@@ -10,7 +10,7 @@ jobs:
         id: create-release-draft
         uses: jgoergen/githubActionDemo/actions
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.TOKEN }}
       - name: Print the URL of the release draft
         if: steps.create-release-draft.outputs.release-url != ''
         run: echo ${{ steps.create-release-draft.outputs.release-url }}
