@@ -6,10 +6,10 @@ jobs:
     name: 'Release'
     runs-on: ubuntu-latest
     steps:
-      - uses: jgoergen/githubActionDemo@v1.03
+      - uses: jgoergen/githubActionDemo@v2.0
       - name: Create a release draft for a version tag
         id: create-release-draft
-        uses: actions/
+        uses: ./
         with:
           repo-token: ${{ secrets.TOKEN }}
       - name: Print the URL of the release draft
