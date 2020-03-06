@@ -8,7 +8,7 @@ jobs:
     steps:
       - name: Create a release draft for a version tag
         id: create-release-draft
-        uses: jgoergen/githubActionDemo/actions
+        uses: jgoergen/githubActionDemo
         with:
           repo-token: ${{ secrets.TOKEN }}
       - name: Print the URL of the release draft
