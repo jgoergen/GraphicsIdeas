@@ -57,8 +57,8 @@
     // put any adjustable settings here that would be interesting to tinker with.
 
     var AllowContextMenu = true;
-    var CANVAS_WIDTH = 4000;
-    var CANVAS_HEIGHT = 4000;
+    var CANVAS_WIDTH = 1920;
+    var CANVAS_HEIGHT = 1080;
     var FPS = 60;
     var SETTINGS_PACKAGE = {
         ANIMATION_SPEED_DIVISOR: {
@@ -70,12 +70,12 @@
             Max: 8
         },
         FRACTAL_WIDTH: {
-            Min: 500,
-            Max: 3000
+            Min: 100,
+            Max: 2000
         },
         FRACTAL_HEIGHT: {
-            Min: 1000,
-            Max: 5000
+            Min: 500,
+            Max: 2000
         },
         FRACTAL_PIXEL_WIDTH: {
             Min: 1,
@@ -104,7 +104,43 @@
         ROTATION: {
             Min: 0,
             Max: 360
-        }
+        },
+        MIN_R: {
+            Min: 0,
+            Max: 100
+        },
+        MAX_R: {
+            Min: 120,
+            Max: 255
+        },
+        R_SPEED: {
+            Min: 0.1,
+            Max: 1
+        },
+        MIN_G: {
+            Min: 0,
+            Max: 100
+        },
+        MAX_G: {
+            Min: 120,
+            Max: 255
+        },
+        G_SPEED: {
+            Min: 0.1,
+            Max: 1
+        },
+        MIN_B: {
+            Min: 0,
+            Max: 100
+        },
+        MAX_B: {
+            Min: 120,
+            Max: 255
+        },
+        B_SPEED: {
+            Min: 0.1,
+            Max: 1
+        },
     };
 
     /////////////////////////////////////////////////////////
@@ -113,6 +149,9 @@
     var lastTime = 0;
     var date = undefined;
     var elapsed = 0;
+    var cR = 0;
+    var cG = 0;
+    var cB = 0;
 
     // code to run before update looping starts.
 
@@ -133,6 +172,10 @@
                 //params.ctx.lineWidth = 1
                 //params.ctx.strokeStyle = "rgba(255,255,255," + settings.ALPHA.Value + ")";
                 //params.canvas.style = 'filter:invert(1)';
+
+                cR = settings.MIN_R.Value;
+                cG = settings.MIN_G.Value;
+                cB = settings.MIN_B.Value;
 
                 console.log(
                     "STEM_AMOUNT", settings.STEM_AMOUNT.Value,
@@ -159,9 +202,26 @@
 
         adjustedElapsed = elapsed / settings.ANIMATION_SPEED_DIVISOR.Value;
 
+        cR += settings.R_SPEED.Value;
+        if (cR > settings.MAX_R.Value || cR < settings.MIN_R.Value) {
+            settings.R_SPEED.Value *= -1;
+        }
+
+        cG += settings.G_SPEED.Value;
+        if (cG > settings.MAX_G.Value || cG < settings.MIN_G.Value) {
+            settings.G_SPEED.Value *= -1;
+        }
+
+        cB += settings.B_SPEED.Value;
+        if (cB > settings.MAX_B.Value || cB < settings.MIN_B.Value) {
+            settings.B_SPEED.Value *= -1;
+        }
+
         a = 0;
         b = 0;
         r = 0;
+        
+        params.ctx.fillStyle = "rgba(" + cR + "," + cG + "," + cB + "," + settings.ALPHA.Value + ")";
 
         for (i = Math.floor(settings.POINT_COUNT.Value); i--;) {
 
