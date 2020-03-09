@@ -6,7 +6,7 @@ jobs:
     name: 'Release'
     runs-on: ubuntu-latest
     steps:
-      - uses: jgoergen/githubActionDemo@v2.0
+      - uses: jgoergen/githubActionDemo/
       - name: Create a release draft for a version tag
         id: create-release-draft
         uses: ./
