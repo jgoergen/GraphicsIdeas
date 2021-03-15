@@ -2,6 +2,7 @@ let VerletIntegration = function (options) {
 
     this.iterations = 2;
     this.particles;
+    this.effectors;
     this.constraints;
     this.bodies;
     this.gravity;
@@ -17,6 +18,7 @@ let VerletIntegration = function (options) {
     this.init = function (options) {
 
         this.particles = [];
+        this.effectors = [];
         this.paused = false;
         this.gravity = new Vector2D(0, 0.005);
         this.constraints = [];
@@ -63,6 +65,11 @@ let VerletIntegration = function (options) {
         this.particles.push(particle);
     }
 
+    this.addEffector = function (effector) {
+
+        this.effectors.push(effector);
+    }
+
     this.addConstraint = function (constraint) {
 
         this.constraints.push(constraint);
@@ -91,6 +98,31 @@ let VerletIntegration = function (options) {
 
             // derive velocity
             let velocityVector = this.particles[i].vector.getSubtractedFromVector(this.particles[i].lastVector);
+
+            // apply attractor influence
+            for (let o = 0; o < this.effectors.length; o++) {
+
+                const baDistX = this.particles[i].vector.x - this.effectors[o].vector.x;
+                const baDistY = this.particles[i].vector.y - this.effectors[o].vector.y;
+
+                if (Math.abs(baDistX) + Math.abs(baDistY) < this.effectors[o].radius) {
+
+                    if (this.effectors[o].force < 0) {
+                        velocityVector.addToVector(
+                            new Vector2D(
+                                (1 - (baDistX / this.effectors[o].radius)) * this.effectors[o].force,
+                                (1 - (baDistY / this.effectors[o].radius)) * this.effectors[o].force
+                            ));
+                    }
+                    else {
+                        velocityVector.addToVector(
+                            new Vector2D(
+                                ((baDistX / this.effectors[o].radius)) * this.effectors[o].force,
+                                ((baDistY / this.effectors[o].radius)) * this.effectors[o].force
+                            ));
+                    }
+                }
+            }
 
             // apply gravity
             velocityVector.addToVector(this.gravity);
@@ -305,9 +337,9 @@ let VerletIntegration = function (options) {
 
             for (let o = 0; o < this.constraints.length; o++) {
 
-                if (this.constraints[o].collides && 
-                    this.particles[i].objectID != this.constraints[o].objectID && 
-                    this.particles[i] != this.constraints[o].ends.startParticle && 
+                if (this.constraints[o].collides &&
+                    this.particles[i].objectID != this.constraints[o].objectID &&
+                    this.particles[i] != this.constraints[o].ends.startParticle &&
                     this.particles[i] != this.constraints[o].ends.endParticle) {
 
                     if (CollisionFuncs.CircleCrossesLine(
@@ -317,7 +349,7 @@ let VerletIntegration = function (options) {
                         this.constraints[o].ends.endParticle.vector)) {
 
                         let collisionData = CollisionFuncs.GetCircleCrossingLineCollision(
-                            this.particles[i].vector, 
+                            this.particles[i].vector,
                             this.particles[i].radius,
                             this.constraints[o].ends.startParticle.vector,
                             this.constraints[o].ends.endParticle.vector);
