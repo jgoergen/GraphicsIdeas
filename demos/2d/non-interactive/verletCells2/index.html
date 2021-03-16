@@ -1,0 +1,298 @@
+<html>
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <script src="../../../libs/2DLib/Vector2D.js" type="text/javascript"></script>
+    <script src="../../../libs/2DLib/Line2D.js" type="text/javascript"></script>
+    <script src="../../../libs/2DLib/Circle2D.js" type="text/javascript"></script>
+    <script src="../../../libs/VerletIntegration/Particle.js" type="text/javascript"></script>
+    <script src="../../../libs/VerletIntegration/Effector.js" type="text/javascript"></script>
+    <script src="../../../libs/VerletIntegration/VerletIntegration.js" type="text/javascript"></script>
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+
+    <title></title>
+
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+</body>
+
+<script type="text/javascript">
+
+    /// Settings ////////////////////////////////////////////
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var VERLET_FPS = 120;
+    var FPS = 60;
+    var CANVAS_WIDTH = 500;
+    var CANVAS_HEIGHT = 500;
+    var GRAVITY_DAMPENING = 0.005;
+
+    /////////////////////////////////////////////////////////
+
+    let localCtxReference = undefined;
+    let lastTime = 0;
+    let date = undefined;
+    let elapsed = 0;
+    let verlet;
+    let objectIndex = 0;
+    let demoMode = 0;
+    var usingTilt = false;
+    var verletUpdateIntervalID = 0;
+    var gravityUpdateIntervalID = 0;
+
+    // code to run before update looping starts.
+
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                lastTime = new Date();
+                elapsed = Math.random() * 1000;
+                params.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+
+                console.log("Init");
+                localCtxReference = params.ctx;
+                params.ctx.fillStyle = "white";
+                params.ctx.lineWidth = "1";
+                params.ctx.strokeStyle = "white";
+                lastTime = new Date();
+                elapsed = Math.random() * 10000;
+
+                verlet = new VerletIntegration({
+                    gravity: new Vector2D(0, 0.1),
+                    constraintsEnabled: false,
+                    particleLineCollisionEnabled: false,
+                    bodyCollisionEnabled: false
+                });
+
+                generateScene();
+
+                // run the physics update at a faster rate then the display update;
+                verletUpdateIntervalID = setTimeout(
+                    function () { updateVerlet(); },
+                    Math.ceil(1000 / VERLET_FPS));
+
+                // to simulate tilt changes, if no tilt is being used, update the gravity periodically
+                gravityUpdateIntervalID = setTimeout(
+                    function () { changeGravity(); },
+                    Math.floor(
+                        Math.random() * 1000 * 10));
+
+                resolve();
+            });
+    }
+
+    // code to run every frame.
+
+    function update(params) {
+
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
+
+        //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        params.ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+        params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        params.ctx.strokeStyle = "white";
+
+        for (var i = 0; i < verlet.particles.length; i++) {
+
+            if (verlet.particles[i].data.drawn) {
+
+                params.ctx.fillStyle = verlet.particles[i].data.color;
+                params.ctx.beginPath();
+
+                if (verlet.particles[i].radius)
+                    params.ctx.arc(
+                        verlet.particles[i].vector.x,
+                        verlet.particles[i].vector.y,
+                        verlet.particles[i].radius + 6,
+                        0,
+                        2 * Math.PI);
+                else
+                    params.ctx.rect(
+                        verlet.particles[i].vector.x,
+                        verlet.particles[i].vector.y,
+                        2,
+                        2);
+
+                //params.ctx.stroke();
+                params.ctx.fill();
+            }
+        }
+        /*
+        for (var i = 0; i < verlet.effectors.length; i++) {
+
+            if (verlet.effectors[i].data.drawn) {
+
+                if (verlet.effectors[i].force > 0) {
+
+                    params.ctx.strokeStyle = "green";
+                }
+                else {
+
+                    params.ctx.strokeStyle = "red";
+                }
+
+                params.ctx.beginPath();
+
+                params.ctx.arc(
+                    verlet.effectors[i].vector.x,
+                    verlet.effectors[i].vector.y,
+                    verlet.effectors[i].radius,
+                    0,
+                    2 * Math.PI);
+
+                params.ctx.stroke();
+            }
+        }
+        */
+    }
+
+    function updateVerlet() {
+
+        verlet.runTimeStep();
+
+        verletUpdateIntervalID = setTimeout(
+            function () { updateVerlet(); },
+            Math.ceil(1000 / VERLET_FPS));
+    }
+
+    function changeGravity() {
+
+        for (var i = 0; i < verlet.effectors.length; i++) {
+
+            //verlet.effectors[i].vector.x = (Math.random() * CANVAS_WIDTH);
+            //verlet.effectors[i].vector.y = (Math.random() * CANVAS_HEIGHT);
+            verlet.effectors[i].radius = (Math.random() * 100) + 100;
+            verlet.effectors[i].force = (Math.random() * 0.4) - 0.2;
+        }
+
+        if (!usingTilt) {
+            verlet.gravity.x = (Math.random() * 0.05) - 0.025;
+            verlet.gravity.y = (Math.random() * 0.05) - 0.025;
+        }
+
+        gravityUpdateIntervalID = setTimeout(
+            function () { changeGravity(); },
+            Math.floor(
+                Math.random() * 1000 * 5));
+    }
+
+    function constraintSnapped(constraint) {
+
+    }
+
+    function generateScene() {
+
+        verlet.iterations = 1;
+        var colors = ["#d45", "#a24"];
+
+        for (var i = 0; i < 1000; i++) {
+
+
+            let particle =
+                new Particle({
+                    vector: new Vector2D(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT),
+                    radius: 7,
+                    collides: true,
+                    data: {
+                        drawn: true,
+                        color: "rgba(0, 0, 0, 0.1)"
+                    }
+                });
+
+            verlet.addParticle(particle);
+        }
+
+        for (var i = 0; i < 3; i++) {
+            for (var o = 0; o < 3; o++) {
+                let effector =
+                    new Effector({
+                        vector:
+                            new Vector2D(
+                                (CANVAS_WIDTH / 2) * i,
+                                (CANVAS_HEIGHT / 2) * o),
+                        pinToMouse: false,
+                        force: (Math.random() * 0.4) - 0.2,
+                        radius: (Math.random() * 100) + 100,
+                        data: { drawn: false }
+                    });
+
+                verlet.addEffector(effector);
+            }
+        }
+    }
+
+    function tilt(e) {
+        return;
+        usingTilt = true;
+        verlet.gravity.x = (e.gamma) * GRAVITY_DAMPENING;
+        verlet.gravity.y = (e.beta) * GRAVITY_DAMPENING;
+    }
+
+    // code to run when user presses primary mouse button ( or first finger. )
+
+    function mouseDown(e) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user raises primary mouse button ( or first finger. )
+
+    function mouseUp(e) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user moves primary mouse button ( or first finger. )
+
+    function mouseMove(e, isMouseDown) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user presses secondary mouse button ( or second finger. )
+
+    function secondaryMouseDown(e) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user raises secondary mouse button ( or second finger. )
+
+    function secondaryMouseUp(e) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user moves secondary mouse button ( or second finger. )
+
+    function secondaryMouseMove(e) {
+
+        //e.x e.y e.speed
+    }
+</script>
+
+</html>

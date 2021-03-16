@@ -14,6 +14,10 @@ let VerletIntegration = function (options) {
     this.constraintSnapCallback;
     this.useMass = false;
     this.stageFriction = 0;
+    this.constraintsEnabled = true;
+    this.particleCollisionEnabled = true;
+    this.particleLineCollisionEnabled = true;
+    this.bodyCollisionEnabled = true;
 
     this.init = function (options) {
 
@@ -24,7 +28,7 @@ let VerletIntegration = function (options) {
         this.constraints = [];
         this.bodies = [];
         this.stageMinVect = new Vector2D(10, 10);
-        this.stageMaxVect = new Vector2D(790, 490);
+        this.stageMaxVect = new Vector2D(490, 490);
         this.speedLimitMinVect = new Vector2D(-4, -4);
         this.speedLimitMaxVect = new Vector2D(4, 4);
         this.stageFriction = 0.001;
@@ -57,6 +61,18 @@ let VerletIntegration = function (options) {
 
             if (options.stageFriction)
                 this.stageFriction = options.stageFriction;
+
+            if (options.constraintsEnabled)
+                this.constraintsEnabled = options.constraintsEnabled;
+
+            if (options.particleCollisionEnabled)
+                this.particleCollisionEnabled = options.particleCollisionEnabled;
+
+            if (options.particleLineCollisionEnabled)
+                this.particleLineCollisionEnabled = options.particleLineCollisionEnabled;
+
+            if (options.bodyCollisionEnabled)
+                this.bodyCollisionEnabled = options.bodyCollisionEnabled;
         }
     }
 
@@ -128,7 +144,7 @@ let VerletIntegration = function (options) {
             velocityVector.addToVector(this.gravity);
 
             // limit speed
-            // velocityVector.clamp(speedLimitMinVect, speedLimitMaxVect);
+            //velocityVector.clamp(this.speedLimitMinVect, this.speedLimitMaxVect);
 
             // adjust for timestep delta
             // velocityVector.multiplyBy(timeDeltaSquare);
@@ -157,10 +173,18 @@ let VerletIntegration = function (options) {
 
         for (let j = 0; j < this.iterations; j++) {
 
-            this.runConstraints();
-            this.runParticleCollisions();
-            this.runParticleOnLineCollisions();
-            this.runBodyCollisions();
+            if (this.constraints.length > 0 && this.constraintsEnabled === true)
+                this.runConstraints();
+
+            if (this.particleCollisionEnabled === true)
+                this.runParticleCollisions();
+
+            if (this.constraints.length > 0 && this.particleLineCollisionEnabled === true)
+                this.runParticleOnLineCollisions();
+
+            if (this.bodies.length > 0 && this.bodyCollisionEnabled === true)
+                this.runBodyCollisions();
+
             this.runPinning();
         }
     }

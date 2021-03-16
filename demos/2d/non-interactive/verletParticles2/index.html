@@ -41,8 +41,8 @@
     // put any adjustable settings here that would be interesting to tinker with.
 
     var VERLET_FPS = 120;
-    var FPS = 30;
-    var CANVAS_WIDTH = 800;
+    var FPS = 60;
+    var CANVAS_WIDTH = 500;
     var CANVAS_HEIGHT = 500;
     var GRAVITY_DAMPENING = 0.005;
 
@@ -80,7 +80,9 @@
 
                 verlet = new VerletIntegration({
                     gravity: new Vector2D(0, 0.1),
-                    constraintSnapCallback: constraintSnapped
+                    constraintsEnabled: false,
+                    particleLineCollisionEnabled: false,
+                    bodyCollisionEnabled: false
                 });
 
                 generateScene();
@@ -108,20 +110,24 @@
         elapsed += date - lastTime;
         lastTime = date;
 
-        params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        //params.ctx.fillStyle = "rgba(0, 0, 0, 0.03)";
+        //params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
         params.ctx.strokeStyle = "white";
 
         for (var i = 0; i < verlet.particles.length; i++) {
 
             if (verlet.particles[i].data.drawn) {
 
+                params.ctx.fillStyle = verlet.particles[i].data.color;
                 params.ctx.beginPath();
 
                 if (verlet.particles[i].radius)
                     params.ctx.arc(
                         verlet.particles[i].vector.x,
                         verlet.particles[i].vector.y,
-                        verlet.particles[i].radius,
+                        verlet.particles[i].radius + 2,
                         0,
                         2 * Math.PI);
                 else
@@ -131,10 +137,11 @@
                         2,
                         2);
 
-                params.ctx.stroke();
+                //params.ctx.stroke();
+                params.ctx.fill();
             }
         }
-
+        /*
         for (var i = 0; i < verlet.effectors.length; i++) {
 
             if (verlet.effectors[i].data.drawn) {
@@ -160,25 +167,7 @@
                 params.ctx.stroke();
             }
         }
-
-        params.ctx.beginPath();
-
-        for (var i = 0; i < verlet.constraints.length; i++) {
-
-            if (verlet.constraints[i].data.drawn) {
-
-                params.ctx.moveTo(
-                    verlet.constraints[i].ends.startParticle.vector.x,
-                    verlet.constraints[i].ends.startParticle.vector.y);
-
-                params.ctx.lineTo(
-                    verlet.constraints[i].ends.endParticle.vector.x,
-                    verlet.constraints[i].ends.endParticle.vector.y);
-
-            }
-        }
-
-        params.ctx.stroke();
+        */
     }
 
     function updateVerlet() {
@@ -194,9 +183,10 @@
 
         for (var i = 0; i < verlet.effectors.length; i++) {
 
-            verlet.effectors[i].vector.x = Math.random() * CANVAS_WIDTH;
-            verlet.effectors[i].vector.y = Math.random() * CANVAS_HEIGHT;
-            verlet.effectors[i].force = (Math.random() * 0.8) - 0.4;
+            //verlet.effectors[i].vector.x = (Math.random() * CANVAS_WIDTH);
+            //verlet.effectors[i].vector.y = (Math.random() * CANVAS_HEIGHT);
+            verlet.effectors[i].radius = (Math.random() * 100) + 100;
+            verlet.effectors[i].force = (Math.random() * 0.4) - 0.2;
         }
 
         if (!usingTilt) {
@@ -207,7 +197,7 @@
         gravityUpdateIntervalID = setTimeout(
             function () { changeGravity(); },
             Math.floor(
-                Math.random() * 1000 * 10));
+                Math.random() * 1000 * 5));
     }
 
     function constraintSnapped(constraint) {
@@ -217,32 +207,41 @@
     function generateScene() {
 
         verlet.iterations = 1;
+        var colors = ["#fff", "#000"];
 
-        for (var i = 0; i < 800; i++) {
+        for (var i = 0; i < 600; i++) {
+
 
             let particle =
                 new Particle({
                     vector: new Vector2D(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT),
-                    radius: 7,
+                    radius: 8,
                     collides: true,
-                    data: { drawn: true }
+                    data: {
+                        drawn: true,
+                        color: colors[Math.floor(Math.random() * colors.length)]
+                    }
                 });
 
             verlet.addParticle(particle);
         }
 
-        for (var i = 0; i < 9; i++) {
+        for (var i = 0; i < 3; i++) {
+            for (var o = 0; o < 3; o++) {
+                let effector =
+                    new Effector({
+                        vector:
+                            new Vector2D(
+                                (CANVAS_WIDTH / 2) * i,
+                                (CANVAS_HEIGHT / 2) * o),
+                        pinToMouse: false,
+                        force: (Math.random() * 0.4) - 0.2,
+                        radius: (Math.random() * 100) + 100,
+                        data: { drawn: false }
+                    });
 
-            let effector =
-                new Effector({
-                    vector: new Vector2D(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT),
-                    pinToMouse: false,
-                    force: (Math.random() * 0.8) - 0.4,
-                    radius: (Math.random() * 100) + 50,
-                    data: { drawn: false }
-                });
-
-            verlet.addEffector(effector);
+                verlet.addEffector(effector);
+            }
         }
     }
 
