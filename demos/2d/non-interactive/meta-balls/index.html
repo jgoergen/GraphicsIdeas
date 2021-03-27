@@ -1,0 +1,254 @@
+<html>
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
+
+    <title></title>
+
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+</body>
+
+<script type="text/javascript">
+
+    /// Settings ////////////////////////////////////////////
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 800;
+    var FPS = 60;
+
+    var SETTINGS_PACKAGE = {
+        RADIUS: {
+            Min: 70,
+            Max: 120
+        },
+        BLUR: {
+            Min: 10,
+            Max: 100
+        },
+        BLUR_OVERSAMPLES: {
+            Min: 1,
+            Max: 3
+        },
+        BALLS: {
+            Value: 20
+        },
+        MAX_MOVE_SPEED: {
+            Min: 1,
+            Max: 6
+        },
+        THRESHOLD: {
+            Min: 50,
+            Max: 220
+        },
+        FLAT: {
+            Array: [true, false]
+        },
+        STATIC_AMOUNT: {
+            Min: 0,
+            Max: 220
+        },
+        FUZZY_BALLS: {
+            Array: [true, false]
+        },
+        GLOBAL_ALPHA: {
+            Min: 0.1,
+            Max: 1.0
+        }
+    };
+
+    var GRADIENT_COLORS = {
+        0.0: `rgba(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.random() * 1})`,
+        0.4: `rgba(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.random() * 1})`,
+        0.8: `rgba(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.random() * 1})`,
+        1.0: `rgba(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.random() * 1})`,
+    };
+
+    /////////////////////////////////////////////////////////
+
+    var localCtxReference = undefined;
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
+
+    this.data = null;
+    this.max = 0;
+    this.minOpacity = 0.1;
+    var circle = undefined;
+    var gradient = undefined;
+
+    // code to run before update looping starts.
+
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                localCtxReference = params.ctx;
+                localCtxReference.fillStyle = "white";
+                lastTime = new Date();
+                elapsed = Math.random() * 10000;
+
+                data = new Array();
+                max = 0;
+                circle = getRadialBlur(Math.ceil(settings.RADIUS.Value));
+                gradient = getGradient(GRADIENT_COLORS);
+                localCtxReference.globalAlpha = settings.GLOBAL_ALPHA.Value;
+
+                for (var i = 0; i < settings.BALLS.Value; i++) {
+                    addPoint(
+                        Math.random() * CANVAS_WIDTH,
+                        Math.random() * CANVAS_HEIGHT,
+                        (Math.random() * (settings.MAX_MOVE_SPEED.Value * 2)) - settings.MAX_MOVE_SPEED.Value,
+                        (Math.random() * (settings.MAX_MOVE_SPEED.Value * 2)) - settings.MAX_MOVE_SPEED.Value
+                    )
+                }
+
+                resolve(FPS);
+            });
+    }
+
+    // code to run every frame.
+
+    function update(params) {
+
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
+
+        //console.log("Update");
+        localCtxReference.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        for (var i = 0, len = data.length; i < len; i++) {
+
+            data[i].x += data[i].vx;
+            data[i].y += data[i].vy;
+
+            if (data[i].x < 1 || data[i].x > CANVAS_WIDTH) {
+                data[i].x -= data[i].vx;
+                data[i].vx *= -1;
+            }
+
+            if (data[i].y < 1 || data[i].y > CANVAS_HEIGHT) {
+                data[i].y -= data[i].vy;
+                data[i].vy *= -1;
+            }
+
+            localCtxReference.drawImage(circle, data[i].x - (circle.width / 2), data[i].y - (circle.height / 2));
+        }
+
+        var imageData = localCtxReference.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        var pixels = imageData.data;
+
+        for (var i = 0, n = pixels.length; i < n; i += 4) {
+
+            alpha = pixels[i + 3];
+
+            if (alpha < settings.THRESHOLD.Value) {
+
+                pixels[i + 3] = 0;
+            }
+            else if (settings.FLAT.Value) {
+
+                pixels[i + 3] = Math.max(0, 255 - Math.floor(Math.random() * settings.STATIC_AMOUNT.Value));
+            }
+            else {
+                pixels[i] = Math.max(0, gradient[alpha * 4] - Math.floor(Math.random() * settings.STATIC_AMOUNT.Value));
+                pixels[i + 1] = Math.max(0, gradient[(alpha * 4) + 1] - Math.floor(Math.random() * settings.STATIC_AMOUNT.Value));
+                pixels[i + 2] = Math.max(0, gradient[(alpha * 4) + 2] - Math.floor(Math.random() * settings.STATIC_AMOUNT.Value));
+            }
+        }
+
+        localCtxReference.putImageData(imageData, 0, 0);
+    }
+
+    function getGradient(_grad) {
+
+        var tempCanvas = document.createElement("canvas");
+        var ctx = tempCanvas.getContext("2d");
+        var gradient = ctx.createLinearGradient(0, 0, 0, 256);
+
+        tempCanvas.width = 1;
+        tempCanvas.height = 256;
+
+        for (var i in _grad)
+            gradient.addColorStop(i, _grad[i]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1, 256);
+
+        return ctx.getImageData(0, 0, 1, 256).data;
+    }
+
+    function getRadialBlur(_r) {
+
+        var circle = document.createElement("canvas");
+        var r2 = _r + Math.ceil(settings.BLUR.Value * 2);
+        circle.width = circle.height = r2 * 2;
+        var ctx = circle.getContext("2d");
+
+        ctx.fillStyle = "rgba(255, 255, 255, 1)";
+        ctx.shadowBlur = Math.ceil(settings.BLUR.Value);
+        ctx.shadowColor = "white";
+        ctx.beginPath();
+        ctx.arc(r2, r2, _r, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.fill();
+
+        for (var i = 0; i < settings.BLUR_OVERSAMPLES.Value; i++) {
+            ctx.drawImage(circle, 0, 0);
+        }
+
+        if (settings.FUZZY_BALLS.Value) {
+            var imageData = ctx.getImageData(0, 0, circle.width, circle.height);
+            var pixels = imageData.data;
+            for (var i = 0, n = pixels.length; i < n; i += 4) {
+                pixels[i + 3] = Math.max(0, pixels[i + 3] - Math.floor(Math.random() * settings.STATIC_AMOUNT.Value / 4));
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        return circle;
+    }
+
+    function addPoint(_x, _y, _vx, _vy) {
+
+        if (_x < 0 || _x > CANVAS_WIDTH)
+            return;
+
+        if (_y < 0 || _y > CANVAS_HEIGHT)
+            return;
+
+        data.push({ x: _x, y: _y, vx: _vx, vy: _vy });
+    }
+
+    // code to run when user moves primary mouse button ( or first finger. )
+    function mouseMove(e, isMouseDown) {
+
+    }
+
+</script>
+
+</html>

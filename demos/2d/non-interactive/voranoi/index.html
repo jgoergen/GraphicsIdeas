@@ -1,0 +1,262 @@
+<html>
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+
+    <title></title>
+
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+</body>
+
+<script type="text/javascript">
+
+    /// Settings ////////////////////////////////////////////
+
+    // make a fortune variation
+    // https://jacquesheunis.com/post/fortunes-algorithm/
+    // https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var CANVAS_WIDTH = 1000;
+    var CANVAS_HEIGHT = 800;
+    var FPS = 60;
+
+    var X_POINT_COUNT = 20;
+    var Y_POINT_COUNT = Math.ceil(X_POINT_COUNT / 2);
+    var POINT_VARIATION = 1;
+    var DRAWN_POINT_SIZE = 5;
+    var MAX_MOVE_SPEED = 50;
+    var MOVE_CHANCE = 0.1;
+    var MOVE_TWEEN_SPEED = 4;
+    var SHADED = false;
+    var SWELLING = true;
+    var SWELL_SPEED = 100;
+    var SHADE_BASE_DIVISOR = 0.72;
+    var DISTANCE_TYPE = 1; // 0 == manhattan, 1 == euclidian, 2 == hypot
+    var GREYSCALE = false;
+    var PIXEL_SIZE = DRAWN_POINT_SIZE;
+    var MITOSIS = false;
+    var MITOSIS_CHANCE = 0.01;
+    var MITOSIS_MAX = 20;
+    var ALPHA = 1;
+    var FADE = 1;
+    var VOID_CHANCE = 0;
+    var VOID_BLACK = true;
+    var CLOSEST_DISTANCE = Infinity;
+
+    /////////////////////////////////////////////////////////
+
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
+    var points = [];
+    var mitosisCount = 0;
+
+    function generateNewRandomPoint(x, y, forceX, forceY) {
+
+        var greyLevel = Math.floor(Math.random() * 256);
+
+        return {
+            x: forceX ? forceX :
+                Math.min(
+                    Math.max(
+                        (CANVAS_WIDTH / X_POINT_COUNT) * x + ((Math.random() * POINT_VARIATION) - POINT_VARIATION / 2),
+                        0),
+                    CANVAS_WIDTH),
+            y: forceY ? forceY :
+                Math.min(
+                    Math.max(
+                        (CANVAS_HEIGHT / Y_POINT_COUNT) * y + ((Math.random() * POINT_VARIATION) - POINT_VARIATION / 2),
+                        0),
+                    CANVAS_HEIGHT),
+            r: GREYSCALE ? greyLevel : Math.floor(Math.random() * 256),
+            g: GREYSCALE ? greyLevel : Math.floor(Math.random() * 256),
+            b: GREYSCALE ? greyLevel : Math.floor(Math.random() * 256),
+            offset: Math.random() * 10,
+            speed: Math.random() * MAX_MOVE_SPEED,
+            void: Math.random() < VOID_CHANCE
+        };
+    }
+
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                lastTime = new Date();
+                elapsed = Math.random() * 1000;
+                params.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+
+                // generate initial points and 'wiggle' them a bit
+                for (var x = 0; x < X_POINT_COUNT; x++)
+                    for (var y = 0; y < Y_POINT_COUNT; y++)
+                        points.push(generateNewRandomPoint(x, y));
+
+                resolve(FPS);
+            });
+    }
+
+    // code to run every frame.
+
+    function update(params) {
+
+        if (ALPHA < 1)
+            params.ctx.drawImage(
+                canvas,
+                0,
+                0,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT);
+
+        if (FADE > 0) {
+
+            params.ctx.fillStyle = "rgba(0,0,0," + FADE + ")";
+            params.ctx.fillRect(
+                0,
+                0,
+                CANVAS_WIDTH,
+                CANVAS_HEIGHT);
+        }
+
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
+
+        for (var o = 0; o < points.length; o++) {
+
+            if (Math.random() < MOVE_CHANCE) {
+
+                points[o].targetX = points[o].x + (Math.random() * points[o].speed) - (points[o].speed / 2);
+                points[o].targetY = points[o].y + (Math.random() * points[o].speed) - (points[o].speed / 2);
+
+                if (points[o].targetX < 0)
+                    points[o].x = points[o].targetX += CANVAS_WIDTH;
+
+                if (points[o].targetX > CANVAS_WIDTH)
+                    points[o].x = points[o].targetX -= CANVAS_WIDTH;
+
+                if (points[o].targetY < 0)
+                    points[o].y = points[o].targetY += CANVAS_HEIGHT;
+
+                if (points[o].targetY > CANVAS_WIDTH)
+                    points[o].y = points[o].targetY -= CANVAS_WIDTH;
+            }
+
+            if (!points[o].targetX)
+                points[o].targetX = points[o].x;
+
+            if (!points[o].targetY)
+                points[o].targetY = points[o].y;
+
+            points[o].x += (points[o].targetX - points[o].x) / MOVE_TWEEN_SPEED;
+            points[o].y += (points[o].targetY - points[o].y) / MOVE_TWEEN_SPEED;
+
+            if (MITOSIS && mitosisCount < MITOSIS_MAX && Math.random() < (MITOSIS_CHANCE * (1 - (mitosisCount / MITOSIS_MAX)))) {
+
+                points.push(generateNewRandomPoint(null, null, points[o].x, points[o].y));
+                mitosisCount++;
+            }
+        }
+
+        // generate simple voronoi data (brute force method)
+        var distance = 0;
+        for (var x = 0; x < CANVAS_WIDTH; x += DRAWN_POINT_SIZE) {
+
+            for (var y = 0; y < CANVAS_HEIGHT; y += DRAWN_POINT_SIZE) {
+
+                var shadingDivisor = 1;
+                var closestIndex = -1;
+                var closestDistance = CLOSEST_DISTANCE;
+
+                for (var o = 0; o < points.length; o++) {
+
+                    switch (DISTANCE_TYPE) {
+                        case 0: // manhattan
+                            distance = Math.abs(points[o].x - x) + Math.abs(points[o].y - y);
+                            break;
+
+                        case 1: // euclidian
+                            distance = Math.sqrt((points[o].x - x) * (points[o].x - x) + (points[o].y - y) * (points[o].y - y));
+                            break;
+
+                        case 2: // hypot
+                            distance = Math.hypot(points[o].x - x, points[o].y - y);
+                            break;
+                    }
+
+                    if (distance < closestDistance) {
+
+                        closestDistance = distance;
+                        closestIndex = o
+                    }
+                }
+
+                if (closestIndex >= 0) {
+                    if (SHADED) {
+
+                        if (SWELLING)
+                            shadingDivisor = closestDistance * ((Math.sin(elapsed / SWELL_SPEED + points[closestIndex].offset) / 2) + SHADE_BASE_DIVISOR);
+                        else
+                            shadingDivisor = closestDistance * (SHADE_BASE_DIVISOR / 2);
+                    }
+
+                    if (points[closestIndex].void) {
+
+                        if (VOID_BLACK)
+                            ctx.fillStyle = "rgb(0,0,0)";
+                        else
+                            continue;
+
+                    } else {
+
+                        if (VOID_BLACK)
+                            params.ctx.fillStyle =
+                                "rgba(" +
+                                points[closestIndex].r / shadingDivisor + "," +
+                                points[closestIndex].g / shadingDivisor + "," +
+                                points[closestIndex].b / shadingDivisor + "," +
+                                ALPHA + ")";
+                        else
+                            params.ctx.fillStyle =
+                                "rgba(" +
+                                points[closestIndex].r + "," +
+                                points[closestIndex].g + "," +
+                                points[closestIndex].b + "," +
+                                1 / shadingDivisor + ")";
+                    }
+
+                    params.ctx.fillRect(
+                        x,
+                        y,
+                        PIXEL_SIZE,
+                        PIXEL_SIZE);
+                }
+            }
+        }
+    }
+
+</script>
+
+</html>
