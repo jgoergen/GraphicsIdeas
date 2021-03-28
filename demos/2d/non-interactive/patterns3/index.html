@@ -35,8 +35,8 @@
 
     // put any adjustable settings here that would be interesting to tinker with.
 
-    var CANVAS_WIDTH = 400;
-    var CANVAS_HEIGHT = 400;
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 800;
     var FPS = 60;
 
     var SEG_START_SPEED_DIVISOR = (Math.random() * 4) + 1;
@@ -86,7 +86,7 @@
         date = new Date();
         elapsed += date - lastTime;
         lastTime = date;
-        reducedTime = elapsed / 2000;
+        reducedTime = elapsed / 3000;
 
         var imageData = params.ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         var pixels = imageData.data;
@@ -101,7 +101,10 @@
             pixels[i] = gradient[(color1 * 4)];
             pixels[i + 1] = gradient[(color2 * 4) + 1];
             pixels[i + 2] = gradient[(color3 * 4) + 2];
-            pixels[i + 3] = 255;
+            pixels[i + 3] = Math.floor(
+                ((Math.atan((coords[0] + reducedTime) / 600) *
+                    Math.cos((coords[1] + reducedTime) / 1005)) + 1) * 1000000
+            ) % 255;
         }
 
         params.ctx.putImageData(imageData, 0, 0);
