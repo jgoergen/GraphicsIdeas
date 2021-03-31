@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
     <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
 
     <title></title>
 
@@ -20,7 +21,6 @@
         canvas {
             border: 1px solid #ccc;
             width: 100%;
-            image-rendering: pixelated;
         }
     </style>
 </head>
@@ -35,8 +35,8 @@
 
     // put any adjustable settings here that would be interesting to tinker with.
 
-    var CANVAS_WIDTH = 100;
-    var CANVAS_HEIGHT = 100;
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 800;
     var FPS = 60;
 
     var SEG_START_SPEED_DIVISOR = (Math.random() * 4) + 1;
@@ -86,33 +86,25 @@
         date = new Date();
         elapsed += date - lastTime;
         lastTime = date;
-        reducedTime = elapsed / 500;
+        reducedTime = elapsed / 3000;
 
         var imageData = params.ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         var pixels = imageData.data;
-        var moveSpeed = Math.floor((Math.cos(reducedTime / 2) * Math.sin(reducedTime) + 1) * 500);
 
-        for (var i = 1000, n = pixels.length - 1000; i < n; i += (12 + moveSpeed)) {
+        for (var i = 0, n = pixels.length; i < n; i += 4) {
 
-            pixels[i] = pixels[i - moveSpeed];
-            pixels[i + 1] = pixels[i];
-            pixels[i + 2] = pixels[i + moveSpeed];
+            var coords = MathHelperFunctions.IndexToXY(i, CANVAS_WIDTH * 4);
+            var color1 = Math.ceil((Math.sin(coords[0] / 1000 + reducedTime)) * 127) + 127;
+            var color2 = Math.ceil((Math.cos(coords[0] / 3400 + reducedTime)) * 127) + 127;
+            var color3 = 255; //color1 + color2 + coords[1] % 255;
 
-            pixels[i + 3] =
-                Math.floor(Math.random() *
-                    Math.floor(
-                        (Math.sin(reducedTime + (i / 1000)) + 1) * 30020)
-                    % 255);
-
-            pixels[i + 4] = pixels[i - moveSpeed];
-            pixels[i + 5] = pixels[i];
-            pixels[i + 6] = pixels[i + moveSpeed];
-
-            pixels[i + 7] =
-                Math.floor(Math.random() *
-                    Math.floor(
-                        (Math.sin(reducedTime + (i / 1000)) + 1) * 30020)
-                    % 255);
+            pixels[i] = gradient[(color1 * 4)];
+            pixels[i + 1] = gradient[(color2 * 4) + 1];
+            pixels[i + 2] = gradient[(color3 * 4) + 2];
+            pixels[i + 3] = Math.floor(
+                ((Math.cos((coords[0]) / ((reducedTime % 10000) + 120)) *
+                    Math.cos((coords[1]) / ((reducedTime % 10000) + 335))) + 1) * (((elapsed / 8) % 100000) + 50)
+            ) % 255;
         }
 
         params.ctx.putImageData(imageData, 0, 0);
