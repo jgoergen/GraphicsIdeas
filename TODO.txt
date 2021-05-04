@@ -11,3 +11,22 @@ make a PWA SPA page to run the demos and include a demo browser
     optional dynamic controls for all the dynamic settings 
 
     export a demo with dynamic settings locked in as a single js file with minified framework and minified demo built in ( so it can be used on a webpage )
+
+
+https://in4k.github.io/wiki/algorithms
+
+https://howto.planet-d.net/wiki/index.php?n=Main.Sources
+
+https://www.iquilezles.org/
+
+http://jamie-wong.com/2016/07/15/ray-marching-signed-distance-functions/
+
+http://www.alanzucconi.com/2016/07/01/signed-distance-functions/
+
+http://mercury.sexy/hg_sdf/
+
+https://thebookofshaders.com/
+
+http://www.displayhack.org/2012/the-great-demoscene-sourcecode-giveaway/
+
+https://www.flipcode.com/archives/The_Art_of_Demomaking-Issue_01_Prologue.shtml

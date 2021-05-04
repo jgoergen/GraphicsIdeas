@@ -8,7 +8,7 @@ var DrawingHelperFunctions = {
         if (_borderThickness)
             _ctx.lineWidth = _borderThickness;
 
-        if(_borderColor)
+        if (_borderColor)
             _ctx.strokeStyle = _borderColor;
 
         _ctx.beginPath();
@@ -34,6 +34,30 @@ var DrawingHelperFunctions = {
                         ctx.stroke();
                         */
         }
+    },
+
+    interpolatePoints: function (p1, p2, amount) {
+        return {
+            x: p1.x + ((p2.x - p1.x) * amount),
+            y: p1.y + ((p2.y - p1.y) * amount)
+        };
+    },
+
+    interpolateMultiplePoints: function (amount, ...points) {
+        var interpolationSegmentLengths = (1 / points.length) + 0.01;
+        var pSeg1 = Math.floor(amount / interpolationSegmentLengths);
+        var pSeg2 = pSeg1 === (points.length - 1) ? 0 : pSeg1 + 1;
+
+        while (amount > interpolationSegmentLengths) {
+            amount -= interpolationSegmentLengths;
+        }
+
+        var segAmount = amount / interpolationSegmentLengths;
+
+        return {
+            x: points[pSeg1].x + ((points[pSeg2].x - points[pSeg1].x) * segAmount),
+            y: points[pSeg1].y + ((points[pSeg2].y - points[pSeg1].y) * segAmount)
+        };
     },
 
     SunburstLinePattern: function (ctx, splits, center, x, y, x2, y2, pixelSize) {
@@ -65,14 +89,12 @@ var DrawingHelperFunctions = {
     },
 
     BreakLineIntoSteps: function (x1, y1, x2, y2, steps) {
-
-        var lastParticle = startParticle;
         var intervalX = (x2 - x1) / steps;
         var intervalY = (y2 - y1) / steps;
         var positions = [];
 
         // spawn intermediary particles to form a chain
-        for (var step = 0; step <= steps; step++) {
+        for (var step = 0; step < steps; step++) {
 
             var stepPos = undefined;
 
