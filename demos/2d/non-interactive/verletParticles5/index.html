@@ -110,9 +110,9 @@
         elapsed += date - lastTime;
         lastTime = date;
 
-        params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        //params.ctx.fillStyle = "rgba(0, 0, 0, 0.015)";
-        //params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        params.ctx.fillStyle = "rgba(0, 0, 0, 1)";
+        params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         params.ctx.strokeStyle = "white";
 
@@ -142,32 +142,32 @@
             }
         }
         /*
-        for (var i = 0; i < verlet.effectors.length; i++) {
-
-            if (verlet.effectors[i].data.drawn) {
-
-                if (verlet.effectors[i].force > 0) {
-
-                    params.ctx.strokeStyle = "green";
+                for (var i = 0; i < verlet.effectors.length; i++) {
+        
+                    if (verlet.effectors[i].data.drawn) {
+        
+                        if (verlet.effectors[i].force > 0) {
+        
+                            params.ctx.strokeStyle = "green";
+                        }
+                        else {
+        
+                            params.ctx.strokeStyle = "red";
+                        }
+        
+                        params.ctx.beginPath();
+        
+                        params.ctx.arc(
+                            verlet.effectors[i].vector.x,
+                            verlet.effectors[i].vector.y,
+                            verlet.effectors[i].radius,
+                            0,
+                            2 * Math.PI);
+        
+                        params.ctx.stroke();
+                    }
                 }
-                else {
-
-                    params.ctx.strokeStyle = "red";
-                }
-
-                params.ctx.beginPath();
-
-                params.ctx.arc(
-                    verlet.effectors[i].vector.x,
-                    verlet.effectors[i].vector.y,
-                    verlet.effectors[i].radius,
-                    0,
-                    2 * Math.PI);
-
-                params.ctx.stroke();
-            }
-        }
-        */
+                */
     }
 
     function updateVerlet() {
@@ -185,7 +185,7 @@
 
             //verlet.effectors[i].vector.x = (Math.random() * CANVAS_WIDTH);
             //verlet.effectors[i].vector.y = (Math.random() * CANVAS_HEIGHT);
-            verlet.effectors[i].radius = (Math.random() * 100) + 100;
+            verlet.effectors[i].radius = (Math.random() * 100) + 50;
             verlet.effectors[i].force = (Math.random() * 0.4) - 0.2;
         }
 
@@ -207,19 +207,21 @@
     function generateScene() {
 
         verlet.iterations = 1;
-        var colors = ["#d45", "#a24"];
+        var hexLetters = ["20", "50", "70"];
 
-        for (var i = 0; i < 1000; i++) {
-
+        for (var i = 0; i < 800; i++) {
 
             let particle =
                 new Particle({
                     vector: new Vector2D(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT),
-                    radius: 2,
+                    radius: 8,
                     collides: true,
                     data: {
-                        drawn: true,
-                        color: colors[Math.floor(Math.random() * colors.length)]
+                        drawn: Math.random() > 0.7,
+                        color:
+                            "rgba(130," +
+                            hexLetters[Math.floor(Math.random() * hexLetters.length)] +
+                            ",200,0.2)"
                     }
                 });
 

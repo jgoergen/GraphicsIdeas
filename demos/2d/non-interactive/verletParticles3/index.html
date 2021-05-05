@@ -209,13 +209,12 @@
         verlet.iterations = 1;
         var colors = ["#3a5", "#2b4"];
 
-        for (var i = 0; i < 2000; i++) {
-
+        for (var i = 0; i < 1000; i++) {
 
             let particle =
                 new Particle({
                     vector: new Vector2D(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT),
-                    radius: 3,
+                    radius: 5,
                     collides: true,
                     data: {
                         drawn: true,

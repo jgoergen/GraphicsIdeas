@@ -52,6 +52,7 @@
     var pointCount = undefined;
     var size = undefined;
     var shapes = undefined;
+    var drawPositions = undefined;
 
     //////////////// CHARACTER DEFINITIONS /////////////////////////////////////////////
 
@@ -100,6 +101,8 @@
         return new Promise(
             function (resolve, reject) {
 
+                drawPositions = [];
+
                 console.log("Init");
                 lastTime = Math.floor(Math.random() * 10000000);
                 elapsed = Math.random() * 10000;
@@ -113,16 +116,13 @@
                 var y = Math.floor(CANVAS_HEIGHT / 2);
 
                 shapes = [
-                    interpolatePointCount(pointCount, char_1),
-                    interpolatePointCount(pointCount, char_2),
-                    interpolatePointCount(pointCount, char_3),
-                    interpolatePointCount(pointCount, char_4),
-                    interpolatePointCount(pointCount, char_5),
-                    interpolatePointCount(pointCount, char_6),
-                    interpolatePointCount(pointCount, char_7),
-                    interpolatePointCount(pointCount, char_8),
-                    interpolatePointCount(pointCount, char_9),
-                    interpolatePointCount(pointCount, char_0)
+                    interpolatePointCount(pointCount, char_l),
+                    interpolatePointCount(pointCount, char_o),
+                    interpolatePointCount(pointCount, char_a),
+                    interpolatePointCount(pointCount, char_d),
+                    interpolatePointCount(pointCount, char_i),
+                    interpolatePointCount(pointCount, char_n),
+                    interpolatePointCount(pointCount, char_g)
                 ];
 
                 console.log("Points generated", ...shapes.map(shape => shape.length));
@@ -160,6 +160,7 @@
         }
 
         drawPoints(params.ctx, interpolatedArray, "#fff");
+        drawPoints(params.ctx, drawPositions, "#00f");
     }
 
     function interpolateMultiplePoints(amount, padding, ...points) {
@@ -346,6 +347,30 @@
         return arrayOfArrays.map(function (p) { return { x: p[0], y: p[1] } });
     }
 
+    function mouseDown(e) {
+        console.log("down", e.x, e.y);
+
+        drawPositions.push({
+            x: e.x,
+            y: e.y
+        });
+    }
+
+    function secondaryMouseDown(e) {
+        console.log("secondary down", e.x, e.y);
+
+        // TODO: dump draw positions to console
+        console.log(JSON.stringify(drawPositions));
+        drawPositions = [];
+    }
+
+    function mouseMove(position, mouseDown) {
+
+    }
+
+    function secondaryMouseMove(position) {
+
+    }
 
 </script>
 
