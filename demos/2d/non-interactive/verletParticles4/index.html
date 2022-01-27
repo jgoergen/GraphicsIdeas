@@ -42,9 +42,18 @@
 
     var VERLET_FPS = 120;
     var FPS = 60;
-    var CANVAS_WIDTH = 500;
-    var CANVAS_HEIGHT = 500;
+    var CANVAS_WIDTH = 1000;
+    var CANVAS_HEIGHT = 565;
     var GRAVITY_DAMPENING = 0.005;
+    var R = Math.floor(Math.random() * 255);
+    var G = Math.floor(Math.random() * 255);
+    var B = Math.floor(Math.random() * 255);
+    var BALL_COUNT = Math.floor(Math.random() * 2000) + 2000;
+    var MAX_BALL_SIZE = Math.floor(Math.random() * 15);
+    var MIN_BALL_SIZE = Math.floor(Math.random() * 3) + 3;
+    var BALL_OPACITY = 0.01; // (Math.random() * 0.1) + 0.05;
+    var FADE = (Math.random() * 0.2) + 0.05;
+    var SHELL_SIZE = 10; //Math.max(MIN_BALL_SIZE, Math.floor(Math.random() * 6) - 3);
 
     /////////////////////////////////////////////////////////
 
@@ -82,7 +91,13 @@
                     gravity: new Vector2D(0, 0.1),
                     constraintsEnabled: false,
                     particleLineCollisionEnabled: false,
-                    bodyCollisionEnabled: false
+                    bodyCollisionEnabled: false,
+                    stageMinVect: new Vector2D(10, 10),
+                    stageMaxVect: new Vector2D(CANVAS_WIDTH - 10, CANVAS_HEIGHT - 10),
+                    speedLimitMinVect: new Vector2D(-8, -8),
+                    speedLimitMaxVect: new Vector2D(8, 8),
+                    iterations: 1,
+                    markCollides: true
                 });
 
                 generateScene();
@@ -98,7 +113,7 @@
                     Math.floor(
                         Math.random() * 1000 * 10));
 
-                resolve();
+                resolve({ fps: FPS });
             });
     }
 
@@ -110,15 +125,15 @@
         elapsed += date - lastTime;
         lastTime = date;
 
-        params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        //params.ctx.fillStyle = "rgba(0, 0, 0, 0.015)";
-        //params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        params.ctx.fillStyle = "rgba(0, 0, 0, " + FADE + ")";
+        params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         params.ctx.strokeStyle = "white";
 
         for (var i = 0; i < verlet.particles.length; i++) {
 
-            if (verlet.particles[i].data.drawn) {
+            if (verlet.particles[i].data.drawn && verlet.particles[i].data.collided > 18) {
 
                 params.ctx.fillStyle = verlet.particles[i].data.color;
                 params.ctx.beginPath();
@@ -127,7 +142,7 @@
                     params.ctx.arc(
                         verlet.particles[i].vector.x,
                         verlet.particles[i].vector.y,
-                        verlet.particles[i].radius + 2,
+                        verlet.particles[i].radius + SHELL_SIZE,
                         0,
                         2 * Math.PI);
                 else
@@ -137,37 +152,9 @@
                         2,
                         2);
 
-                //params.ctx.stroke();
                 params.ctx.fill();
             }
         }
-        /*
-        for (var i = 0; i < verlet.effectors.length; i++) {
-
-            if (verlet.effectors[i].data.drawn) {
-
-                if (verlet.effectors[i].force > 0) {
-
-                    params.ctx.strokeStyle = "green";
-                }
-                else {
-
-                    params.ctx.strokeStyle = "red";
-                }
-
-                params.ctx.beginPath();
-
-                params.ctx.arc(
-                    verlet.effectors[i].vector.x,
-                    verlet.effectors[i].vector.y,
-                    verlet.effectors[i].radius,
-                    0,
-                    2 * Math.PI);
-
-                params.ctx.stroke();
-            }
-        }
-        */
     }
 
     function updateVerlet() {
@@ -205,21 +192,19 @@
     }
 
     function generateScene() {
+        var colors = ["rgba(" + R + ", " + G + ", " + B + ", " + BALL_OPACITY + ")", "rgba(" + Math.min(255, R + 50) + ", " + Math.min(255, G + 50) + ", " + Math.min(255, B + 50) + ", " + BALL_OPACITY + ")"];
 
-        verlet.iterations = 1;
-        var colors = ["#d45", "#a24"];
-
-        for (var i = 0; i < 1000; i++) {
-
+        for (var i = 0; i < BALL_COUNT; i++) {
 
             let particle =
                 new Particle({
                     vector: new Vector2D(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT),
-                    radius: 2,
+                    radius: Math.floor(Math.random() * MAX_BALL_SIZE) + MIN_BALL_SIZE,
                     collides: true,
                     data: {
                         drawn: true,
-                        color: colors[Math.floor(Math.random() * colors.length)]
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        collided: 0
                     }
                 });
 

@@ -1,57 +1,57 @@
-(function () {
-
-    var FPS = 60;
-    var waitForAnimationFrame = true;
+var DemoFramework = function () {
 
     var thisRef = this;
-    this.ctx = undefined;
-    this.canvas = undefined;
-    this.isMouseDown = false;
-    this.isSecondaryMouseDown = false;
-    this.now = undefined;
-    this.then = Date.now();
-    this.interval = 1000 / FPS;
-    this.delta;
-    this.lastX = undefined;
-    this.lastY = undefined;
-    this.canvasOffsetX = undefined;
-    this.canvasOffsetY = undefined;
-    this.settings = {};
-    this.stage = undefined;
-    this.passParams = {};
+
+    this.FPS = 60;
+    this.waitForAnimationFrame = true;
+    thisRef.ctx = undefined;
+    thisRef.canvas = undefined;
+    thisRef.isMouseDown = false;
+    thisRef.isSecondaryMouseDown = false;
+    thisRef.now = undefined;
+    thisRef.then = Date.now();
+    thisRef.interval = 1000 / FPS;
+    thisRef.delta;
+    thisRef.lastX = undefined;
+    thisRef.lastY = undefined;
+    thisRef.canvasOffsetX = undefined;
+    thisRef.canvasOffsetY = undefined;
+    thisRef.stage = undefined;
+    thisRef.passParams = {};
+    thisRef.updateIntervalID = 0;
 
     // ThreeJS Stuff
-    this.scene = undefined;
-    this.camera = undefined;
-    this.controls = undefined;
-    this.renderer = undefined;
+    thisRef.scene = undefined;
+    thisRef.camera = undefined;
+    thisRef.controls = undefined;
+    thisRef.renderer = undefined;
 
-    this.initialize = function () {
+    thisRef.initialize = function () {
 
         if (window.TYPE === "threejs") {
 
-            this.scene = new THREE.Scene();
-            this.camera = new THREE.PerspectiveCamera(75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000);
-            this.renderer = new THREE.WebGLRenderer();
+            thisRef.scene = new THREE.Scene();
+            thisRef.camera = new THREE.PerspectiveCamera(75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000);
+            thisRef.renderer = new THREE.WebGLRenderer();
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-            this.controls = new THREE.TrackballControls(camera);
-            this.controls.rotateSpeed = 1.0;
-            this.controls.zoomSpeed = 1.2;
-            this.controls.panSpeed = 0.8;
-            this.controls.noZoom = false;
-            this.controls.noPan = false;
-            this.controls.staticMoving = true;
-            this.controls.dynamicDampingFactor = 0.3;
+            thisRef.controls = new THREE.TrackballControls(camera);
+            thisRef.controls.rotateSpeed = 1.0;
+            thisRef.controls.zoomSpeed = 1.2;
+            thisRef.controls.panSpeed = 0.8;
+            thisRef.controls.noZoom = false;
+            thisRef.controls.noPan = false;
+            thisRef.controls.staticMoving = true;
+            thisRef.controls.dynamicDampingFactor = 0.3;
 
-            this.stage = this.renderer.domElement;
-            document.body.appendChild(this.stage);
+            thisRef.stage = thisRef.renderer.domElement;
+            document.body.appendChild(thisRef.stage);
 
-            this.passParams = {
-                scene: this.scene,
-                camera: this.camera,
-                renderer: this.renderer
+            thisRef.passParams = {
+                scene: thisRef.scene,
+                camera: thisRef.camera,
+                renderer: thisRef.renderer
             };
 
         } else if (window.TYPE === "pixijs") {
@@ -67,36 +67,36 @@
 
             app.renderer.autoResize = true;
             document.body.appendChild(app.view);
-            this.stage = app.view;
+            thisRef.stage = app.view;
 
-            this.passParams = {
+            thisRef.passParams = {
                 app: app,
                 stage: app.stage
             };
 
         } else if (window.TYPE === "none") {
 
-            this.stage = document.querySelector("body");
-            this.passParams = {};
+            thisRef.stage = document.querySelector("body");
+            thisRef.passParams = {};
 
         } else {
 
-            this.canvas =
+            thisRef.canvas =
                 document
                     .getElementById(
                         "canvas");
 
-            this.canvas.width = CANVAS_WIDTH;
-            this.canvas.height = CANVAS_HEIGHT;
-            this.canvasOffsetX = this.canvas.offsetLeft;
-            this.canvasOffsetY = this.canvas.offsetTop;
-            this.ctx = canvas.getContext("2d");
+            thisRef.canvas.width = CANVAS_WIDTH;
+            thisRef.canvas.height = CANVAS_HEIGHT;
+            thisRef.canvasOffsetX = thisRef.canvas.offsetLeft;
+            thisRef.canvasOffsetY = thisRef.canvas.offsetTop;
+            thisRef.ctx = canvas.getContext("2d");
 
-            this.stage = this.canvas;
+            thisRef.stage = thisRef.canvas;
 
-            this.passParams = {
-                canvas: this.canvas,
-                ctx: this.ctx
+            thisRef.passParams = {
+                canvas: thisRef.canvas,
+                ctx: thisRef.ctx
             };
         }
 
@@ -111,38 +111,38 @@
 
         if (('ontouchstart' in window || 'onmsgesturechange' in window)) {
 
-            this.stage
+            thisRef.stage
                 .addEventListener(
                     "touchstart",
                     function (e) { thisRef.touchStartHanlder(e); },
                     false);
 
-            this.stage
+            thisRef.stage
                 .addEventListener(
                     "touchmove",
                     function (e) { thisRef.touchMoveHanlder(e); },
                     false);
 
-            this.stage
+            thisRef.stage
                 .addEventListener(
                     "touchend",
                     function (e) { thisRef.touchEndHanlder(e); },
                     false);
         }
 
-        this.stage
+        thisRef.stage
             .addEventListener(
                 "mousemove",
                 function (e) { thisRef.mouseMoveHandler(e); },
                 false);
 
-        this.stage
+        thisRef.stage
             .addEventListener(
                 "mousedown",
                 function (e) { thisRef.mouseDownHandler(e); },
                 false);
 
-        this.stage
+        thisRef.stage
             .addEventListener(
                 "mouseup",
                 function (e) { thisRef.mouseUpHandler(e); },
@@ -169,42 +169,84 @@
         // prepare settings
         if (window.hasOwnProperty("SETTINGS_PACKAGE")) {
 
-            this.initSettings(window.SETTINGS_PACKAGE);
+            thisRef.initSettings(window.SETTINGS_PACKAGE);
         }
 
-        init(this.passParams)
+        thisRef.doInit(thisRef.passParams);
+    };
+
+    thisRef.doInit = function (params) {
+
+        init(params)
             .then(
                 function (options) {
-
                     if (options && options.hasOwnProperty("fps")) {
 
                         if (options.fps === -1) {
 
                             waitForAnimationFrame = false;
-                            setInterval(function () { update(this.passParams); }, 0);
+                            thisRef.updateIntervalID = setInterval(function () { update(params); }, 0);
                             return;
 
                         } else {
 
-                            this.FPS = options.fps;
-                            this.interval = 1000 / options.fps;
+                            thisRef.setFPS(options.fps);
                         }
                     }
 
-                    requestAnimationFrame(this.run);
+
+                    if (window.ConsoleFeatures && !window.DF) {
+
+                        console.log("==========================");
+                        console.log("Demo Framework Initialized");
+                        console.log("==========================");
+                        console.log("DF.Restart()");
+                        console.log("DF.FullRestart()");
+                        console.log("DF.SetFPS(60)");
+
+                        window.DF = {
+                            FullRestart: () => {
+                                clearInterval(thisRef.updateIntervalID);
+                                cancelAnimationFrame(thisRef.updateIntervalID);
+                                thisRef.initSettings(window.SETTINGS_PACKAGE);
+                                thisRef.doInit(params);
+
+                                Object.keys(window.settings).forEach(
+                                    function (key) {
+
+                                        window.settings[key].Regenerate();
+                                    });
+                            },
+                            Restart: () => {
+                                thisRef.doInit(params);
+                                clearInterval(thisRef.updateIntervalID);
+                                cancelAnimationFrame(thisRef.updateIntervalID);
+                            },
+                            SetFPS: thisRef.setFPS
+                        };
+                    }
+
+                    thisRef.updateIntervalID = requestAnimationFrame(() => thisRef.run());
                 });
+    }
+
+    thisRef.setFPS = function (fps) {
+
+        thisRef.FPS = fps;
+        thisRef.interval = 1000 / fps;
     };
 
-    this.initSettings = function (settingsOverrides) {
+    thisRef.initSettings = function (settingsOverrides) {
 
+        window.settings = {};
         Object.keys(settingsOverrides).forEach(
             function (key) {
-
-                window.settings[key] = this.settings[key] = this.setupSettingOverride(settingsOverrides[key]);
+                var settingOverride = thisRef.setupSettingOverride(settingsOverrides[key]);
+                window.settings[key] = settingOverride;
             });
     };
 
-    this.setupSettingOverride = function (settingOverride) {
+    thisRef.setupSettingOverride = function (settingOverride) {
 
         if (!settingOverride.hasOwnProperty("Generator")) {
 
@@ -263,39 +305,39 @@
         return settingOverride;
     };
 
-    this.interpolateMove = function (x, y) {
+    thisRef.interpolateMove = function (x, y) {
 
         // fix canvas scaling
-        x = x * this.stage.width / this.stage.clientWidth;
-        y = y * this.stage.height / this.stage.clientHeight;
+        x = x * thisRef.stage.width / thisRef.stage.clientWidth;
+        y = y * thisRef.stage.height / thisRef.stage.clientHeight;
 
         var result = [];
 
-        if (!this.lastX) {
+        if (!thisRef.lastX) {
 
-            this.lastX = x;
-            this.lastY = y;
+            thisRef.lastX = x;
+            thisRef.lastY = y;
         }
 
-        var distance = Math.sqrt((x - lastX) * (x - lastX) + (y - lastY) * (y - lastY));
+        var distance = Math.sqrt((x - thisRef.lastX) * (x - thisRef.lastX) + (y - thisRef.lastY) * (y - thisRef.lastY));
         var steps = distance / 4;
-        var intervalX = (x - lastX) / steps;
-        var intervalY = (y - lastY) / steps;
+        var intervalX = (x - thisRef.lastX) / steps;
+        var intervalY = (y - thisRef.lastY) / steps;
 
         for (var step = 0; step < steps; step++) {
 
-            x = lastX + (step * intervalX);
-            y = lastY + (step * intervalY);
+            x = thisRef.lastX + (step * intervalX);
+            y = thisRef.lastY + (step * intervalY);
             result.push({ x: x, y: y, speed: distance });
         }
 
-        this.lastX = x;
-        this.lastY = y;
+        thisRef.lastX = x;
+        thisRef.lastY = y;
 
         return result;
     };
 
-    this.tiltHandler = function (e) {
+    thisRef.tiltHandler = function (e) {
 
         // browser compatability
         if (!e.gamma && !e.beta) {
@@ -317,31 +359,31 @@
             tilt({ gamma: e.gamma, beta: e.beta, alpha: e.alpha });
     };
 
-    this.touchStartHanlder = function (e) {
+    thisRef.touchStartHanlder = function (e) {
 
         if (e.touches.length == 1 && window.hasOwnProperty("mouseDown"))
-            mouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+            mouseDown({ x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY });
         else if (e.touches.length == 2 && window.hasOwnProperty("secondaryMouseDown"))
-            secondaryMouseDown({ x: e.touches[0].pageX - this.canvasOffsetX, y: e.touches[0].pageY - this.canvasOffsetY });
+            secondaryMouseDown({ x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY });
     };
 
-    this.touchEndHanlder = function (e) {
+    thisRef.touchEndHanlder = function (e) {
 
         if (e.touches.length == 0 && window.hasOwnProperty("mouseUp"))
             mouseUp();
         else if (e.touches.length == 1 && window.hasOwnProperty("secondaryMouseUp"))
             secondaryMouseUp();
 
-        this.lastX = undefined;
-        this.lastY = undefined;
+        thisRef.lastX = undefined;
+        thisRef.lastY = undefined;
     };
 
-    this.touchMoveHanlder = function (e) {
+    thisRef.touchMoveHanlder = function (e) {
 
         var steps =
-            this.interpolateMove(
-                e.touches[0].pageX - this.canvasOffsetX,
-                e.touches[0].pageY - this.canvasOffsetY);
+            thisRef.interpolateMove(
+                e.touches[0].pageX - thisRef.canvasOffsetX,
+                e.touches[0].pageY - thisRef.canvasOffsetY);
 
         for (var i = 0; i < steps.length; i++) {
 
@@ -354,7 +396,7 @@
         }
     };
 
-    this.mouseDownHandler = function (e) {
+    thisRef.mouseDownHandler = function (e) {
 
         if ((e.which === 3 || e.button === 2)) {
 
@@ -372,7 +414,7 @@
         }
     };
 
-    this.mouseUpHandler = function (e) {
+    thisRef.mouseUpHandler = function (e) {
 
         if ((e.which === 3 || e.button === 2)) {
 
@@ -389,30 +431,30 @@
                 mouseUp(e);
         }
 
-        this.lastX = undefined;
-        this.lastY = undefined;
+        thisRef.lastX = undefined;
+        thisRef.lastY = undefined;
     };
 
-    this.mouseMoveHandler = function (e) {
+    thisRef.mouseMoveHandler = function (e) {
 
         var steps =
-            this.interpolateMove(
+            thisRef.interpolateMove(
                 e.offsetX,
                 e.offsetY);
 
         for (var i = 0; i < steps.length; i++) {
 
-            if (!isMouseDown && !isSecondaryMouseDown) {
+            if (!thisRef.isMouseDown && !thisRef.isSecondaryMouseDown) {
 
                 if (window.hasOwnProperty("mouseMove"))
                     mouseMove(steps[i], false);
 
-            } else if (isMouseDown) {
+            } else if (thisRef.isMouseDown) {
 
                 if (window.hasOwnProperty("mouseMove"))
                     mouseMove(steps[i], true);
 
-            } else if (isSecondaryMouseDown) {
+            } else if (thisRef.isSecondaryMouseDown) {
 
                 if (window.hasOwnProperty("secondaryMouseMove"))
                     secondaryMouseMove(steps[i]);
@@ -420,26 +462,30 @@
         }
     };
 
-    this.run = function () {
+    thisRef.run = function () {
 
-        now = Date.now();
-        delta = now - then;
+        thisRef.now = Date.now();
+        var delta = thisRef.now - thisRef.then;
 
-        if (delta > interval) {
+        if (delta > thisRef.interval) {
 
-            then = now - (delta % interval);
+            thisRef.then = thisRef.now;
 
-            Object.keys(this.settings).forEach(
-                function (key) {
+            if (window.settings) {
+                Object.keys(window.settings).forEach(
+                    function (key) {
 
-                    this.settings[key].Update();
-                });
+                        window.settings[key].Update();
+                    });
+            }
 
-            update(this.passParams);
+            update(thisRef.passParams);
         }
 
-        requestAnimationFrame(this.run);
+        thisRef.updateIntervalID = requestAnimationFrame(() => thisRef.run());
     };
 
-    window.onload = this.initialize;
-})();
+    thisRef.initialize();
+};
+
+window.onload = () => new DemoFramework();

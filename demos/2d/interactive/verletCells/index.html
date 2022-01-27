@@ -45,10 +45,10 @@
     var CANVAS_WIDTH = 1000;
     var CANVAS_HEIGHT = 565;
     var GRAVITY_DAMPENING = 0.005;
-    var BALL_COUNT = Math.floor(Math.random() * 1000);
-    var MAX_BALL_SIZE = Math.floor(Math.random() * 60);
-    var MIN_BALL_SIZE = Math.floor(Math.random() * 10) + 2;
-    var BALL_OPACITY = (Math.random() * 0.9) + 0.1;
+    var BALL_COUNT = Math.floor(Math.random() * 300) + 400;
+    var MAX_BALL_SIZE = Math.floor(Math.random() * 40);
+    var MIN_BALL_SIZE = Math.floor(Math.random() * 20) + 10;
+    var BALL_OPACITY = (Math.random() * 0.6) + 0.1;
     var FADE = (Math.random() * 0.9) + 0.1;
     var SHELL_SIZE = Math.floor(Math.random() * 6) - 3;
     var R = Math.floor(Math.random() * 255);
@@ -162,11 +162,6 @@
 
     function changeGravity() {
 
-        for (var i = 0; i < verlet.effectors.length; i++) {
-            verlet.effectors[i].radius = (Math.random() * 500) + 250;
-            verlet.effectors[i].force = (Math.random() * 0.8) - 0.4;
-        }
-
         if (!usingTilt) {
             verlet.gravity.x = (Math.random() * 0.06) - 0.03;
             verlet.gravity.y = (Math.random() * 0.06) - 0.03;
@@ -176,6 +171,11 @@
             function () { changeGravity(); },
             Math.floor(
                 Math.random() * 1000 * 10));
+    }
+
+    function mouseMove(e, isMouseDown) {
+        verlet.effectors[0].vector.x = e.x;
+        verlet.effectors[0].vector.y = e.y;
     }
 
     function constraintSnapped(constraint) {
@@ -196,22 +196,18 @@
             verlet.addParticle(particle);
         }
 
-        for (var i = 0; i < 3; i++) {
-            for (var o = 0; o < 3; o++) {
-                let effector =
-                    new Effector({
-                        vector:
-                            new Vector2D(
-                                (CANVAS_WIDTH / 2) * i,
-                                (CANVAS_HEIGHT / 2) * o),
-                        pinToMouse: false,
-                        force: (Math.random() * 0.8) - 0.4,
-                        radius: (Math.random() * 500) + 250
-                    });
+        let effector =
+            new Effector({
+                vector:
+                    new Vector2D(
+                        (CANVAS_WIDTH / 2),
+                        (CANVAS_HEIGHT / 2)),
+                pinToMouse: false,
+                force: 10.0,
+                radius: 200
+            });
 
-                verlet.addEffector(effector);
-            }
-        }
+        verlet.addEffector(effector);
     }
 
     function tilt(e) {

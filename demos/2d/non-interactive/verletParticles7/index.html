@@ -45,15 +45,16 @@
     var CANVAS_WIDTH = 1000;
     var CANVAS_HEIGHT = 565;
     var GRAVITY_DAMPENING = 0.005;
-    var BALL_COUNT = Math.floor(Math.random() * 1000);
-    var MAX_BALL_SIZE = Math.floor(Math.random() * 60);
-    var MIN_BALL_SIZE = Math.floor(Math.random() * 10) + 2;
-    var BALL_OPACITY = (Math.random() * 0.9) + 0.1;
-    var FADE = (Math.random() * 0.9) + 0.1;
-    var SHELL_SIZE = Math.floor(Math.random() * 6) - 3;
     var R = Math.floor(Math.random() * 255);
     var G = Math.floor(Math.random() * 255);
     var B = Math.floor(Math.random() * 255);
+    var BALL_COUNT = Math.floor(Math.random() * 600) + 600;
+    var MAX_BALL_SIZE = Math.floor(Math.random() * 20);
+    var MIN_BALL_SIZE = Math.floor(Math.random() * 10) + 5;
+    var BALL_OPACITY = 0.005; // (Math.random() * 0.1) + 0.05;
+    var FADE = (Math.random() * 0.1) + 0.05;
+    var SHELL_SIZE = Math.floor(Math.random() * 150) + 20;
+    var MAX_COLLIDE = Math.floor(Math.random() * 18) + 1;
 
     /////////////////////////////////////////////////////////
 
@@ -71,12 +72,13 @@
     // code to run before update looping starts.
 
     function init(params) {
+
         return new Promise(
             function (resolve, reject) {
 
                 lastTime = new Date();
                 elapsed = Math.random() * 1000;
-                params.ctx.fillStyle = "rgba(" + R + ", " + G + ", " + B + ", " + BALL_OPACITY + ")";
+                params.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
 
                 console.log("Init");
                 localCtxReference = params.ctx;
@@ -96,7 +98,7 @@
                     speedLimitMinVect: new Vector2D(-8, -8),
                     speedLimitMaxVect: new Vector2D(8, 8),
                     iterations: 1,
-                    useMass: true
+                    markCollides: true
                 });
 
                 generateScene();
@@ -110,7 +112,7 @@
                 gravityUpdateIntervalID = setTimeout(
                     function () { changeGravity(); },
                     Math.floor(
-                        Math.random() * 1000 * 6));
+                        Math.random() * 1000 * 10));
 
                 resolve({ fps: FPS });
             });
@@ -125,29 +127,34 @@
         lastTime = date;
 
         //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        params.ctx.fillStyle = "rgba(" + (255 - R) + ", " + (255 - G) + ", " + (255 - B) + ", " + FADE + ")";
+        params.ctx.fillStyle = "rgba(0, 0, 0, " + FADE + ")";
         params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         params.ctx.strokeStyle = "white";
 
         for (var i = 0; i < verlet.particles.length; i++) {
-            params.ctx.fillStyle =
-                "rgba(" +
-                R + ", " +
-                G + ", " +
-                B + ", " +
-                Math.min(1, BALL_OPACITY + (verlet.particles[i].mass / 20)) + ")";
 
-            params.ctx.beginPath();
+            if (verlet.particles[i].data.drawn && verlet.particles[i].data.collided < MAX_COLLIDE) {
 
-            params.ctx.arc(
-                verlet.particles[i].vector.x,
-                verlet.particles[i].vector.y,
-                verlet.particles[i].radius - SHELL_SIZE,
-                0,
-                2 * Math.PI);
+                params.ctx.fillStyle = verlet.particles[i].data.color;
+                params.ctx.beginPath();
 
-            params.ctx.fill();
+                if (verlet.particles[i].radius)
+                    params.ctx.arc(
+                        verlet.particles[i].vector.x,
+                        verlet.particles[i].vector.y,
+                        verlet.particles[i].radius + SHELL_SIZE,
+                        0,
+                        2 * Math.PI);
+                else
+                    params.ctx.rect(
+                        verlet.particles[i].vector.x,
+                        verlet.particles[i].vector.y,
+                        2,
+                        2);
+
+                params.ctx.fill();
+            }
         }
     }
 
@@ -163,19 +170,22 @@
     function changeGravity() {
 
         for (var i = 0; i < verlet.effectors.length; i++) {
-            verlet.effectors[i].radius = (Math.random() * 500) + 250;
-            verlet.effectors[i].force = (Math.random() * 0.8) - 0.4;
+
+            //verlet.effectors[i].vector.x = (Math.random() * CANVAS_WIDTH);
+            //verlet.effectors[i].vector.y = (Math.random() * CANVAS_HEIGHT);
+            verlet.effectors[i].radius = (Math.random() * 200) + 200;
+            verlet.effectors[i].force = (Math.random() * 0.1) - 0.05;
         }
 
         if (!usingTilt) {
-            verlet.gravity.x = (Math.random() * 0.06) - 0.03;
-            verlet.gravity.y = (Math.random() * 0.06) - 0.03;
+            verlet.gravity.x = (Math.random() * 0.02) - 0.001;
+            verlet.gravity.y = (Math.random() * 0.02) - 0.001;
         }
 
         gravityUpdateIntervalID = setTimeout(
             function () { changeGravity(); },
             Math.floor(
-                Math.random() * 1000 * 10));
+                Math.random() * 1000 * 5));
     }
 
     function constraintSnapped(constraint) {
@@ -183,14 +193,20 @@
     }
 
     function generateScene() {
+        var colors = ["rgba(" + R + ", " + G + ", " + B + ", " + BALL_OPACITY + ")", "rgba(" + Math.min(255, R + 50) + ", " + Math.min(255, G + 50) + ", " + Math.min(255, B + 50) + ", " + BALL_OPACITY + ")"];
 
         for (var i = 0; i < BALL_COUNT; i++) {
+
             let particle =
                 new Particle({
                     vector: new Vector2D(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT),
                     radius: Math.floor(Math.random() * MAX_BALL_SIZE) + MIN_BALL_SIZE,
                     collides: true,
-                    mass: (Math.random() * 0.8) + 0.2
+                    data: {
+                        drawn: true,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        collided: 0
+                    }
                 });
 
             verlet.addParticle(particle);
@@ -205,8 +221,9 @@
                                 (CANVAS_WIDTH / 2) * i,
                                 (CANVAS_HEIGHT / 2) * o),
                         pinToMouse: false,
-                        force: (Math.random() * 0.8) - 0.4,
-                        radius: (Math.random() * 500) + 250
+                        force: (Math.random() * 0.4) - 0.2,
+                        radius: (Math.random() * 100) + 100,
+                        data: { drawn: false }
                     });
 
                 verlet.addEffector(effector);
@@ -219,6 +236,48 @@
         usingTilt = true;
         verlet.gravity.x = (e.gamma) * GRAVITY_DAMPENING;
         verlet.gravity.y = (e.beta) * GRAVITY_DAMPENING;
+    }
+
+    // code to run when user presses primary mouse button ( or first finger. )
+
+    function mouseDown(e) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user raises primary mouse button ( or first finger. )
+
+    function mouseUp(e) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user moves primary mouse button ( or first finger. )
+
+    function mouseMove(e, isMouseDown) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user presses secondary mouse button ( or second finger. )
+
+    function secondaryMouseDown(e) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user raises secondary mouse button ( or second finger. )
+
+    function secondaryMouseUp(e) {
+
+        //e.x e.y e.speed
+    }
+
+    // code to run when user moves secondary mouse button ( or second finger. )
+
+    function secondaryMouseMove(e) {
+
+        //e.x e.y e.speed
     }
 </script>
 

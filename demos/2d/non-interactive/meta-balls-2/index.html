@@ -38,6 +38,7 @@
     var CANVAS_WIDTH = 1400;
     var CANVAS_HEIGHT = 800;
     var FPS = 60;
+    var ConsoleFeatures = true;
 
     var SETTINGS_PACKAGE = {
         RADIUS: {
@@ -127,7 +128,7 @@
                     )
                 }
 
-                resolve(FPS);
+                resolve({ fps: FPS });
             });
     }
 

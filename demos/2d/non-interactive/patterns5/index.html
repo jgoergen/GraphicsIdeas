@@ -94,7 +94,7 @@
         for (var i = 0, n = pixels.length; i < n; i += 4) {
 
             var coords = MathHelperFunctions.IndexToXY(i, CANVAS_WIDTH * 4);
-            var color1 = Math.ceil((Math.sin( reducedTime)) * 127) + 127;
+            var color1 = Math.ceil((Math.sin(reducedTime)) * 127) + 127;
             var color2 = Math.ceil(Math.cos((coords[0] * coords[1]) / 1000) * 127) + 127;
             var color3 = Math.ceil((Math.cos(reducedTime)) * 127) + 127;
 
@@ -103,8 +103,8 @@
             pixels[i + 2] = gradient[(color3 * 4) + 2];
             pixels[i + 3] = Math.floor(
                 (((Math.sin(coords[0] / 1000) *
-                    Math.atan(coords[1] / 1000)) + 1) * (((elapsed / 100) ) * 20 + 40000) 
-            )) % 255;
+                    Math.atan(coords[1] / 1000)) + 1) * (((elapsed / 100)) * 20 + 40000)
+                )) % 255;
         }
 
         params.ctx.putImageData(imageData, 0, 0);

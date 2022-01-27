@@ -14,10 +14,8 @@ let VerletIntegration = function (options) {
     this.constraintSnapCallback;
     this.useMass = false;
     this.stageFriction = 0;
-    this.constraintsEnabled = true;
-    this.particleCollisionEnabled = true;
-    this.particleLineCollisionEnabled = true;
-    this.bodyCollisionEnabled = true;
+    this.markCollides = false;
+    this.maxCollideCound = 20;
 
     this.init = function (options) {
 
@@ -28,12 +26,20 @@ let VerletIntegration = function (options) {
         this.constraints = [];
         this.bodies = [];
         this.stageMinVect = new Vector2D(10, 10);
-        this.stageMaxVect = new Vector2D(490, 490);
+        this.stageMaxVect = new Vector2D(790, 490);
         this.speedLimitMinVect = new Vector2D(-4, -4);
         this.speedLimitMaxVect = new Vector2D(4, 4);
         this.stageFriction = 0.001;
+        this.markCollides = false;
+        this.maxCollideCound = 20;
 
         if (options) {
+
+            if (options.markCollides)
+                this.markCollides = options.markCollides;
+
+            if (options.maxCollideCound)
+                this.maxCollideCound = options.maxCollideCound;
 
             if (options.iterations)
                 this.iterations = options.iterations;
@@ -61,18 +67,6 @@ let VerletIntegration = function (options) {
 
             if (options.stageFriction)
                 this.stageFriction = options.stageFriction;
-
-            if (options.constraintsEnabled)
-                this.constraintsEnabled = options.constraintsEnabled;
-
-            if (options.particleCollisionEnabled)
-                this.particleCollisionEnabled = options.particleCollisionEnabled;
-
-            if (options.particleLineCollisionEnabled)
-                this.particleLineCollisionEnabled = options.particleLineCollisionEnabled;
-
-            if (options.bodyCollisionEnabled)
-                this.bodyCollisionEnabled = options.bodyCollisionEnabled;
         }
     }
 
@@ -111,6 +105,9 @@ let VerletIntegration = function (options) {
         // let timeDeltaSquare = Math.pow(timeDelta, 2);
 
         for (let i = 0; i < this.particles.length; i++) {
+            if (this.markCollides && this.particles[i].data.collided > 0) {
+                this.particles[i].data.collided -= 1;
+            }
 
             // derive velocity
             let velocityVector = this.particles[i].vector.getSubtractedFromVector(this.particles[i].lastVector);
@@ -144,7 +141,7 @@ let VerletIntegration = function (options) {
             velocityVector.addToVector(this.gravity);
 
             // limit speed
-            //velocityVector.clamp(this.speedLimitMinVect, this.speedLimitMaxVect);
+            velocityVector.clamp(this.speedLimitMinVect, this.speedLimitMaxVect);
 
             // adjust for timestep delta
             // velocityVector.multiplyBy(timeDeltaSquare);
@@ -173,18 +170,10 @@ let VerletIntegration = function (options) {
 
         for (let j = 0; j < this.iterations; j++) {
 
-            if (this.constraints.length > 0 && this.constraintsEnabled === true)
-                this.runConstraints();
-
-            if (this.particleCollisionEnabled === true)
-                this.runParticleCollisions();
-
-            if (this.constraints.length > 0 && this.particleLineCollisionEnabled === true)
-                this.runParticleOnLineCollisions();
-
-            if (this.bodies.length > 0 && this.bodyCollisionEnabled === true)
-                this.runBodyCollisions();
-
+            this.runConstraints();
+            this.runParticleCollisions();
+            this.runParticleOnLineCollisions();
+            this.runBodyCollisions();
             this.runPinning();
         }
     }
@@ -243,7 +232,6 @@ let VerletIntegration = function (options) {
         let totalRadius = 0;
 
         for (let i = 0; i < this.particles.length; i++) {
-
             if (!this.particles[i].collides || this.particles[i].radius == 0)
                 continue;
 
@@ -255,33 +243,40 @@ let VerletIntegration = function (options) {
                 totalRadius = (this.particles[i].radius + this.particles[o].radius);
 
                 // first pass check for speed
-                if (Math.abs(this.particles[i].vector.x - this.particles[o].vector.x) > totalRadius ||
-                    Math.abs(this.particles[i].vector.y - this.particles[o].vector.y) > totalRadius)
+                if (Math.abs(this.particles[i].vector.x - this.particles[o].vector.x) > totalRadius * 2 ||
+                    Math.abs(this.particles[i].vector.y - this.particles[o].vector.y) > totalRadius * 2)
                     continue;
 
-                let distance = this.particles[i].vector.distanceTo(this.particles[o].vector);
-                if (distance < totalRadius) {
+                const distance = this.particles[i].vector.distanceTo(this.particles[o].vector);
+
+                if (distance <= totalRadius) {
+
+                    if (this.markCollides) {
+                        if (this.particles[i].data.collided < this.maxCollideCound)
+                            this.particles[i].data.collided += 1;
+
+                        if (this.particles[o].data.collided < this.maxCollideCound)
+                            this.particles[o].data.collided += 1;
+                    }
 
                     let collisionVector = this.particles[i].vector.getSubtractedFromVector(this.particles[o].vector).divideByScalar(distance);
+                    // verlet is built around recalcing these things in multiple passes, so the response needs to be dulled
+                    // otherwise it appears 'jumpy'
+                    collisionVector.multiplyByScalar(0.5);
+                    let dot1 = this.particles[i].vector.getSubtractedFromVector(this.particles[i].lastVector).dotProduct(collisionVector);
+                    let dot2 = this.particles[o].vector.getSubtractedFromVector(this.particles[o].lastVector).dotProduct(collisionVector);
+                    let optimizedP = 0;
 
                     if (this.useMass) {
-
-                        // slower but takes mass into account
-                        collisionVector.multiplyByScalar(0.5);
-                        let dot1 = this.particles[i].vector.getSubtractedFromVector(this.particles[i].lastVector).dotProduct(collisionVector);
-                        let dot2 = this.particles[o].vector.getSubtractedFromVector(this.particles[o].lastVector).dotProduct(collisionVector);
-                        let optimizedP = 2.0 * (dot1 - dot2) / (this.particles[i].mass + this.particles[o].mass);
-
-                        collisionVector.getMultipliedByScalar(optimizedP);
-                        this.particles[o].vector.subtractByVector(collisionVector.getMultipliedByScalar(this.particles[i].mass));
-                        this.particles[i].vector.addToVector(collisionVector.getMultipliedByScalar(this.particles[o].mass));
-                    } else {
-
-                        // faster but ignores mass
-                        collisionVector.multiplyByScalar(0.5);
-                        this.particles[o].vector.subtractByVector(collisionVector);
-                        this.particles[i].vector.addToVector(collisionVector);
+                        optimizedP = 2.0 * (dot1 - dot2) / (this.particles[i].mass + this.particles[o].mass);
                     }
+                    else {
+                        optimizedP = 2.0 * (dot1 - dot2);
+                    }
+
+                    collisionVector.getMultipliedByScalar(optimizedP);
+                    this.particles[o].vector.subtractByVector(collisionVector.getMultipliedByScalar(this.particles[i].mass));
+                    this.particles[i].vector.addToVector(collisionVector.getMultipliedByScalar(this.particles[o].mass));
                 }
             }
         }
