@@ -78,15 +78,14 @@
         var pixels = imageData.data;
         var moveSpeed = Math.floor((Math.cos(reducedTime / 2) * Math.sin(reducedTime) + 1) * 500);
 
-        for (var i = 1000, n = pixels.length - 1000; i < n; i += (12 + moveSpeed)) {
+        for (var i = 100, n = pixels.length - 100; i < n; i += (9 + moveSpeed)) {
             pixels[i] = pixels[i - moveSpeed];
             pixels[i + 1] = pixels[i];
             pixels[i + 2] = pixels[i + moveSpeed];
 
             pixels[i + 3] =
                 Math.floor(Math.random() *
-                    Math.floor(
-                        (Math.sin(reducedTime + (i / 500)) + 1) * 30020)
+                        (Math.sin(reducedTime + (i / 500)) + 1) * 10020
                     % 255);
 
             pixels[i + 4] = pixels[i - moveSpeed];
@@ -95,8 +94,7 @@
 
             pixels[i + 7] =
                 Math.floor(Math.random() *
-                    Math.floor(
-                        (Math.sin(reducedTime + (i / 1000)) + 1) * 30020)
+                        (Math.sin(reducedTime + (i / 1000)) + 1) * 20020
                     % 255);
         }
 
