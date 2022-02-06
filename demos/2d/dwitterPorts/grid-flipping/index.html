@@ -1,81 +1,79 @@
 <html>
-    <head>
 
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+<head>
 
-        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <title></title>
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
 
-        <style type="text/css">
+    <title></title>
 
-            body { background-color: black; }
-            canvas { border: 1px solid #ccc; width: 100%; }
-
-        </style>
-    </head>
-    <body>
-        <canvas id="canvas" width="300" height="300"></canvas>
-    </body>
-
-    <script type="text/javascript">
-
-        // original idea from: https://www.dwitter.net/d/17000
-
-        /// Settings ////////////////////////////////////////////
-
-        // put any adjustable settings here that would be interesting to tinker with.
-
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 800;
-        var FPS = 60;
-        var SETTINGS_PACKAGE = {
-            ANIMATION_SPEED_DIVISOR: {
-                Min: 2000,
-                Max: 5000
-            }
-        };
-
-        /////////////////////////////////////////////////////////
-
-        var localCtxReference = undefined;
-        var lastTime = 0;
-        var date = undefined;
-        var elapsed = 0;
-
-        // code to run before update looping starts.
-
-        function init(params) {
-            
-            return new Promise(
-                function(resolve, reject) {
-
-                    console.log("Init");
-                    lastTime = new Date();
-                    elapsed = Math.random() * 10000;
-                    
-                    resolve({
-                        fps: FPS
-                    });
-                });
+    <style type="text/css">
+        body {
+            background-color: black;
         }
 
-        // code to run every frame.
-        let i = 0;
-        let m = 0;
-
-        function update(params) {
-
-            date = new Date();
-            elapsed += date - lastTime;
-            lastTime = date;
-
-            x.rotate(.5236*(2+~~t%2));for(i=99;i--;x.fillStyle=R(m=S(i*12+t)*2e3,m/16,255-m,.02))x.fillRect(-2e3,i*40-2e3,6e3,240)
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
         }
+    </style>
+</head>
 
-    </script>
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+</body>
+
+<script type="text/javascript">
+
+    // original idea from: https://www.dwitter.net/d/17000
+
+    /// Settings ////////////////////////////////////////////
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 800;
+    var FPS = 60;
+    var values = {
+        ANIMATION_SPEED_DIVISOR: {
+            Min: 2000,
+            Max: 5000
+        }
+    };
+
+    /////////////////////////////////////////////////////////
+
+    let i = 0;
+    let m = 0;
+
+    const RGBA = (r, g, b, a) => `rgba(${r}, ${g}, ${b}, ${a})`;
+
+    const init = async params => {
+        console.log("Init");
+    }
+
+    const update = p => {
+        p.ctx.rotate(0.5236 * (2 + ~~p.elapsed % 2));
+        for (i = 99; i--; p.ctx.fillStyle = RGBA(m = Math.sin(i * 12 + p.elapsed) * 2e3, m / 16, 255 - m, .02)) {
+            p.ctx.fillRect(-2e3, i * 40 - 2e3, 6e3, 240);
+        }
+    }
+
+    new DemoFramework(
+        {
+            fps: FPS,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            values,
+            init,
+            update
+        });
+
+</script>
+
 </html>

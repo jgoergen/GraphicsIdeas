@@ -3,27 +3,12 @@
 <head>
 
     <meta charset="utf-8" />
-    <meta
-        http-equiv="X-UA-Compatible"
-        content="IE=edge"
-    >
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <meta
-        http-equiv="ScreenOrientation"
-        content="autoRotate:disabled"
-    >
-    <meta
-        name="apple-mobile-web-app-capable"
-        content="yes"
-    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-    <script
-        src="../../../libs/DemoFramework2.js"
-        type="text/javascript"
-    ></script>
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
 
     <title></title>
 
@@ -40,11 +25,7 @@
 </head>
 
 <body>
-    <canvas
-        id="canvas"
-        width="300"
-        height="300"
-    ></canvas>
+    <canvas id="canvas" width="300" height="300"></canvas>
 </body>
 
 <script type="text/javascript">
@@ -54,12 +35,10 @@
 
     /// Settings ////////////////////////////////////////////
 
-    // put any adjustable settings here that would be interesting to tinker with.
-
     var CANVAS_WIDTH = 1000;
     var CANVAS_HEIGHT = 1080;
     var FPS = 60;
-    var SETTINGS_PACKAGE = {
+    var values = {
         ANIMATION_SPEED_DIVISOR: {
             Min: 100,
             Max: 10000
@@ -79,76 +58,59 @@
 
     /////////////////////////////////////////////////////////
 
-    var localCtxReference = undefined;
-    var lastTime = 0;
-    var date = undefined;
-    var elapsed = 0;
+    const init = async p => {
+        console.log("Init");
+        p.ctx.strokeStyle = "#fff";
+        p.ctx.lineWidth = 1
+        p.ctx.lineJoin = "round";
+        p.ctx.scale(3, 3);
 
-    // code to run before update looping starts.
-
-    function init(params) {
-
-        return new Promise(
-            function (resolve, reject) {
-
-                console.log("Init");
-                lastTime = new Date();
-                elapsed = Math.random() * 10000;
-                params.ctx.strokeStyle = "#fff";
-                params.ctx.lineWidth = 1
-
-                params.ctx.lineJoin = "round";
-                params.ctx.scale(3, 3);
-
-                console.log(
-                    "Params",
-                    "ANIMATION_SPEED_DIVISOR",
-                    settings.ANIMATION_SPEED_DIVISOR.Value,
-                    "INITIAL_SHAPE_VALUE",
-                    settings.INITIAL_SHAPE_VALUE.Value,
-                    "SPIN_AMOUNT",
-                    settings.SPIN_AMOUNT.Value,
-                    "SHAPE_STYLE",
-                    settings.SHAPE_STYLE.Value);
-
-                resolve({
-                    fps: FPS
-                });
-            });
+        console.log(
+            "Params",
+            "ANIMATION_SPEED_DIVISOR",
+            p.values.ANIMATION_SPEED_DIVISOR.Value,
+            "INITIAL_SHAPE_VALUE",
+            p.values.INITIAL_SHAPE_VALUE.Value,
+            "SPIN_AMOUNT",
+            p.values.SPIN_AMOUNT.Value,
+            "SHAPE_STYLE",
+            p.values.SHAPE_STYLE.Value);
     }
 
     // code to run every frame.
 
-    function update(params) {
-
-        date = new Date();
-        elapsed += date - lastTime;
-        lastTime = date;
-
-        adjustedElapsed = elapsed / settings.ANIMATION_SPEED_DIVISOR.Value;
-        params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        params.ctx.beginPath();
+    const update = p => {
+        adjustedElapsed = p.elapsed / p.values.ANIMATION_SPEED_DIVISOR.Value;
+        p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        p.ctx.beginPath();
 
         for (j = 21; j--;) {
-
             for (i = 26; i--;) {
+                r = (j + i % p.values.SHAPE_STYLE.Value) + (adjustedElapsed % 2);
+                a = (i + j) % 24 / 3.8197 + Math.cos(r) / p.values.SPIN_AMOUNT.Value;
 
-                r = (j + i % settings.SHAPE_STYLE.Value) + (adjustedElapsed % 2);
-                a = (i + j) % 24 / 3.8197 + Math.cos(r) / settings.SPIN_AMOUNT.Value;
-
-                params.ctx.arc(
+                p.ctx.arc(
                     170,
                     170,
-                    Math.pow(settings.INITIAL_SHAPE_VALUE.Value, r),
+                    Math.pow(p.values.INITIAL_SHAPE_VALUE.Value, r),
                     a,
                     a);
 
             }
         }
 
-        params.ctx.stroke();
+        p.ctx.stroke();
     }
 
+    new DemoFramework(
+        {
+            fps: FPS,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            values,
+            init,
+            update
+        });
 </script>
 
 </html>

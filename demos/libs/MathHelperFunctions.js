@@ -1,6 +1,6 @@
 var MathHelperFunctions = {
 
-    Quantize: function(value, interval) {
+    Quantize: function (value, interval) {
 
         return Math.round(value / interval) * interval;
     },
@@ -34,9 +34,9 @@ var MathHelperFunctions = {
         return Math.floor((Math.random() * (_high - _low)) + _low);
     },
 
-    WrapVal: function(val, lowerLimit, upperLimit) {
+    WrapVal: function (val, lowerLimit, upperLimit) {
 
-        while(val < lowerLimit || val > upperLimit) {
+        while (val < lowerLimit || val > upperLimit) {
 
             if (val <= lowerLimit)
                 val += (upperLimit - lowerLimit);
@@ -48,7 +48,7 @@ var MathHelperFunctions = {
         return val;
     },
 
-    GetBearingBetweenPositions: function(x, y, x2, y2) {
+    GetBearingBetweenPositions: function (x, y, x2, y2) {
 
         var dLon = MathHelperFunctions.DegToRad(y2 - y);
 
@@ -63,22 +63,22 @@ var MathHelperFunctions = {
         return radToBearing(Math.atan2(dLon, dPhi));
     },
 
-    DegToRad: function(degrees) {
+    DegToRad: function (degrees) {
 
         return degrees * (Math.PI / 180)
     },
 
-    RadToDeg: function(radians) {
+    RadToDeg: function (radians) {
 
         return radians * 180 / Math.PI;
     },
 
-    RadToBearing: function(radians) {
+    RadToBearing: function (radians) {
 
         return (MathHelperFunctions.RadToDeg(radians) + 360) % 360;
     },
 
-    RotatePoint: function(centerX, centerY, x, y, angleDegrees) {
+    RotatePoint: function (centerX, centerY, x, y, angleDegrees) {
 
         var radians = (Math.PI / 180) * angleDegrees,
             cos = Math.cos(radians),
@@ -89,7 +89,7 @@ var MathHelperFunctions = {
         return [nx, ny];
     },
 
-    Map: function(value, fromStart, fromEnd, toStart, toEnd) {
+    Map: function (value, fromStart, fromEnd, toStart, toEnd) {
 
         return (value - fromStart) / (fromEnd - fromStart) * (toEnd - toStart) + toStart;
     }

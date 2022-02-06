@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
     <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
     <script src="../../../libs/MidpointDisplacementNoiseGenerator.js" type="text/javascript"></script>
 
     <title></title>
@@ -27,6 +28,7 @@
 
 <body>
     <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="editor"></div>
 </body>
 
 <script type="text/javascript">
@@ -35,7 +37,7 @@
     // put any adjustable settings here that would be interesting to tinker with.
 
     const CANVAS_WIDTH = 800;
-    const CANVAS_HEIGHT = 800;
+    const CANVAS_HEIGHT = 600;
     const FPS = 60;
 
     const values = {
@@ -80,6 +82,7 @@
             p.ctx.fillStyle = "white";
             p.ctx.strokeStyle = "white";
             p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            new DFEditor(p.values, "editor");
         };
 
     // code to run every frame.
@@ -147,6 +150,7 @@
 
     new DemoFramework(
         {
+            consoleFeatures: true,
             fps: FPS,
             width: CANVAS_WIDTH,
             height: CANVAS_HEIGHT,

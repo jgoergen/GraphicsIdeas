@@ -1,143 +1,133 @@
 <html>
-    <head>
 
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+<head>
 
-        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <title></title>
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
 
-        <style type="text/css">
+    <title></title>
 
-            body { background-color: black; }
-            canvas { border: 1px solid #ccc; width: 100%; }
-
-        </style>
-    </head>
-    <body>
-        <canvas id="canvas" width="300" height="300"></canvas>
-    </body>
-
-    <script type="text/javascript">
-
-        // original idea from: https://www.dwitter.net/d/17016
-
-        /// Settings ////////////////////////////////////////////
-
-        // put any adjustable settings here that would be interesting to tinker with.
-
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 800;
-        var FPS = 60;
-        var SETTINGS_PACKAGE = {
-            X_ANIMATION_SPEED_DIVISOR: {
-                Min: 5000,
-                Max: 10000
-            },
-            Y_ANIMATION_SPEED_DIVISOR: {
-                Min: 5000,
-                Max: 10000
-            },
-            X_ROTATION_SPEED: {
-                Min: -3,
-                Max: 3
-            },
-            Y_ROTATION_SPEED: {
-                Min: -3,
-                Max: 3
-            },
-            CENTER_OFFSET: {
-                Min: 300,
-                Max: 500
-            },
-            FADE_ALPHA: {
-                Min: 0.001,
-                Max: 0.01
-            },
-            PIXEL_ALPHA: {
-                Min: 0.2,
-                Max: 1
-            },
-            PIXEL_SIZE: {
-                Value: 1
-            },
-            MAX_R: {
-                Min: 100,
-                Max: 255
-            },
-            MAX_G: {
-                Min: 100,
-                Max: 255
-            },
-            MAX_B: {
-                Min: 100,
-                Max: 255
-            }
-        };
-
-        /////////////////////////////////////////////////////////
-
-        var localCtxReference = undefined;
-        var lastTime = 0;
-        var date = undefined;
-        var elapsed = 0;
-
-        // code to run before update looping starts.
-
-        function init(params) {
-            
-            return new Promise(
-                function(resolve, reject) {
-
-                    console.log("Init");
-                    lastTime = new Date();
-                    elapsed = Math.random() * 10000;
-                    
-                    resolve({
-                        fps: FPS
-                    });
-                });
+    <style type="text/css">
+        body {
+            background-color: black;
         }
 
-        // code to run every frame.
-        
-        function update(params) {
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+</head>
 
-            date = new Date();
-            elapsed += date - lastTime;
-            lastTime = date;
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+</body>
 
-            for(j = 1; j < 10; j ++) {
+<script type="text/javascript">
 
-                params.ctx.translate(settings.CENTER_OFFSET.Value, settings.CENTER_OFFSET.Value);
-                params.ctx.rotate(settings.X_ROTATION_SPEED.Value);
-                params.ctx.translate(settings.CENTER_OFFSET.Value * -1, settings.CENTER_OFFSET.Value * -1);
-                
-                for (i = 0; i < 20; i += 0.05) {
+    // original idea from: https://www.dwitter.net/d/17016
 
-                    params.ctx.translate(400, 400);
-                    params.ctx.rotate(settings.Y_ROTATION_SPEED.Value);
-                    params.ctx.translate(-400, -400);
+    /// Settings ////////////////////////////////////////////
 
-                    params.ctx.fillStyle = "rgba(" + 
-                        settings.MAX_R.Value * Math.sin((elapsed / settings.X_ANIMATION_SPEED_DIVISOR.Value) * j) + ", " +
-                        settings.MAX_G.Value * Math.cos((elapsed / settings.Y_ANIMATION_SPEED_DIVISOR.Value) * i) + ", " + 
-                        settings.MAX_B.Value + ", " +
-                        settings.PIXEL_ALPHA.Value +
-                    ")";
+    // put any adjustable settings here that would be interesting to tinker with.
 
-                    params.ctx.fillRect(
-                        400 + 20 * i * Math.cos((elapsed / settings.X_ANIMATION_SPEED_DIVISOR.Value)), 
-                        400 + 20 * j * Math.sin((elapsed / settings.Y_ANIMATION_SPEED_DIVISOR.Value)), 
-                        settings.PIXEL_SIZE.Value, 
-                        settings.PIXEL_SIZE.Value);
-                }
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 800;
+    var FPS = 60;
+    var values = {
+        X_ANIMATION_SPEED_DIVISOR: {
+            Min: 5000,
+            Max: 10000
+        },
+        Y_ANIMATION_SPEED_DIVISOR: {
+            Min: 5000,
+            Max: 10000
+        },
+        X_ROTATION_SPEED: {
+            Min: -3,
+            Max: 3
+        },
+        Y_ROTATION_SPEED: {
+            Min: -3,
+            Max: 3
+        },
+        CENTER_OFFSET: {
+            Min: 300,
+            Max: 500
+        },
+        FADE_ALPHA: {
+            Min: 0.001,
+            Max: 0.01
+        },
+        PIXEL_ALPHA: {
+            Min: 0.2,
+            Max: 1
+        },
+        PIXEL_SIZE: {
+            Value: 1
+        },
+        MAX_R: {
+            Min: 100,
+            Max: 255
+        },
+        MAX_G: {
+            Min: 100,
+            Max: 255
+        },
+        MAX_B: {
+            Min: 100,
+            Max: 255
+        }
+    };
+
+    /////////////////////////////////////////////////////////
+
+    const RGBA = (r, g, b, a) => `rgba(${r}, ${g}, ${b}, ${a})`;
+
+    const init = async p => {
+        console.log("Init");
+    }
+
+    const update = p => {
+        for (j = 1; j < 10; j++) {
+            p.ctx.translate(p.values.CENTER_OFFSET.Value, p.values.CENTER_OFFSET.Value);
+            p.ctx.rotate(p.values.X_ROTATION_SPEED.Value);
+            p.ctx.translate(p.values.CENTER_OFFSET.Value * -1, p.values.CENTER_OFFSET.Value * -1);
+
+            for (i = 0; i < 20; i += 0.05) {
+                p.ctx.translate(400, 400);
+                p.ctx.rotate(p.values.Y_ROTATION_SPEED.Value);
+                p.ctx.translate(-400, -400);
+
+                p.ctx.fillStyle = RGBA(
+                    p.values.MAX_R.Value * Math.sin((p.elapsed / p.values.X_ANIMATION_SPEED_DIVISOR.Value) * j),
+                    p.values.MAX_G.Value * Math.cos((p.elapsed / p.values.Y_ANIMATION_SPEED_DIVISOR.Value) * i),
+                    p.values.MAX_B.Value,
+                    p.values.PIXEL_ALPHA.Value);
+
+                p.ctx.fillRect(
+                    400 + 20 * i * Math.cos((p.elapsed / p.values.X_ANIMATION_SPEED_DIVISOR.Value)),
+                    400 + 20 * j * Math.sin((p.elapsed / p.values.Y_ANIMATION_SPEED_DIVISOR.Value)),
+                    p.values.PIXEL_SIZE.Value,
+                    p.values.PIXEL_SIZE.Value);
             }
         }
+    }
 
-    </script>
+    new DemoFramework(
+        {
+            fps: FPS,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            values,
+            init,
+            update
+        });
+</script>
+
 </html>

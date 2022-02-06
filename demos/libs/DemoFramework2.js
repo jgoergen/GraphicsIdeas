@@ -1,4 +1,4 @@
-var DemoFramework = function () {
+var DemoFramework = function (initialSettings) {
 
     var thisRef = this;
 
@@ -19,6 +19,9 @@ var DemoFramework = function () {
     thisRef.stage = undefined;
     thisRef.passParams = {};
     thisRef.updateIntervalID = 0;
+    thisRef.lastTime = 0;
+    thisRef.date = undefined;
+    thisRef.elapsed = 0;
 
     // ThreeJS Stuff
     thisRef.scene = undefined;
@@ -28,13 +31,13 @@ var DemoFramework = function () {
 
     thisRef.initialize = function () {
 
-        if (window.TYPE === "threejs") {
+        if (initialSettings.type === "threejs") {
 
             thisRef.scene = new THREE.Scene();
-            thisRef.camera = new THREE.PerspectiveCamera(75, CANVAS_WIDTH / CANVAS_HEIGHT, 0.1, 1000);
+            thisRef.camera = new THREE.PerspectiveCamera(75, initialSettings.width / initialSettings.height, 0.1, 1000);
             thisRef.renderer = new THREE.WebGLRenderer();
             renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
+            renderer.setSize(initialSettings.width, initialSettings.height);
 
             thisRef.controls = new THREE.TrackballControls(camera);
             thisRef.controls.rotateSpeed = 1.0;
@@ -51,14 +54,16 @@ var DemoFramework = function () {
             thisRef.passParams = {
                 scene: thisRef.scene,
                 camera: thisRef.camera,
-                renderer: thisRef.renderer
+                renderer: thisRef.renderer,
+                elapsed: 0,
+                delta: 0
             };
 
-        } else if (window.TYPE === "pixijs") {
+        } else if (initialSettings.type === "pixijs") {
 
             let app = new PIXI.Application({
-                width: CANVAS_WIDTH,
-                height: CANVAS_HEIGHT,
+                width: initialSettings.width,
+                height: initialSettings.height,
                 antialias: true,
                 transparent: false,
                 resolution: 1
@@ -71,13 +76,18 @@ var DemoFramework = function () {
 
             thisRef.passParams = {
                 app: app,
-                stage: app.stage
+                stage: app.stage,
+                elapsed: 0,
+                delta: 0
             };
 
-        } else if (window.TYPE === "none") {
+        } else if (initialSettings.type === "none") {
 
             thisRef.stage = document.querySelector("body");
-            thisRef.passParams = {};
+            thisRef.passParams = {
+                elapsed: 0,
+                delta: 0
+            };
 
         } else {
 
@@ -86,8 +96,8 @@ var DemoFramework = function () {
                     .getElementById(
                         "canvas");
 
-            thisRef.canvas.width = CANVAS_WIDTH;
-            thisRef.canvas.height = CANVAS_HEIGHT;
+            thisRef.canvas.width = initialSettings.width;
+            thisRef.canvas.height = initialSettings.height;
             thisRef.canvasOffsetX = thisRef.canvas.offsetLeft;
             thisRef.canvasOffsetY = thisRef.canvas.offsetTop;
             thisRef.ctx = canvas.getContext("2d");
@@ -96,11 +106,13 @@ var DemoFramework = function () {
 
             thisRef.passParams = {
                 canvas: thisRef.canvas,
-                ctx: thisRef.ctx
+                ctx: thisRef.ctx,
+                elapsed: 0,
+                delta: 0
             };
         }
 
-        if (!window.AllowContextMenu) {
+        if (!initialSettings.allowContextMenu) {
 
             document.oncontextmenu = function (e) {
 
@@ -149,7 +161,7 @@ var DemoFramework = function () {
                 false);
 
         // does the device support tilt events?
-        if (window.DeviceOrientationEvent) {
+        if (initialSettings.deviceOrientationEvent) {
 
             window
                 .addEventListener(
@@ -157,27 +169,30 @@ var DemoFramework = function () {
                     function (e) { thisRef.tiltHandler(e); },
                     false);
 
-        } else if (window.DeviceMotionEvent) {
+        } else if (initialSettings.deviceMotionEvent) {
 
             window
                 .addEventListener(
                     "devicemotion",
-                    function (e) { thisRef.tiltHandler(e); },
+                    function (e) { thisRef.tiltHandler(thisRef.passParams, e); },
                     false);
         }
 
         // prepare settings
-        if (window.hasOwnProperty("SETTINGS_PACKAGE")) {
+        if (initialSettings.hasOwnProperty("values")) {
 
-            thisRef.initSettings(window.SETTINGS_PACKAGE);
+            thisRef.initSettings(initialSettings.values);
         }
+
+        thisRef.lastTime = new Date();
+        thisRef.elapsed = Math.random() * 10000;
 
         thisRef.doInit(thisRef.passParams);
     };
 
     thisRef.doInit = function (params) {
 
-        init(params)
+        initialSettings.init(params)
             .then(
                 function (options) {
                     if (options && options.hasOwnProperty("fps")) {
@@ -194,37 +209,35 @@ var DemoFramework = function () {
                         }
                     }
 
+                    console.log("==========================");
+                    console.log("Demo Framework Initialized");
+                    console.log("==========================");
+                    console.log("DF.Restart()");
+                    console.log("DF.FullRestart()");
+                    console.log("DF.SetFPS(60)");
+                    console.log("DF.Values");
 
-                    if (window.ConsoleFeatures && !window.DF) {
+                    window.DF = {
+                        FullRestart: () => {
+                            clearInterval(thisRef.updateIntervalID);
+                            cancelAnimationFrame(thisRef.updateIntervalID);
+                            thisRef.initSettings(initialSettings.values);
+                            thisRef.doInit(params);
 
-                        console.log("==========================");
-                        console.log("Demo Framework Initialized");
-                        console.log("==========================");
-                        console.log("DF.Restart()");
-                        console.log("DF.FullRestart()");
-                        console.log("DF.SetFPS(60)");
-
-                        window.DF = {
-                            FullRestart: () => {
-                                clearInterval(thisRef.updateIntervalID);
-                                cancelAnimationFrame(thisRef.updateIntervalID);
-                                thisRef.initSettings(window.SETTINGS_PACKAGE);
-                                thisRef.doInit(params);
-
-                                Object.keys(window.settings).forEach(
-                                    function (key) {
-
-                                        window.settings[key].Regenerate();
-                                    });
-                            },
-                            Restart: () => {
-                                thisRef.doInit(params);
-                                clearInterval(thisRef.updateIntervalID);
-                                cancelAnimationFrame(thisRef.updateIntervalID);
-                            },
-                            SetFPS: thisRef.setFPS
-                        };
-                    }
+                            Object.keys(thisRef.passParams.values).forEach(
+                                function (key) {
+                                    thisRef.passParams.values[key].Locked = false;
+                                    thisRef.passParams.values[key].Regenerate();
+                                });
+                        },
+                        Restart: () => {
+                            thisRef.doInit(params);
+                            clearInterval(thisRef.updateIntervalID);
+                            cancelAnimationFrame(thisRef.updateIntervalID);
+                        },
+                        SetFPS: thisRef.setFPS,
+                        Values: thisRef.passParams.values
+                    };
 
                     thisRef.updateIntervalID = requestAnimationFrame(() => thisRef.run());
                 });
@@ -238,11 +251,11 @@ var DemoFramework = function () {
 
     thisRef.initSettings = function (settingsOverrides) {
 
-        window.settings = {};
+        thisRef.passParams.values = {};
         Object.keys(settingsOverrides).forEach(
             function (key) {
                 var settingOverride = thisRef.setupSettingOverride(settingsOverrides[key]);
-                window.settings[key] = settingOverride;
+                thisRef.passParams.values[key] = settingOverride;
             });
     };
 
@@ -269,11 +282,19 @@ var DemoFramework = function () {
 
             if (settingOverride.hasOwnProperty("TransitionFrames")) {
 
-                settingOverride.Update = function () { this.Value += (this.TargetValue - this.Value) / this.TransitionFrames; return this; };
+                settingOverride.Update = function () {
+                    if (!this.Locked) {
+                        this.Value += (this.TargetValue - this.Value) / this.TransitionFrames; return this;
+                    }
+                };
 
             } else {
 
-                settingOverride.Update = function () { this.Value = this.TargetValue; return this; }
+                settingOverride.Update = function () {
+                    if (!this.Locked) {
+                        this.Value = this.TargetValue; return this;
+                    }
+                }
             }
         }
 
@@ -300,6 +321,11 @@ var DemoFramework = function () {
         if (!settingOverride.hasOwnProperty("TransitionFrames")) {
 
             settingOverride.TransitionFrames = 10;
+        }
+
+        if (!settingOverride.hasOwnProperty("Locked")) {
+
+            settingOverride.Locked = false;
         }
 
         return settingOverride;
@@ -355,24 +381,24 @@ var DemoFramework = function () {
         }
 
         // if we end up with any tilt values, send them along
-        if (e.gamma && e.beta && e.alpha && window.hasOwnProperty("tilt"))
-            tilt({ gamma: e.gamma, beta: e.beta, alpha: e.alpha });
+        if (e.gamma && e.beta && e.alpha && initialSettings.hasOwnProperty("tilt"))
+            initialSettings.tilt(thisRef.passParams, { gamma: e.gamma, beta: e.beta, alpha: e.alpha });
     };
 
     thisRef.touchStartHanlder = function (e) {
 
-        if (e.touches.length == 1 && window.hasOwnProperty("mouseDown"))
-            mouseDown({ x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY });
-        else if (e.touches.length == 2 && window.hasOwnProperty("secondaryMouseDown"))
-            secondaryMouseDown({ x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY });
+        if (e.touches.length == 1 && initialSettings.hasOwnProperty("mouseDown"))
+            initialSettings.mouseDown(thisRef.passParams, { x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY });
+        else if (e.touches.length == 2 && initialSettings.hasOwnProperty("secondaryMouseDown"))
+            initialSettings.secondaryMouseDown(thisRef.passParams, { x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY });
     };
 
     thisRef.touchEndHanlder = function (e) {
 
-        if (e.touches.length == 0 && window.hasOwnProperty("mouseUp"))
-            mouseUp();
-        else if (e.touches.length == 1 && window.hasOwnProperty("secondaryMouseUp"))
-            secondaryMouseUp();
+        if (e.touches.length == 0 && initialSettings.hasOwnProperty("mouseUp"))
+            initialSettings.mouseUp(thisRef.passParams);
+        else if (e.touches.length == 1 && initialSettings.hasOwnProperty("secondaryMouseUp"))
+            initialSettings.secondaryMouseUp(thisRef.passParams);
 
         thisRef.lastX = undefined;
         thisRef.lastY = undefined;
@@ -387,12 +413,12 @@ var DemoFramework = function () {
 
         for (var i = 0; i < steps.length; i++) {
 
-            if (e.touches.length == 0 && window.hasOwnProperty("mouseMove"))
-                mouseMove(steps[i], false);
-            else if (e.touches.length == 1 && window.hasOwnProperty("mouseMove"))
-                mouseMove(steps[i], true);
-            else if (e.touches.length == 2 && window.hasOwnProperty("secondaryMouseMove"))
-                secondaryMouseMove(steps[i]);
+            if (e.touches.length == 0 && initialSettings.hasOwnProperty("mouseMove"))
+                initialSettings.mouseMove(thisRef.passParams, steps[i], false);
+            else if (e.touches.length == 1 && initialSettings.hasOwnProperty("mouseMove"))
+                initialSettings / mouseMove(thisRef.passParams, steps[i], true);
+            else if (e.touches.length == 2 && initialSettings.hasOwnProperty("secondaryMouseMove"))
+                initialSettings.secondaryMouseMove(thisRef.passParams, steps[i]);
         }
     };
 
@@ -400,17 +426,17 @@ var DemoFramework = function () {
 
         if ((e.which === 3 || e.button === 2)) {
 
-            isSecondaryMouseDown = true;
+            thisRef.isSecondaryMouseDown = true;
 
-            if (window.hasOwnProperty("secondaryMouseDown"))
-                secondaryMouseDown(e);
+            if (initialSettings.hasOwnProperty("secondaryMouseDown"))
+                initialSettings.secondaryMouseDown(thisRef.passParams, e);
 
         } else {
 
-            isMouseDown = true;
+            thisRef.isMouseDown = true;
 
-            if (window.hasOwnProperty("mouseDown"))
-                mouseDown(e);
+            if (initialSettings.hasOwnProperty("mouseDown"))
+                initialSettings.mouseDown(thisRef.passParams, e);
         }
     };
 
@@ -418,17 +444,17 @@ var DemoFramework = function () {
 
         if ((e.which === 3 || e.button === 2)) {
 
-            isSecondaryMouseDown = false;
+            thisRef.isSecondaryMouseDown = false;
 
-            if (window.hasOwnProperty("secondaryMouseUp"))
-                secondaryMouseUp(e);
+            if (initialSettings.hasOwnProperty("secondaryMouseUp"))
+                initialSettings.secondaryMouseUp(thisRef.passParams, e);
 
         } else {
 
-            isMouseDown = false;
+            thisRef.isMouseDown = false;
 
-            if (window.hasOwnProperty("mouseUp"))
-                mouseUp(e);
+            if (initialSettings.hasOwnProperty("mouseUp"))
+                initialSettings.mouseUp(thisRef.passParams, e);
         }
 
         thisRef.lastX = undefined;
@@ -446,40 +472,44 @@ var DemoFramework = function () {
 
             if (!thisRef.isMouseDown && !thisRef.isSecondaryMouseDown) {
 
-                if (window.hasOwnProperty("mouseMove"))
-                    mouseMove(steps[i], false);
+                if (initialSettings.hasOwnProperty("mouseMove"))
+                    initialSettings.mouseMove(thisRef.passParams, steps[i], false);
 
             } else if (thisRef.isMouseDown) {
 
-                if (window.hasOwnProperty("mouseMove"))
-                    mouseMove(steps[i], true);
+                if (initialSettings.hasOwnProperty("mouseMove"))
+                    initialSettings.mouseMove(thisRef.passParams, steps[i], true);
 
             } else if (thisRef.isSecondaryMouseDown) {
 
-                if (window.hasOwnProperty("secondaryMouseMove"))
-                    secondaryMouseMove(steps[i]);
+                if (initialSettings.hasOwnProperty("secondaryMouseMove"))
+                    initialSettings.secondaryMouseMove(thisRef.passParams, steps[i]);
             }
         }
     };
 
     thisRef.run = function () {
 
+        thisRef.date = new Date();
+        thisRef.elapsed += thisRef.date - thisRef.lastTime;
+        thisRef.lastTime = thisRef.date;
         thisRef.now = Date.now();
+
         var delta = thisRef.now - thisRef.then;
 
         if (delta > thisRef.interval) {
 
             thisRef.then = thisRef.now;
+            thisRef.passParams.elapsed = thisRef.elapsed;
+            thisRef.passParams.delta = delta = delta;
 
-            if (window.settings) {
-                Object.keys(window.settings).forEach(
-                    function (key) {
-
-                        window.settings[key].Update();
-                    });
+            if (thisRef.passParams.values) {
+                Object.keys(thisRef.passParams.values).forEach(
+                    key => thisRef.passParams.values[key].Update()
+                );
             }
 
-            update(thisRef.passParams);
+            initialSettings.update(thisRef.passParams);
         }
 
         thisRef.updateIntervalID = requestAnimationFrame(() => thisRef.run());
@@ -487,5 +517,3 @@ var DemoFramework = function () {
 
     thisRef.initialize();
 };
-
-window.onload = () => new DemoFramework();
