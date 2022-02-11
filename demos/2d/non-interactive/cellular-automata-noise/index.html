@@ -1,166 +1,173 @@
 <html>
-    <head>
 
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+<head>
 
-        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <title></title>
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
 
-        <style type="text/css">
+    <title></title>
 
-            body { background-color: black; }
-            canvas { border: 1px solid #ccc; width: 100%; }
-
-        </style>
-    </head>
-    <body>
-        <canvas id="canvas" width="300" height="300"></canvas>
-    </body>
-
-    <script type="text/javascript">
-
-        /// Settings ////////////////////////////////////////////
-
-        // put any adjustable settings here that would be interesting to tinker with.
-
-        var CANVAS_WIDTH = 1920;
-        var CANVAS_HEIGHT = 1080;
-        var CELL_SIZE = Math.ceil(Math.random() * 4) + 2;
-        var HORIZONTAL_DIVISIONS = 1;
-        var VERTICAL_DIVISIONS = 1;
-        var CELLS_X = Math.ceil((CANVAS_WIDTH  / HORIZONTAL_DIVISIONS) / CELL_SIZE);
-        var CELLS_Y = Math.ceil((CANVAS_HEIGHT / VERTICAL_DIVISIONS) / CELL_SIZE);
-        var CELL_FADE = (Math.random() * 0.5);
-        var CELL_DENSITY = 2;
-        var REGENERATE_INTENSITY = (Math.random() * 0.1) + 0.02;
-        var FPS = 30;
-
-        /////////////////////////////////////////////////////////
-
-        var localCtxReference = undefined;
-        var lastTime = 0;
-        var date = undefined;
-        var elapsed = 0;
-
-        var map = null;
-        var phase = 0;
-        var blackPixel = null;
-        var whitePixel = null;
-        var cellTop, cellLeft, cellRight, cellBottom, neighbors, state, newState;
-
-        // code to run before update looping starts.
-
-        function init(params) {
-            
-            return new Promise(
-                function(resolve, reject) {
-
-                    localCtxReference = params.ctx;
-                    lastTime = new Date();
-                    elapsed = Math.random() * 10000;
-
-                    params.ctx.lineWidth = 1;
-                    map = generateMap();
-                    resolve(FPS);
-                });
+    <style type="text/css">
+        body {
+            background-color: black;
         }
 
-        // code to run every frame.
-
-        function update(params) {
-
-            date = new Date();
-            elapsed += date - lastTime;
-            lastTime = date;
-            
-            //params.ctx.clearRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
-            params.ctx.fillStyle="rgba(255,255,255," + CELL_FADE + ")";
-            params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);            
-            params.ctx.fillStyle = "rgba(0,0,0,1)";
-            
-            // run step
-            for (var y = 0; y < map.length; y++)     
-                for (var x = 0; x < map[0].length; x++)
-                    if (map[y][x].u)
-                        if (phase == 0)
-                            map[y][x].n = checkCell(params.ctx, x, y);
-                        else
-                            map[y][x].c = checkCell(params.ctx, x, y);
-                            
-            phase = (phase == 0 ? 1 : 0);
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
         }
+    </style>
+</head>
 
-        function generateMap() {
- 
-            var tempMap = new Array();
-            
-            for (var y = 0; y < CELLS_Y; y++) {
-                
-                var row = new Array(); 
-                
-                for (var x = 0; x < CELLS_X; x++) {
-                    
-                    var state = (Math.floor(Math.random() * CELL_DENSITY) == 0) ? 0 : 1;
-                    row.push({ c: state, n: state, u: state==1, t: null, b: null, l: null, r: null, tl: null, tr: null, bl: null, br: null });
-                }
-                
-                tempMap.push(row);
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+</body>
+
+<script type="text/javascript">
+
+    /// Settings ////////////////////////////////////////////
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var CANVAS_WIDTH = 1920;
+    var CANVAS_HEIGHT = 1080;
+    var CELL_SIZE = Math.ceil(Math.random() * 4) + 2;
+    var HORIZONTAL_DIVISIONS = 1;
+    var VERTICAL_DIVISIONS = 1;
+    var CELLS_X = Math.ceil((CANVAS_WIDTH / HORIZONTAL_DIVISIONS) / CELL_SIZE);
+    var CELLS_Y = Math.ceil((CANVAS_HEIGHT / VERTICAL_DIVISIONS) / CELL_SIZE);
+    var CELL_FADE = (Math.random() * 0.5);
+    var CELL_DENSITY = 2;
+    var REGENERATE_INTENSITY = (Math.random() * 0.1) + 0.02;
+    var FPS = 30;
+
+    /////////////////////////////////////////////////////////
+
+    var localCtxReference = undefined;
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
+
+    var map = null;
+    var phase = 0;
+    var blackPixel = null;
+    var whitePixel = null;
+    var cellTop, cellLeft, cellRight, cellBottom, neighbors, state, newState;
+
+    // code to run before update looping starts.
+
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                localCtxReference = params.ctx;
+                lastTime = new Date();
+                elapsed = Math.random() * 10000;
+
+                params.ctx.lineWidth = 1;
+                map = generateMap();
+                resolve(FPS);
+            });
+    }
+
+    // code to run every frame.
+
+    function update(params) {
+
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
+
+        //params.ctx.clearRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
+        params.ctx.fillStyle = "rgba(255,255,255," + CELL_FADE + ")";
+        params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        params.ctx.fillStyle = "rgba(0,0,0,1)";
+
+        // run step
+        for (var y = 0; y < map.length; y++)
+            for (var x = 0; x < map[0].length; x++)
+                if (map[y][x].u)
+                    if (phase == 0)
+                        map[y][x].n = checkCell(params.ctx, x, y);
+                    else
+                        map[y][x].c = checkCell(params.ctx, x, y);
+
+        phase = (phase == 0 ? 1 : 0);
+    }
+
+    function generateMap() {
+
+        var tempMap = new Array();
+
+        for (var y = 0; y < CELLS_Y; y++) {
+
+            var row = new Array();
+
+            for (var x = 0; x < CELLS_X; x++) {
+
+                var state = (Math.floor(Math.random() * CELL_DENSITY) == 0) ? 0 : 1;
+                row.push({ c: state, n: state, u: state == 1, t: null, b: null, l: null, r: null, tl: null, tr: null, bl: null, br: null });
             }
-            
-            for (var y = 0; y < CELLS_Y; y++) {
-                
-                var row = new Array(); 
-                
-                for (var x = 0; x < CELLS_X; x++) {
-                    
-                    cellTop = y - 1;
-                    if (cellTop < 0) 
-                        cellTop = CELLS_Y - 1;
 
-                    cellLeft = x - 1;
-                    if (cellLeft < 0) 
-                        cellLeft = CELLS_X - 1;
-
-                    cellBottom = y + 1;
-                    if (cellBottom >= CELLS_Y) 
-                        cellBottom = 0;
-
-                    cellRight = x + 1;
-                    if (cellRight >= CELLS_X) 
-                        cellRight = 0;
-
-                    var cell = tempMap[y][x];
-                    cell.t = tempMap[cellTop][x];
-                    cell.b = tempMap[cellBottom][x];
-                    cell.r = tempMap[y][cellRight];
-                    cell.l = tempMap[y][cellLeft];
-                    cell.tl = tempMap[cellTop][cellLeft];
-                    cell.tr = tempMap[cellTop][cellRight];
-                    cell.bl = tempMap[cellBottom][cellLeft];
-                    cell.br = tempMap[cellBottom][cellRight];
-                }
-            }
-            
-            return tempMap;
+            tempMap.push(row);
         }
 
-        function checkCell(_ctx, _x, _y) {
-                
-            var cell = map[_y][_x];
-            var state = 
-                phase == 0 ?
-                cell.c:
+        for (var y = 0; y < CELLS_Y; y++) {
+
+            var row = new Array();
+
+            for (var x = 0; x < CELLS_X; x++) {
+
+                cellTop = y - 1;
+                if (cellTop < 0)
+                    cellTop = CELLS_Y - 1;
+
+                cellLeft = x - 1;
+                if (cellLeft < 0)
+                    cellLeft = CELLS_X - 1;
+
+                cellBottom = y + 1;
+                if (cellBottom >= CELLS_Y)
+                    cellBottom = 0;
+
+                cellRight = x + 1;
+                if (cellRight >= CELLS_X)
+                    cellRight = 0;
+
+                var cell = tempMap[y][x];
+                cell.t = tempMap[cellTop][x];
+                cell.b = tempMap[cellBottom][x];
+                cell.r = tempMap[y][cellRight];
+                cell.l = tempMap[y][cellLeft];
+                cell.tl = tempMap[cellTop][cellLeft];
+                cell.tr = tempMap[cellTop][cellRight];
+                cell.bl = tempMap[cellBottom][cellLeft];
+                cell.br = tempMap[cellBottom][cellRight];
+            }
+        }
+
+        return tempMap;
+    }
+
+    function checkCell(_ctx, _x, _y) {
+
+        var cell = map[_y][_x];
+        var state =
+            phase == 0 ?
+                cell.c :
                 cell.n;
-                
-            neighbors = 0;
-            
-            if (phase == 0)
-                neighbors = 
+
+        neighbors = 0;
+
+        if (phase == 0)
+            neighbors =
                 cell.tl.c +
                 cell.t.c +
                 cell.tr.c +
@@ -169,8 +176,8 @@
                 cell.bl.c +
                 cell.b.c +
                 cell.br.c;
-            else
-                neighbors = 
+        else
+            neighbors =
                 cell.tl.n +
                 cell.t.n +
                 cell.tr.n +
@@ -179,79 +186,80 @@
                 cell.bl.n +
                 cell.b.n +
                 cell.br.n;
-            
+
+        newState = 0;
+
+        /*
+        Any live cell with fewer than two live neighbours dies, as if caused by under-population.
+        Any live cell with two or three live neighbours lives on to the next generation.
+        Any live cell with more than three live neighbours dies, as if by overcrowding.
+        Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+        */
+
+        if (state == 1 && neighbors < 2) {
+
             newState = 0;
-            
-            /*
-            Any live cell with fewer than two live neighbours dies, as if caused by under-population.
-            Any live cell with two or three live neighbours lives on to the next generation.
-            Any live cell with more than three live neighbours dies, as if by overcrowding.
-            Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-            */
-            
-            if (state == 1 && neighbors < 2) {
 
-                newState = 0;
-            
-            } else if (state == 1 && (neighbors == 2 || neighbors == 3)) {
-            
+        } else if (state == 1 && (neighbors == 2 || neighbors == 3)) {
+
+            newState = 1;
+            setupUpdates(cell);
+
+        } else if (state == 1 && neighbors > 3) {
+
+            newState = 0;
+
+        } else if (state == 0 && neighbors == 3) {
+
+            newState = 1;
+
+        } else {
+
+            if (Math.random() < REGENERATE_INTENSITY) {
+
                 newState = 1;
-                setupUpdates(cell);
-            
-            } else if (state == 1 && neighbors > 3) {
-            
-                newState = 0;
-            
-            } else if (state == 0 && neighbors == 3) {
-            
-                newState = 1;
-
-            } else {
-
-                if (Math.random() < REGENERATE_INTENSITY) {
-
-                    newState = 1;
-                }
             }
-                
-            if (newState != state)
-                setupUpdates(cell);
-            else 
-                cell.u = false;
-                
-            if (newState == 1) {
-                
-                var widthOffset = (CANVAS_WIDTH / HORIZONTAL_DIVISIONS);
-                var heightOffset = (CANVAS_HEIGHT / VERTICAL_DIVISIONS);
-
-                for (var u = 0; u < HORIZONTAL_DIVISIONS; u ++) {
-
-                    for (var o = 0; o < VERTICAL_DIVISIONS; o ++) {
-                    
-                        _ctx.fillRect( 
-                            (_x * CELL_SIZE) + (widthOffset * u), 
-                            (_y * CELL_SIZE) + (heightOffset * o), 
-                            CELL_SIZE, 
-                            CELL_SIZE );
-                    }
-                }
-            }
-            
-            return newState;
         }
 
-        function setupUpdates(cell) {
+        if (newState != state)
+            setupUpdates(cell);
+        else
+            cell.u = false;
 
-            cell.u = true;
-            cell.tl.u = true;
-            cell.t.u = true;
-            cell.tr.u = true;
-            cell.l.u = true;
-            cell.r.u = true;
-            cell.bl.u = true;
-            cell.b.u = true;
-            cell.br.u = true;
+        if (newState == 1) {
+
+            var widthOffset = (CANVAS_WIDTH / HORIZONTAL_DIVISIONS);
+            var heightOffset = (CANVAS_HEIGHT / VERTICAL_DIVISIONS);
+
+            for (var u = 0; u < HORIZONTAL_DIVISIONS; u++) {
+
+                for (var o = 0; o < VERTICAL_DIVISIONS; o++) {
+
+                    _ctx.fillRect(
+                        (_x * CELL_SIZE) + (widthOffset * u),
+                        (_y * CELL_SIZE) + (heightOffset * o),
+                        CELL_SIZE,
+                        CELL_SIZE);
+                }
+            }
         }
 
-    </script>
+        return newState;
+    }
+
+    function setupUpdates(cell) {
+
+        cell.u = true;
+        cell.tl.u = true;
+        cell.t.u = true;
+        cell.tr.u = true;
+        cell.l.u = true;
+        cell.r.u = true;
+        cell.bl.u = true;
+        cell.b.u = true;
+        cell.br.u = true;
+    }
+
+</script>
+
 </html>

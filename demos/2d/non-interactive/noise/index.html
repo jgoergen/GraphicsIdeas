@@ -1,94 +1,103 @@
 <html>
-    <head>
 
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+<head>
 
-        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
-        <script src="../../../libs/MidpointDisplacementNoiseGenerator.js" type="text/javascript"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <title></title>
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
+    <script src="../../../libs/MidpointDisplacementNoiseGenerator.js" type="text/javascript"></script>
 
-        <style type="text/css">
+    <title></title>
 
-            body { background-color: black; }
-            canvas { border: 1px solid #ccc; width: 100%; }
-
-        </style>
-    </head>
-    <body>
-        <canvas id="canvas" width="300" height="300"></canvas>
-    </body>
-
-    <script type="text/javascript">
-
-        /// Settings ////////////////////////////////////////////
-
-        // put any adjustable settings here that would be interesting to tinker with.
-
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 800;
-        var FPS = 10;
-        var MAP_DIMENSIONS = [32, 64, 128, 256][Math.floor(Math.random() * 4)];
-        var ROUGHNESS = Math.random() * 10;
-        var UNIT_SIZE = 1;
-        var BLOCK_SIZE = Math.floor(Math.random() * 4);
-        var OFFSET_SPEED = (Math.floor(Math.random() * 40) - 20);
-        var LOOPING = Math.random() > 0.5
-
-        /////////////////////////////////////////////////////////
-
-        var localCtxReference = undefined;
-        var lastTime = 0;
-        var date = undefined;
-        var elapsed = 0;
-        var noise;
-        var offset = 0;
-
-        // code to run before update looping starts.
-        
-        function init(params) {
-            
-            return new Promise(
-                function(resolve, reject) {
-                            
-                    console.log("Init");
-                    localCtxReference = params.ctx;
-                    localCtxReference.fillStyle = "white";
-                    lastTime = new Date();
-                    elapsed = Math.random() * 10000;
-                    noise = new MidpointDisplacementNoiseGenerator(MAP_DIMENSIONS, ROUGHNESS, UNIT_SIZE, BLOCK_SIZE, LOOPING);
-                    noise.generateNoise();
-                    resolve(FPS);
-                });
-        }
-        
-        // code to run every frame.
-
-        function update(params) {
-
-            date = new Date();
-            elapsed += date - lastTime;
-            lastTime = date;
-
-            if (offset >= 255)
-                offset = 0;
-
-            if (offset < 0)
-                offset = 255;
-
-            offset += OFFSET_SPEED;
-            
-            params.ctx.drawImage(
-                noise.draw(0, 0, offset),
-                0,
-                0,
-                CANVAS_WIDTH,
-                CANVAS_HEIGHT);
+    <style type="text/css">
+        body {
+            background-color: black;
         }
 
-    </script>
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="editor"></div>
+</body>
+
+<script type="text/javascript">
+
+    /// Settings ////////////////////////////////////////////
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 800;
+    var FPS = 10;
+    var MAP_DIMENSIONS = [32, 64, 128, 256][Math.floor(Math.random() * 4)];
+    var ROUGHNESS = Math.random() * 10;
+    var UNIT_SIZE = 1;
+    var BLOCK_SIZE = Math.floor(Math.random() * 4);
+    var OFFSET_SPEED = (Math.floor(Math.random() * 40) - 20);
+    var LOOPING = Math.random() > 0.5
+
+    /////////////////////////////////////////////////////////
+
+    var localCtxReference = undefined;
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
+    var noise;
+    var offset = 0;
+
+    // code to run before update looping starts.
+
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                console.log("Init");
+                localCtxReference = params.ctx;
+                localCtxReference.fillStyle = "white";
+                lastTime = new Date();
+                elapsed = Math.random() * 10000;
+                noise = new MidpointDisplacementNoiseGenerator(MAP_DIMENSIONS, ROUGHNESS, UNIT_SIZE, BLOCK_SIZE, LOOPING);
+                noise.generateNoise();
+                resolve(FPS);
+            });
+    }
+
+    // code to run every frame.
+
+    function update(params) {
+
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
+
+        if (offset >= 255)
+            offset = 0;
+
+        if (offset < 0)
+            offset = 255;
+
+        offset += OFFSET_SPEED;
+
+        params.ctx.drawImage(
+            noise.draw(0, 0, offset),
+            0,
+            0,
+            CANVAS_WIDTH,
+            CANVAS_HEIGHT);
+    }
+
+</script>
+
 </html>

@@ -178,6 +178,8 @@ var DemoFramework = function (initialSettings) {
                     false);
         }
 
+        thisRef.initConsoleFeatures(thisRef.passParams);
+
         // prepare settings
         if (initialSettings.hasOwnProperty("values")) {
 
@@ -189,6 +191,38 @@ var DemoFramework = function (initialSettings) {
 
         thisRef.doInit(thisRef.passParams);
     };
+
+    thisRef.initConsoleFeatures = function (params) {
+        console.log("==========================");
+        console.log("Demo Framework Initialized");
+        console.log("==========================");
+        console.log("DF.Restart()");
+        console.log("DF.FullRestart()");
+        console.log("DF.SetFPS(60)");
+        console.log("DF.Values");
+
+        window.DF = {
+            FullRestart: () => {
+                clearInterval(thisRef.updateIntervalID);
+                cancelAnimationFrame(thisRef.updateIntervalID);
+                thisRef.initSettings(initialSettings.values);
+                thisRef.doInit(params);
+
+                Object.keys(thisRef.passParams.values).forEach(
+                    function (key) {
+                        thisRef.passParams.values[key].Locked = false;
+                        thisRef.passParams.values[key].Regenerate();
+                    });
+            },
+            Restart: () => {
+                thisRef.doInit(params);
+                clearInterval(thisRef.updateIntervalID);
+                cancelAnimationFrame(thisRef.updateIntervalID);
+            },
+            SetFPS: thisRef.setFPS,
+            Values: thisRef.passParams.values
+        };
+    }
 
     thisRef.doInit = function (params) {
 
@@ -208,36 +242,6 @@ var DemoFramework = function (initialSettings) {
                             thisRef.setFPS(options.fps);
                         }
                     }
-
-                    console.log("==========================");
-                    console.log("Demo Framework Initialized");
-                    console.log("==========================");
-                    console.log("DF.Restart()");
-                    console.log("DF.FullRestart()");
-                    console.log("DF.SetFPS(60)");
-                    console.log("DF.Values");
-
-                    window.DF = {
-                        FullRestart: () => {
-                            clearInterval(thisRef.updateIntervalID);
-                            cancelAnimationFrame(thisRef.updateIntervalID);
-                            thisRef.initSettings(initialSettings.values);
-                            thisRef.doInit(params);
-
-                            Object.keys(thisRef.passParams.values).forEach(
-                                function (key) {
-                                    thisRef.passParams.values[key].Locked = false;
-                                    thisRef.passParams.values[key].Regenerate();
-                                });
-                        },
-                        Restart: () => {
-                            thisRef.doInit(params);
-                            clearInterval(thisRef.updateIntervalID);
-                            cancelAnimationFrame(thisRef.updateIntervalID);
-                        },
-                        SetFPS: thisRef.setFPS,
-                        Values: thisRef.passParams.values
-                    };
 
                     thisRef.updateIntervalID = requestAnimationFrame(() => thisRef.run());
                 });
@@ -284,7 +288,16 @@ var DemoFramework = function (initialSettings) {
 
                 settingOverride.Update = function () {
                     if (!this.Locked) {
-                        this.Value += (this.TargetValue - this.Value) / this.TransitionFrames; return this;
+                        this.Value += (this.TargetValue - this.Value) / this.TransitionFrames;
+
+                        if (this.Floored) {
+                            this.Value = Math.floor(this.Value);
+                        }
+                        else if (this.Ceiled) {
+                            this.Value = Math.ceil(this.Value);
+                        }
+
+                        return this;
                     }
                 };
 
@@ -292,7 +305,16 @@ var DemoFramework = function (initialSettings) {
 
                 settingOverride.Update = function () {
                     if (!this.Locked) {
-                        this.Value = this.TargetValue; return this;
+                        if (this.Floored) {
+                            this.Value = Math.floor(this.TargetValue);
+                        }
+                        else if (this.Ceiled) {
+                            this.Value = Math.ceil(this.TargetValue);
+                        }
+                        else {
+                            this.Value = this.TargetValue;
+                        }
+                        return this;
                     }
                 }
             }
@@ -302,6 +324,13 @@ var DemoFramework = function (initialSettings) {
 
             settingOverride.Regenerate();
             settingOverride.Value = settingOverride.TargetValue;
+
+            if (settingOverride.Floored) {
+                settingOverride.Value = Math.floor(settingOverride.Value);
+            }
+            else if (settingOverride.Ceiled) {
+                settingOverride.Value = Math.ceil(settingOverride.Value);
+            }
 
         } else {
 
@@ -326,6 +355,16 @@ var DemoFramework = function (initialSettings) {
         if (!settingOverride.hasOwnProperty("Locked")) {
 
             settingOverride.Locked = false;
+        }
+
+        if (!settingOverride.hasOwnProperty("Floored")) {
+
+            settingOverride.Floored = false;
+        }
+
+        if (!settingOverride.hasOwnProperty("Ceiled")) {
+
+            settingOverride.Ceiled = false;
         }
 
         return settingOverride;

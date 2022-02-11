@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
     <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
     <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
 
     <title></title>
@@ -27,6 +28,7 @@
 
 <body>
     <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="editor"></div>
 </body>
 
 <script type="text/javascript">
@@ -128,12 +130,7 @@
                     )
                 }
 
-<<<<<<< HEAD
                 resolve({ fps: FPS });
-=======
-                localCtxReference.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
-                resolve(FPS);
->>>>>>> 3196c66492bfcd6f4f26d8fe912caea3a7756e5e
             });
     }
 
@@ -146,13 +143,8 @@
         lastTime = date;
 
         //console.log("Update");
-<<<<<<< HEAD
         localCtxReference.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-=======
-
-        localCtxReference.rotate(0.01);
->>>>>>> 3196c66492bfcd6f4f26d8fe912caea3a7756e5e
         for (var i = 0, len = data.length; i < len; i++) {
 
             data[i].x += data[i].vx;

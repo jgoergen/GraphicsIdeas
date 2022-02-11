@@ -1,253 +1,263 @@
 <html>
-    <head>
 
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+<head>
 
-        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <title></title>
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
 
-        <style type="text/css">
+    <title></title>
 
-            body { background-color: black; }
-            .svgGraphic { width: 100%; }
-            rect { mix-blend-mode: screen; }
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
 
-        </style>
-    </head>
-    <body>
-        <svg class="svgGraphic" width="100%" viewBox="0 0 400 400">
-            <defs>
-                <clipPath id="layer1Clip">
-                    <rect class="layer1Clip" x="100" y="100" width="100" height="100" fill="purple"></rect>
-                </clipPath>
-                <clipPath id="layer2Clip">
-                    <rect class="layer2Clip" x="100" y="100" width="100" height="100" fill="yellow"></rect>
-                </clipPath>
-                <clipPath id="layer3Clip">
-                    <rect class="layer3Clip" x="150" y="150" width="100" height="100" fill="red"></rect>
-                </clipPath>
-                <clipPath id="layer4Clip">
-                    <rect class="layer4Clip" x="150" y="150" width="100" height="100" fill="blue"></rect>
-                </clipPath>
+        .svgGraphic {
+            width: 100%;
+        }
 
-                <clipPath id="layer5Clip">
-                    <rect class="layer5Clip" x="150" y="100" width="100" height="100" fill="purple"></rect>
-                </clipPath>
-                <clipPath id="layer6Clip">
-                    <rect class="layer6Clip" x="150" y="100" width="100" height="100" fill="yellow"></rect>
-                </clipPath>
-                <clipPath id="layer7Clip">
-                    <rect class="layer7Clip" x="100" y="150" width="100" height="100" fill="red"></rect>
-                </clipPath>
-                <clipPath id="layer8Clip">
-                    <rect class="layer8Clip" x="100" y="150" width="100" height="100" fill="blue"></rect>
-                </clipPath>
-            </defs>
+        rect {
+            mix-blend-mode: screen;
+        }
+    </style>
+</head>
 
-            <rect class="layer1" x="150" y="150" width="100" height="100" fill="orange" clip-path="url(#layer1Clip)"></rect>
-            <rect class="layer2" x="150" y="150" width="100" height="100" fill="green" clip-path="url(#layer2Clip)"></rect>
-            <rect class="layer3" x="100" y="100" width="100" height="100" fill="white" clip-path="url(#layer3Clip)"></rect>
-            <rect class="layer4" x="100" y="100" width="100" height="100" fill="brown" clip-path="url(#layer4Clip)"></rect>
+<body>
+    <svg class="svgGraphic" width="100%" viewBox="0 0 400 400">
+        <defs>
+            <clipPath id="layer1Clip">
+                <rect class="layer1Clip" x="100" y="100" width="100" height="100" fill="purple"></rect>
+            </clipPath>
+            <clipPath id="layer2Clip">
+                <rect class="layer2Clip" x="100" y="100" width="100" height="100" fill="yellow"></rect>
+            </clipPath>
+            <clipPath id="layer3Clip">
+                <rect class="layer3Clip" x="150" y="150" width="100" height="100" fill="red"></rect>
+            </clipPath>
+            <clipPath id="layer4Clip">
+                <rect class="layer4Clip" x="150" y="150" width="100" height="100" fill="blue"></rect>
+            </clipPath>
 
-            <rect class="layer5" x="100" y="150" width="100" height="100" fill="orange" clip-path="url(#layer5Clip)"></rect>
-            <rect class="layer6" x="100" y="150" width="100" height="100" fill="green" clip-path="url(#layer6Clip)"></rect>
-            <rect class="layer7" x="150" y="100" width="100" height="100" fill="white" clip-path="url(#layer7Clip)"></rect>
-            <rect class="layer8" x="150" y="100" width="100" height="100" fill="brown" clip-path="url(#layer8Clip)"></rect>
-        </svg>
-    </body>
+            <clipPath id="layer5Clip">
+                <rect class="layer5Clip" x="150" y="100" width="100" height="100" fill="purple"></rect>
+            </clipPath>
+            <clipPath id="layer6Clip">
+                <rect class="layer6Clip" x="150" y="100" width="100" height="100" fill="yellow"></rect>
+            </clipPath>
+            <clipPath id="layer7Clip">
+                <rect class="layer7Clip" x="100" y="150" width="100" height="100" fill="red"></rect>
+            </clipPath>
+            <clipPath id="layer8Clip">
+                <rect class="layer8Clip" x="100" y="150" width="100" height="100" fill="blue"></rect>
+            </clipPath>
+        </defs>
 
-    <script type="text/javascript">
+        <rect class="layer1" x="150" y="150" width="100" height="100" fill="orange" clip-path="url(#layer1Clip)"></rect>
+        <rect class="layer2" x="150" y="150" width="100" height="100" fill="green" clip-path="url(#layer2Clip)"></rect>
+        <rect class="layer3" x="100" y="100" width="100" height="100" fill="white" clip-path="url(#layer3Clip)"></rect>
+        <rect class="layer4" x="100" y="100" width="100" height="100" fill="brown" clip-path="url(#layer4Clip)"></rect>
 
-        /// Settings ////////////////////////////////////////////
+        <rect class="layer5" x="100" y="150" width="100" height="100" fill="orange" clip-path="url(#layer5Clip)"></rect>
+        <rect class="layer6" x="100" y="150" width="100" height="100" fill="green" clip-path="url(#layer6Clip)"></rect>
+        <rect class="layer7" x="150" y="100" width="100" height="100" fill="white" clip-path="url(#layer7Clip)"></rect>
+        <rect class="layer8" x="150" y="100" width="100" height="100" fill="brown" clip-path="url(#layer8Clip)"></rect>
+    </svg>
+</body>
 
-        // put any adjustable settings here that would be interesting to tinker with.
+<script type="text/javascript">
 
-        var TYPE = "none";
-        var CANVAS_WIDTH = 800;
-        var CANVAS_HEIGHT = 400;
-        var FPS = 60;
+    /// Settings ////////////////////////////////////////////
 
-        var SETTINGS_PACKAGE = {
-            ROTATE_MAX_ANGLE: {
-                Min: 50,
-                Max: 100,
-                TransitionFrames: 10
-            },
-            ROTATE_SPEED: {
-                Min: 400,
-                Max: 1500,
-                TransitionFrames: 10
-            },
-            COLOR1: {
-                Generator: function() { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
-            },
-            COLOR2: {
-                Generator: function() { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
-            },
-            COLOR3: {
-                Generator: function() { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
-            },
-            COLOR4: {
-                Generator: function() { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
-            },
-            COLOR5: {
-                Generator: function() { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
-            },
-            COLOR6: {
-                Generator: function() { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
-            },
-            COLOR7: {
-                Generator: function() { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
-            },
-            COLOR8: {
-                Generator: function() { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
-            },
-        };
+    // put any adjustable settings here that would be interesting to tinker with.
 
-        /////////////////////////////////////////////////////////
+    var TYPE = "none";
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 400;
+    var FPS = 60;
 
-        var lastTime = 0;
-        var date = undefined;
-        var elapsed = 0;
+    var SETTINGS_PACKAGE = {
+        ROTATE_MAX_ANGLE: {
+            Min: 50,
+            Max: 100,
+            TransitionFrames: 10
+        },
+        ROTATE_SPEED: {
+            Min: 400,
+            Max: 1500,
+            TransitionFrames: 10
+        },
+        COLOR1: {
+            Generator: function () { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
+        },
+        COLOR2: {
+            Generator: function () { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
+        },
+        COLOR3: {
+            Generator: function () { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
+        },
+        COLOR4: {
+            Generator: function () { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
+        },
+        COLOR5: {
+            Generator: function () { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
+        },
+        COLOR6: {
+            Generator: function () { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
+        },
+        COLOR7: {
+            Generator: function () { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
+        },
+        COLOR8: {
+            Generator: function () { return "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 0.5)"; }
+        },
+    };
 
-        var layer1 = undefined;
-        var layer2 = undefined;
-        var layer3 = undefined;
-        var layer4 = undefined;
-        var layer1Clip = undefined;
-        var layer2Clip = undefined;
-        var layer3Clip = undefined;
-        var layer4Clip = undefined;
+    /////////////////////////////////////////////////////////
 
-        // code to run before update looping starts.
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
 
-        function init(params) {
-            
-            return new Promise(
-                function(resolve, reject) {
-                    
-                    console.log("Init");
-                    lastTime = new Date();
-                    elapsed = Math.random() * 10000;
-                    
-                    layer1 = document.querySelector(".svgGraphic .layer1");
-                    layer2 = document.querySelector(".svgGraphic .layer2");
-                    layer3 = document.querySelector(".svgGraphic .layer3");
-                    layer4 = document.querySelector(".svgGraphic .layer4");
-                    layer5 = document.querySelector(".svgGraphic .layer5");
-                    layer6 = document.querySelector(".svgGraphic .layer6");
-                    layer7 = document.querySelector(".svgGraphic .layer7");
-                    layer8 = document.querySelector(".svgGraphic .layer8");
-                    layer1Clip = document.querySelector(".svgGraphic .layer1Clip");
-                    layer2Clip = document.querySelector(".svgGraphic .layer2Clip");
-                    layer3Clip = document.querySelector(".svgGraphic .layer3Clip");
-                    layer4Clip = document.querySelector(".svgGraphic .layer4Clip");
-                    layer5Clip = document.querySelector(".svgGraphic .layer5Clip");
-                    layer6Clip = document.querySelector(".svgGraphic .layer6Clip");
-                    layer7Clip = document.querySelector(".svgGraphic .layer7Clip");
-                    layer8Clip = document.querySelector(".svgGraphic .layer8Clip");
+    var layer1 = undefined;
+    var layer2 = undefined;
+    var layer3 = undefined;
+    var layer4 = undefined;
+    var layer1Clip = undefined;
+    var layer2Clip = undefined;
+    var layer3Clip = undefined;
+    var layer4Clip = undefined;
 
-                    layer1.setAttribute("fill", settings.COLOR1.Value);
-                    layer2.setAttribute("fill", settings.COLOR2.Value);
-                    layer3.setAttribute("fill", settings.COLOR3.Value);
-                    layer4.setAttribute("fill", settings.COLOR4.Value);
-                    layer5.setAttribute("fill", settings.COLOR5.Value);
-                    layer6.setAttribute("fill", settings.COLOR6.Value);
-                    layer7.setAttribute("fill", settings.COLOR7.Value);
-                    layer8.setAttribute("fill", settings.COLOR8.Value);
+    // code to run before update looping starts.
 
-                    resolve({
-                        fps: FPS
-                    });
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                console.log("Init");
+                lastTime = new Date();
+                elapsed = Math.random() * 10000;
+
+                layer1 = document.querySelector(".svgGraphic .layer1");
+                layer2 = document.querySelector(".svgGraphic .layer2");
+                layer3 = document.querySelector(".svgGraphic .layer3");
+                layer4 = document.querySelector(".svgGraphic .layer4");
+                layer5 = document.querySelector(".svgGraphic .layer5");
+                layer6 = document.querySelector(".svgGraphic .layer6");
+                layer7 = document.querySelector(".svgGraphic .layer7");
+                layer8 = document.querySelector(".svgGraphic .layer8");
+                layer1Clip = document.querySelector(".svgGraphic .layer1Clip");
+                layer2Clip = document.querySelector(".svgGraphic .layer2Clip");
+                layer3Clip = document.querySelector(".svgGraphic .layer3Clip");
+                layer4Clip = document.querySelector(".svgGraphic .layer4Clip");
+                layer5Clip = document.querySelector(".svgGraphic .layer5Clip");
+                layer6Clip = document.querySelector(".svgGraphic .layer6Clip");
+                layer7Clip = document.querySelector(".svgGraphic .layer7Clip");
+                layer8Clip = document.querySelector(".svgGraphic .layer8Clip");
+
+                layer1.setAttribute("fill", settings.COLOR1.Value);
+                layer2.setAttribute("fill", settings.COLOR2.Value);
+                layer3.setAttribute("fill", settings.COLOR3.Value);
+                layer4.setAttribute("fill", settings.COLOR4.Value);
+                layer5.setAttribute("fill", settings.COLOR5.Value);
+                layer6.setAttribute("fill", settings.COLOR6.Value);
+                layer7.setAttribute("fill", settings.COLOR7.Value);
+                layer8.setAttribute("fill", settings.COLOR8.Value);
+
+                resolve({
+                    fps: FPS
                 });
-        }
+            });
+    }
 
-        // code to run every frame.
+    // code to run every frame.
 
-        function update(params) {
+    function update(params) {
 
-            date = new Date();
-            elapsed += date - lastTime;
-            lastTime = date;
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
 
-            rotateSVGLayer(
-                layer1, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
+        rotateSVGLayer(
+            layer1,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer1Clip, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
+        rotateSVGLayer(
+            layer1Clip,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer2, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
+        rotateSVGLayer(
+            layer2,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
 
-            rotateSVGLayer(
-                layer2Clip, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
+        rotateSVGLayer(
+            layer2Clip,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
 
-            rotateSVGLayer(
-                layer3, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
+        rotateSVGLayer(
+            layer3,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer3Clip, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
+        rotateSVGLayer(
+            layer3Clip,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer4, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
+        rotateSVGLayer(
+            layer4,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
 
-            rotateSVGLayer(
-                layer4Clip, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
+        rotateSVGLayer(
+            layer4Clip,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
 
-            
-            rotateSVGLayer(
-                layer5, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer5Clip, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
+        rotateSVGLayer(
+            layer5,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer6, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
+        rotateSVGLayer(
+            layer5Clip,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer6Clip, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
+        rotateSVGLayer(
+            layer6,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
 
-            rotateSVGLayer(
-                layer7, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
+        rotateSVGLayer(
+            layer6Clip,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
 
-            rotateSVGLayer(
-                layer7Clip, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
+        rotateSVGLayer(
+            layer7,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer8, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
+        rotateSVGLayer(
+            layer7Clip,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * settings.ROTATE_MAX_ANGLE.Value);
 
-            rotateSVGLayer(
-                layer8Clip, 
-                Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
-        }
+        rotateSVGLayer(
+            layer8,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
 
-        function rotateSVGLayer(svgLayer, angle) {
+        rotateSVGLayer(
+            layer8Clip,
+            Math.sin(elapsed / settings.ROTATE_SPEED.Value) * (settings.ROTATE_MAX_ANGLE.Value * -1));
+    }
 
-            var boundingBox = svgLayer.getBBox();
-            var centerX = boundingBox.x + (boundingBox.width / 2);
-            var centerY = boundingBox.y + (boundingBox.height / 2);
-            svgLayer.setAttribute("transform", "rotate(" + angle + ", " + centerX + ", " + centerY + ")");
-        }
+    function rotateSVGLayer(svgLayer, angle) {
 
-    </script>
+        var boundingBox = svgLayer.getBBox();
+        var centerX = boundingBox.x + (boundingBox.width / 2);
+        var centerY = boundingBox.y + (boundingBox.height / 2);
+        svgLayer.setAttribute("transform", "rotate(" + angle + ", " + centerX + ", " + centerY + ")");
+    }
+
+</script>
+
 </html>

@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
     <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
 
     <title></title>
 
@@ -26,6 +27,7 @@
 
 <body>
     <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="editor"></div>
 </body>
 
 <script type="text/javascript">
@@ -91,6 +93,7 @@
 
     const init = async p => {
         console.log("Init");
+        new DFEditor(p.values, "editor");
     }
 
     const update = p => {

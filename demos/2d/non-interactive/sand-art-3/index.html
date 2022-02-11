@@ -1,83 +1,92 @@
 <html>
-    <head>
 
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+<head>
 
-        <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <title></title>
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
 
-        <style type="text/css">
+    <title></title>
 
-            body { background-color: black; }
-            canvas { border: 1px solid #ccc; width: 100%; }
-
-        </style>
-    </head>
-    <body>
-        <canvas id="canvas" width="300" height="300"></canvas>
-    </body>
-
-    <script type="text/javascript">
-
-        /// Settings ////////////////////////////////////////////
-
-        // put any adjustable settings here that would be interesting to tinker with.
-
-        var CANVAS_WIDTH = 1920;
-        var CANVAS_HEIGHT = 1080;
-        var FPS = 60;
-
-        var SEG_START_SPEED_DIVISOR = (Math.random() * 4) + 1;
-        var SEG_END_SPEED_DIVISOR = (Math.random() * 4) + 1;
-        var SEG_START_MAX_LENGTH = (Math.random() * 4) + 1;
-        var SEG_END_MAX_LENGTH = (Math.random() * 4) + 1;
-        var X_ROT_SPEED_DIVISOR = (Math.random() * 20) + 1;
-        var Y_ROT_SPEED_DIVISOR = (Math.random() * 20) + 1;
-        var X_SPEED_DIVISOR = (Math.random() * 20) + 1;
-        var Y_SPEED_DIVISOR = (Math.random() * 20) + 1;
-        var SEPERATION_AMOUNT = Math.random();
-
-        /////////////////////////////////////////////////////////
-
-        var lastTime = 0;
-        var date = undefined;
-        var elapsed = 0;
-
-        // code to run before update looping starts.
-
-        function init(params) {
-            
-            return new Promise(
-                function(resolve, reject) {
-
-                    lastTime = new Date();
-                    elapsed = Math.random() * 1000;
-                    params.ctx.fillStyle = "rgba(255, 255, 255, 1)";
-
-                    resolve(FPS);
-                });
+    <style type="text/css">
+        body {
+            background-color: black;
         }
 
-        function update(params) {
-
-            date = new Date();
-            elapsed += date - lastTime;
-            lastTime = date;
-
-            reducedTime = elapsed / 1000;
-            
-            for(i = reducedTime + (Math.sin(reducedTime / SEG_START_SPEED_DIVISOR) + 1) * SEG_START_MAX_LENGTH; i > reducedTime - (Math.sin(reducedTime / SEG_END_SPEED_DIVISOR) + 1) * SEG_END_MAX_LENGTH; i -= SEPERATION_AMOUNT)
-                params.ctx.fillRect(
-                    Math.sin(i + Math.cos(i / X_SPEED_DIVISOR)) * (Math.sin(reducedTime / X_ROT_SPEED_DIVISOR) * 900) + (CANVAS_WIDTH / 2),
-                    Math.cos(i + Math.sin(reducedTime / Y_SPEED_DIVISOR)) * (Math.cos(reducedTime / Y_ROT_SPEED_DIVISOR) * 500) + (CANVAS_HEIGHT / 2),
-                    1,
-                    1);
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
         }
+    </style>
+</head>
 
-    </script>
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="editor"></div>
+</body>
+
+<script type="text/javascript">
+
+    /// Settings ////////////////////////////////////////////
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var CANVAS_WIDTH = 1920;
+    var CANVAS_HEIGHT = 1080;
+    var FPS = 60;
+
+    var SEG_START_SPEED_DIVISOR = (Math.random() * 4) + 1;
+    var SEG_END_SPEED_DIVISOR = (Math.random() * 4) + 1;
+    var SEG_START_MAX_LENGTH = (Math.random() * 4) + 1;
+    var SEG_END_MAX_LENGTH = (Math.random() * 4) + 1;
+    var X_ROT_SPEED_DIVISOR = (Math.random() * 20) + 1;
+    var Y_ROT_SPEED_DIVISOR = (Math.random() * 20) + 1;
+    var X_SPEED_DIVISOR = (Math.random() * 20) + 1;
+    var Y_SPEED_DIVISOR = (Math.random() * 20) + 1;
+    var SEPERATION_AMOUNT = Math.random();
+
+    /////////////////////////////////////////////////////////
+
+    var lastTime = 0;
+    var date = undefined;
+    var elapsed = 0;
+
+    // code to run before update looping starts.
+
+    function init(params) {
+
+        return new Promise(
+            function (resolve, reject) {
+
+                lastTime = new Date();
+                elapsed = Math.random() * 1000;
+                params.ctx.fillStyle = "rgba(255, 255, 255, 1)";
+
+                resolve(FPS);
+            });
+    }
+
+    function update(params) {
+
+        date = new Date();
+        elapsed += date - lastTime;
+        lastTime = date;
+
+        reducedTime = elapsed / 1000;
+
+        for (i = reducedTime + (Math.sin(reducedTime / SEG_START_SPEED_DIVISOR) + 1) * SEG_START_MAX_LENGTH; i > reducedTime - (Math.sin(reducedTime / SEG_END_SPEED_DIVISOR) + 1) * SEG_END_MAX_LENGTH; i -= SEPERATION_AMOUNT)
+            params.ctx.fillRect(
+                Math.sin(i + Math.cos(i / X_SPEED_DIVISOR)) * (Math.sin(reducedTime / X_ROT_SPEED_DIVISOR) * 900) + (CANVAS_WIDTH / 2),
+                Math.cos(i + Math.sin(reducedTime / Y_SPEED_DIVISOR)) * (Math.cos(reducedTime / Y_ROT_SPEED_DIVISOR) * 500) + (CANVAS_HEIGHT / 2),
+                1,
+                1);
+    }
+
+</script>
+
 </html>
