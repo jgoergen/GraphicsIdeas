@@ -44,19 +44,19 @@
         CELL_SIZE: { // Math.ceil(
             Min: 0,
             Max: 5,
-            TransitionFrames: 10,
+            TransitionFrames: 1,
             Ceiled: true
         },
         CELLS_X: {
             Min: 0,
             Max: Math.floor(CANVAS_WIDTH / DF.values.CELL_SIZE.Value),
-            TransitionFrames: 10,
+            TransitionFrames: 1,
             Ceiled: true
         },
         CELLS_Y: {
             Min: 0,
             Max: Math.floor(CANVAS_HEIGHT / DF.values.CELL_SIZE.Value),
-            TransitionFrames: 10,
+            TransitionFrames: 1,
             Ceiled: true
         },
         CELL_FADE: {
@@ -67,7 +67,7 @@
         CELL_DENSITY: {
             Min: 0,
             Max: 2,
-            TransitionFrames: 10
+            TransitionFrames: 1
         }
     };
 
@@ -88,7 +88,7 @@
     const update = p => {
         //p.ctx.clearRect(0, 0, p.values.CELLS_X.Value * p.values.CELL_SIZE.Value, p.values.CELLS_Y.Value * p.values.CELL_SIZE.Value);
         p.ctx.fillStyle = "rgba(255,255,255," + p.values.CELL_FADE.Value + ")";
-        p.ctx.fillRect(0, 0, p.values.CELLS_X.Value * p.values.CELL_SIZE.Value, p.values.CELLS_Y.Value * p.values.CELL_SIZE.Value);
+        p.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         p.ctx.fillStyle = "rgba(0,0,0,1)";
 
         // run step
@@ -157,7 +157,7 @@
         return tempMap;
     }
 
-    function checkCell(_x, _y, p) {
+    const checkCell = (_x, _y, p) => {
 
         var cell = map[_y][_x];
         var state =
@@ -225,8 +225,7 @@
         return newState;
     }
 
-    function setupUpdates(cell) {
-
+    const setupUpdates = cell => {
         cell.u = true;
         cell.tl.u = true;
         cell.t.u = true;

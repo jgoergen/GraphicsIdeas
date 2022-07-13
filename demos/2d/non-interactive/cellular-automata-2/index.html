@@ -44,19 +44,19 @@
         CELL_SIZE: { // Math.ceil(
             Min: 0,
             Max: 20,
-            TransitionFrames: 10,
+            TransitionFrames: 1,
             Ceiled: true
         },
         CELLS_X: {
             Min: 0,
             Max: Math.floor(CANVAS_WIDTH / DF.values.CELL_SIZE.Value),
-            TransitionFrames: 10,
+            TransitionFrames: 1,
             Ceiled: true
         },
         CELLS_Y: {
             Min: 0,
             Max: Math.floor(CANVAS_HEIGHT / DF.values.CELL_SIZE.Value),
-            TransitionFrames: 10,
+            TransitionFrames: 1,
             Ceiled: true
         },
         CELL_FADE: {
@@ -87,7 +87,7 @@
         B_CHANGE: {
             Min: 0,
             Max: 3,
-            TransitionFrames: 10,
+            TransitionFrames: 1,
         }
     };
 
@@ -117,7 +117,7 @@
         p.ctx.lineWidth = 1;
         map = generateMap(p);
         p.ctx.fillStyle = "rgba(" + rLower + "," + gLower + "," + bLower + ",1)";
-        p.ctx.fillRect(0, 0, p.values.CELLS_X.Value * p.values.CELL_SIZE.Value, p.values.CELLS_Y.Value * p.values.CELL_SIZE.Value);
+        p.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         new DFEditor(p.values, "editor");
     }
 

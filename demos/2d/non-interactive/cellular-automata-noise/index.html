@@ -27,6 +27,7 @@
 
 <body>
     <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="editor"></div>
 </body>
 
 <script type="text/javascript">
@@ -37,22 +38,59 @@
 
     var CANVAS_WIDTH = 1920;
     var CANVAS_HEIGHT = 1080;
-    var CELL_SIZE = Math.ceil(Math.random() * 4) + 2;
-    var HORIZONTAL_DIVISIONS = 1;
-    var VERTICAL_DIVISIONS = 1;
-    var CELLS_X = Math.ceil((CANVAS_WIDTH / HORIZONTAL_DIVISIONS) / CELL_SIZE);
-    var CELLS_Y = Math.ceil((CANVAS_HEIGHT / VERTICAL_DIVISIONS) / CELL_SIZE);
-    var CELL_FADE = (Math.random() * 0.5);
-    var CELL_DENSITY = 2;
-    var REGENERATE_INTENSITY = (Math.random() * 0.1) + 0.02;
-    var FPS = 30;
+    var FPS = 60;
+
+    DF = {
+        values: {
+            CELL_SIZE: { Value: 1 },
+            HORIZONTAL_DIVISIONS: { Value: 1 },
+            VERTICAL_DIVISIONS: { Value: 1 }
+        }
+    };
+
+    const values = {
+        CELL_SIZE: {
+            Min: 2,
+            Max: 6,
+            TransitionFrames: 1,
+            Ceiled: true
+        },
+        HORIZONTAL_DIVISIONS: {
+            Value: 1
+        },
+        VERTICAL_DIVISIONS: {
+            Value: 1
+        },
+        CELLS_X: {
+            Min: 0,
+            Max: (CANVAS_WIDTH / DF.values.HORIZONTAL_DIVISIONS.Value) / DF.values.CELL_SIZE.Value,
+            TransitionFrames: 1,
+            Ceiled: true
+        },
+        CELLS_Y: {
+            Min: 0,
+            Max: (CANVAS_HEIGHT / DF.values.VERTICAL_DIVISIONS.Value) / DF.values.CELL_SIZE.Value,
+            TransitionFrames: 1,
+            Ceiled: true
+        },
+        CELL_FADE: {
+            Min: 0,
+            Max: 0.5,
+            TransitionFrames: 10
+        },
+        CELL_DENSITY: {
+            Min: 2,
+            Max: 4,
+            TransitionFrames: 1
+        },
+        REGENERATE_INTENSITY: {
+            Min: 0.02,
+            Max: 0.12,
+            TransitionFrames: 10
+        }
+    };
 
     /////////////////////////////////////////////////////////
-
-    var localCtxReference = undefined;
-    var lastTime = 0;
-    var date = undefined;
-    var elapsed = 0;
 
     var map = null;
     var phase = 0;
@@ -60,86 +98,75 @@
     var whitePixel = null;
     var cellTop, cellLeft, cellRight, cellBottom, neighbors, state, newState;
 
-    // code to run before update looping starts.
-
-    function init(params) {
-
-        return new Promise(
-            function (resolve, reject) {
-
-                localCtxReference = params.ctx;
-                lastTime = new Date();
-                elapsed = Math.random() * 10000;
-
-                params.ctx.lineWidth = 1;
-                map = generateMap();
-                resolve(FPS);
-            });
+    const init = async p => {
+        p.ctx.lineWidth = 1;
+        map = generateMap(p);
+        new DFEditor(p.values, "editor");
     }
 
-    // code to run every frame.
-
-    function update(params) {
-
-        date = new Date();
-        elapsed += date - lastTime;
-        lastTime = date;
-
-        //params.ctx.clearRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
-        params.ctx.fillStyle = "rgba(255,255,255," + CELL_FADE + ")";
-        params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        params.ctx.fillStyle = "rgba(0,0,0,1)";
+    const update = p => {
+        //p.ctx.clearRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
+        p.ctx.fillStyle = "rgba(255,255,255," + p.values.CELL_FADE.Value + ")";
+        p.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        p.ctx.fillStyle = "rgba(0,0,0,1)";
 
         // run step
-        for (var y = 0; y < map.length; y++)
-            for (var x = 0; x < map[0].length; x++)
-                if (map[y][x].u)
-                    if (phase == 0)
-                        map[y][x].n = checkCell(params.ctx, x, y);
-                    else
-                        map[y][x].c = checkCell(params.ctx, x, y);
+        for (var y = 0; y < map.length; y++) {
+            for (var x = 0; x < map[0].length; x++) {
+                if (map[y][x].u) {
+                    if (phase == 0) {
+                        map[y][x].n = checkCell(p, x, y);
+                    }
+                    else {
+                        map[y][x].c = checkCell(p, x, y);
+                    }
+                }
+            }
+        }
 
         phase = (phase == 0 ? 1 : 0);
     }
 
-    function generateMap() {
-
+    const generateMap = p => {
         var tempMap = new Array();
 
-        for (var y = 0; y < CELLS_Y; y++) {
-
+        for (var y = 0; y < p.values.CELLS_Y.Value; y++) {
             var row = new Array();
 
-            for (var x = 0; x < CELLS_X; x++) {
-
-                var state = (Math.floor(Math.random() * CELL_DENSITY) == 0) ? 0 : 1;
+            for (var x = 0; x < p.values.CELLS_X.Value; x++) {
+                var state = (Math.floor(Math.random() * p.values.CELL_DENSITY.Value) == 0) ? 0 : 1;
                 row.push({ c: state, n: state, u: state == 1, t: null, b: null, l: null, r: null, tl: null, tr: null, bl: null, br: null });
             }
-
             tempMap.push(row);
         }
 
-        for (var y = 0; y < CELLS_Y; y++) {
-
+        for (var y = 0; y < p.values.CELLS_Y.Value; y++) {
             var row = new Array();
 
-            for (var x = 0; x < CELLS_X; x++) {
-
+            for (var x = 0; x < p.values.CELLS_X.Value; x++) {
                 cellTop = y - 1;
-                if (cellTop < 0)
-                    cellTop = CELLS_Y - 1;
+
+                if (cellTop < 0) {
+                    cellTop = p.values.CELLS_Y.Value - 1;
+                }
 
                 cellLeft = x - 1;
-                if (cellLeft < 0)
-                    cellLeft = CELLS_X - 1;
+
+                if (cellLeft < 0) {
+                    cellLeft = p.values.CELLS_X.Value - 1;
+                }
 
                 cellBottom = y + 1;
-                if (cellBottom >= CELLS_Y)
+
+                if (cellBottom >= p.values.CELLS_Y.Value) {
                     cellBottom = 0;
+                }
 
                 cellRight = x + 1;
-                if (cellRight >= CELLS_X)
+
+                if (cellRight >= p.values.CELLS_X.Value) {
                     cellRight = 0;
+                }
 
                 var cell = tempMap[y][x];
                 cell.t = tempMap[cellTop][x];
@@ -152,12 +179,10 @@
                 cell.br = tempMap[cellBottom][cellRight];
             }
         }
-
         return tempMap;
     }
 
-    function checkCell(_ctx, _x, _y) {
-
+    function checkCell(p, _x, _y) {
         var cell = map[_y][_x];
         var state =
             phase == 0 ?
@@ -166,7 +191,7 @@
 
         neighbors = 0;
 
-        if (phase == 0)
+        if (phase == 0) {
             neighbors =
                 cell.tl.c +
                 cell.t.c +
@@ -176,7 +201,8 @@
                 cell.bl.c +
                 cell.b.c +
                 cell.br.c;
-        else
+        }
+        else {
             neighbors =
                 cell.tl.n +
                 cell.t.n +
@@ -186,6 +212,7 @@
                 cell.bl.n +
                 cell.b.n +
                 cell.br.n;
+        }
 
         newState = 0;
 
@@ -197,49 +224,42 @@
         */
 
         if (state == 1 && neighbors < 2) {
-
             newState = 0;
-
-        } else if (state == 1 && (neighbors == 2 || neighbors == 3)) {
-
+        }
+        else if (state == 1 && (neighbors == 2 || neighbors == 3)) {
             newState = 1;
             setupUpdates(cell);
-
-        } else if (state == 1 && neighbors > 3) {
-
+        }
+        else if (state == 1 && neighbors > 3) {
             newState = 0;
-
-        } else if (state == 0 && neighbors == 3) {
-
+        }
+        else if (state == 0 && neighbors == 3) {
             newState = 1;
-
-        } else {
-
-            if (Math.random() < REGENERATE_INTENSITY) {
-
+        }
+        else {
+            if (Math.random() < p.values.REGENERATE_INTENSITY.Value) {
                 newState = 1;
             }
         }
 
-        if (newState != state)
+        if (newState != state) {
             setupUpdates(cell);
-        else
+        }
+        else {
             cell.u = false;
+        }
 
         if (newState == 1) {
+            var widthOffset = (CANVAS_WIDTH / p.values.HORIZONTAL_DIVISIONS.Value);
+            var heightOffset = (CANVAS_HEIGHT / p.values.VERTICAL_DIVISIONS.Value);
 
-            var widthOffset = (CANVAS_WIDTH / HORIZONTAL_DIVISIONS);
-            var heightOffset = (CANVAS_HEIGHT / VERTICAL_DIVISIONS);
-
-            for (var u = 0; u < HORIZONTAL_DIVISIONS; u++) {
-
-                for (var o = 0; o < VERTICAL_DIVISIONS; o++) {
-
-                    _ctx.fillRect(
-                        (_x * CELL_SIZE) + (widthOffset * u),
-                        (_y * CELL_SIZE) + (heightOffset * o),
-                        CELL_SIZE,
-                        CELL_SIZE);
+            for (var u = 0; u < p.values.HORIZONTAL_DIVISIONS.Value; u++) {
+                for (var o = 0; o < p.values.VERTICAL_DIVISIONS.Value; o++) {
+                    p.ctx.fillRect(
+                        (_x * p.values.CELL_SIZE.Value) + (widthOffset * u),
+                        (_y * p.values.CELL_SIZE.Value) + (heightOffset * o),
+                        p.values.CELL_SIZE.Value,
+                        p.values.CELL_SIZE.Value);
                 }
             }
         }
@@ -248,7 +268,6 @@
     }
 
     function setupUpdates(cell) {
-
         cell.u = true;
         cell.tl.u = true;
         cell.t.u = true;
@@ -260,6 +279,15 @@
         cell.br.u = true;
     }
 
+    new DemoFramework(
+        {
+            fps: FPS,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            values,
+            init,
+            update
+        });
 </script>
 
 </html>

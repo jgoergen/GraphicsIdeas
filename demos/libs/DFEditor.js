@@ -1,3 +1,4 @@
+/* eslint-disable */
 const DFEditor = function (values, elID) {
 
     const thisRef = this;
@@ -121,3 +122,5 @@ const DFEditor = function (values, elID) {
 
     thisRef.initialize();
 }
+
+// export default DFEditor;

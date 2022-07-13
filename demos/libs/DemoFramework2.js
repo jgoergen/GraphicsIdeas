@@ -1,17 +1,18 @@
+/* eslint-disable */
 var DemoFramework = function (initialSettings) {
 
     var thisRef = this;
 
-    this.FPS = 60;
-    this.waitForAnimationFrame = true;
+    thisRef.FPS = 60;
+    thisRef.waitForAnimationFrame = true;
     thisRef.ctx = undefined;
     thisRef.canvas = undefined;
     thisRef.isMouseDown = false;
     thisRef.isSecondaryMouseDown = false;
     thisRef.now = undefined;
     thisRef.then = Date.now();
-    thisRef.interval = 1000 / FPS;
-    thisRef.delta;
+    thisRef.interval = 1000 / thisRef.FPS;
+    thisRef.delta = 0;
     thisRef.lastX = undefined;
     thisRef.lastY = undefined;
     thisRef.canvasOffsetX = undefined;
@@ -22,6 +23,7 @@ var DemoFramework = function (initialSettings) {
     thisRef.lastTime = 0;
     thisRef.date = undefined;
     thisRef.elapsed = 0;
+    thisRef.canvasRect = undefined;
 
     // ThreeJS Stuff
     thisRef.scene = undefined;
@@ -32,6 +34,11 @@ var DemoFramework = function (initialSettings) {
     thisRef.initialize = function () {
 
         if (initialSettings.type === "threejs") {
+
+            if (!window.hasOwnProperty("THREE")) {
+                alert("Attempting to init three.js failed, is it included?");
+                return;
+            }
 
             thisRef.scene = new THREE.Scene();
             thisRef.camera = new THREE.PerspectiveCamera(75, initialSettings.width / initialSettings.height, 0.1, 1000);
@@ -60,6 +67,11 @@ var DemoFramework = function (initialSettings) {
             };
 
         } else if (initialSettings.type === "pixijs") {
+
+            if (!window.hasOwnProperty("pixijs")) {
+                alert("Attempting to init pixijs failed, is it included?");
+                return;
+            }
 
             let app = new PIXI.Application({
                 width: initialSettings.width,
@@ -160,6 +172,32 @@ var DemoFramework = function (initialSettings) {
                 function (e) { thisRef.mouseUpHandler(e); },
                 false);
 
+        document
+            .addEventListener(
+                "keydown",
+                function (e) { thisRef.keyDownHandler(e); },
+                false);
+
+        document
+            .addEventListener(
+                "keyup",
+                function (e) { thisRef.keyUpHandler(e); },
+                false);
+
+        document
+            .addEventListener(
+                "keypress",
+                function (e) { thisRef.keyPressHandler(e); },
+                false);
+
+        /* todo: make optional
+                thisRef.stage
+                    .addEventListener(
+                        "wheel",
+                        function (e) { thisRef.mouseWheelHandler(e); },
+                        false);
+        */
+
         // does the device support tilt events?
         if (initialSettings.deviceOrientationEvent) {
 
@@ -178,7 +216,6 @@ var DemoFramework = function (initialSettings) {
                     false);
         }
 
-        thisRef.initConsoleFeatures(thisRef.passParams);
 
         // prepare settings
         if (initialSettings.hasOwnProperty("values")) {
@@ -186,6 +223,7 @@ var DemoFramework = function (initialSettings) {
             thisRef.initSettings(initialSettings.values);
         }
 
+        thisRef.initConsoleFeatures(thisRef.passParams);
         thisRef.lastTime = new Date();
         thisRef.elapsed = Math.random() * 10000;
 
@@ -208,10 +246,10 @@ var DemoFramework = function (initialSettings) {
                 thisRef.initSettings(initialSettings.values);
                 thisRef.doInit(params);
 
-                Object.keys(thisRef.passParams.values).forEach(
+                Object.keys(params.values).forEach(
                     function (key) {
-                        thisRef.passParams.values[key].Locked = false;
-                        thisRef.passParams.values[key].Regenerate();
+                        params.values[key].Locked = false;
+                        params.values[key].Regenerate();
                     });
             },
             Restart: () => {
@@ -220,7 +258,7 @@ var DemoFramework = function (initialSettings) {
                 cancelAnimationFrame(thisRef.updateIntervalID);
             },
             SetFPS: thisRef.setFPS,
-            Values: thisRef.passParams.values
+            Values: params.values
         };
     }
 
@@ -425,19 +463,33 @@ var DemoFramework = function (initialSettings) {
     };
 
     thisRef.touchStartHanlder = function (e) {
+        const bodyRect = document.body.getBoundingClientRect();
+        const elemRect = e.currentTarget.getBoundingClientRect();
 
+        thisRef.canvasRect = {
+            top: elemRect.top - bodyRect.top,
+            left: elemRect.left - bodyRect.left,
+            right: elemRect.left + elemRect.width,
+            bottom: elemRect.top + elemRect.height,
+            height: elemRect.height,
+            width: elemRect.width,
+            x: elemRect.left - bodyRect.left,
+            y: elemRect.top - bodyRect.top
+        }
         if (e.touches.length == 1 && initialSettings.hasOwnProperty("mouseDown"))
-            initialSettings.mouseDown(thisRef.passParams, { x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY });
+            initialSettings.mouseDown(thisRef.passParams, { x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY }, thisRef.canvasRect);
         else if (e.touches.length == 2 && initialSettings.hasOwnProperty("secondaryMouseDown"))
-            initialSettings.secondaryMouseDown(thisRef.passParams, { x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY });
+            initialSettings.secondaryMouseDown(thisRef.passParams, { x: e.touches[0].pageX - thisRef.canvasOffsetX, y: e.touches[0].pageY - thisRef.canvasOffsetY }, thisRef.canvasRect);
     };
 
     thisRef.touchEndHanlder = function (e) {
 
+        const x = e.touches[0].pageX * thisRef.stage.width / thisRef.stage.clientWidth;
+        const y = e.touches[0].pageY * thisRef.stage.height / thisRef.stage.clientHeight;
         if (e.touches.length == 0 && initialSettings.hasOwnProperty("mouseUp"))
-            initialSettings.mouseUp(thisRef.passParams);
+            initialSettings.mouseUp(thisRef.passParams, { x: x, y: y }, thisRef.canvasRect);
         else if (e.touches.length == 1 && initialSettings.hasOwnProperty("secondaryMouseUp"))
-            initialSettings.secondaryMouseUp(thisRef.passParams);
+            initialSettings.secondaryMouseUp(thisRef.passParams, { x: x, y: y }, thisRef.canvasRect);
 
         thisRef.lastX = undefined;
         thisRef.lastY = undefined;
@@ -453,51 +505,73 @@ var DemoFramework = function (initialSettings) {
         for (var i = 0; i < steps.length; i++) {
 
             if (e.touches.length == 0 && initialSettings.hasOwnProperty("mouseMove"))
-                initialSettings.mouseMove(thisRef.passParams, steps[i], false);
+                initialSettings.mouseMove(thisRef.passParams, steps[i], thisRef.canvasRect, false);
             else if (e.touches.length == 1 && initialSettings.hasOwnProperty("mouseMove"))
-                initialSettings / mouseMove(thisRef.passParams, steps[i], true);
+                initialSettings / mouseMove(thisRef.passParams, steps[i], thisRef.canvasRect, true);
             else if (e.touches.length == 2 && initialSettings.hasOwnProperty("secondaryMouseMove"))
-                initialSettings.secondaryMouseMove(thisRef.passParams, steps[i]);
+                initialSettings.secondaryMouseMove(thisRef.passParams, thisRef.canvasRect, steps[i]);
         }
     };
 
     thisRef.mouseDownHandler = function (e) {
 
+        const bodyRect = document.body.getBoundingClientRect();
+        const elemRect = e.currentTarget.getBoundingClientRect();
+        thisRef.canvasRect = {
+            top: elemRect.top - bodyRect.top,
+            left: elemRect.left - bodyRect.left,
+            right: elemRect.left + elemRect.width,
+            bottom: elemRect.top + elemRect.height,
+            height: elemRect.height,
+            width: elemRect.width,
+            x: elemRect.left - bodyRect.left,
+            y: elemRect.top - bodyRect.top
+        };
+        const x = e.offsetX * thisRef.stage.width / thisRef.stage.clientWidth;
+        const y = e.offsetY * thisRef.stage.height / thisRef.stage.clientHeight;
         if ((e.which === 3 || e.button === 2)) {
 
             thisRef.isSecondaryMouseDown = true;
 
             if (initialSettings.hasOwnProperty("secondaryMouseDown"))
-                initialSettings.secondaryMouseDown(thisRef.passParams, e);
+                initialSettings.secondaryMouseDown(thisRef.passParams, { x: x, y: y }, thisRef.canvasRect);
 
         } else {
 
             thisRef.isMouseDown = true;
 
             if (initialSettings.hasOwnProperty("mouseDown"))
-                initialSettings.mouseDown(thisRef.passParams, e);
+                initialSettings.mouseDown(thisRef.passParams, { x: x, y: y }, thisRef.canvasRect);
         }
     };
 
     thisRef.mouseUpHandler = function (e) {
 
+        const x = e.offsetX * thisRef.stage.width / thisRef.stage.clientWidth;
+        const y = e.offsetY * thisRef.stage.height / thisRef.stage.clientHeight;
         if ((e.which === 3 || e.button === 2)) {
 
             thisRef.isSecondaryMouseDown = false;
 
             if (initialSettings.hasOwnProperty("secondaryMouseUp"))
-                initialSettings.secondaryMouseUp(thisRef.passParams, e);
+                initialSettings.secondaryMouseUp(thisRef.passParams, { x: x, y: y }, thisRef.canvasRect);
 
         } else {
 
             thisRef.isMouseDown = false;
 
             if (initialSettings.hasOwnProperty("mouseUp"))
-                initialSettings.mouseUp(thisRef.passParams, e);
+                initialSettings.mouseUp(thisRef.passParams, { x: x, y: y }, thisRef.canvasRect);
         }
 
         thisRef.lastX = undefined;
         thisRef.lastY = undefined;
+    };
+    thisRef.mouseWheelHandler = function (e) {
+        e.preventDefault();
+        if (initialSettings.hasOwnProperty("mouseScroll")) {
+            initialSettings.mouseScroll(thisRef.passParams, e.deltaY, thisRef.canvasRect);
+        }
     };
 
     thisRef.mouseMoveHandler = function (e) {
@@ -512,19 +586,37 @@ var DemoFramework = function (initialSettings) {
             if (!thisRef.isMouseDown && !thisRef.isSecondaryMouseDown) {
 
                 if (initialSettings.hasOwnProperty("mouseMove"))
-                    initialSettings.mouseMove(thisRef.passParams, steps[i], false);
+                    initialSettings.mouseMove(thisRef.passParams, steps[i], thisRef.canvasRect, false);
 
             } else if (thisRef.isMouseDown) {
 
                 if (initialSettings.hasOwnProperty("mouseMove"))
-                    initialSettings.mouseMove(thisRef.passParams, steps[i], true);
+                    initialSettings.mouseMove(thisRef.passParams, steps[i], thisRef.canvasRect, true);
 
             } else if (thisRef.isSecondaryMouseDown) {
 
                 if (initialSettings.hasOwnProperty("secondaryMouseMove"))
-                    initialSettings.secondaryMouseMove(thisRef.passParams, steps[i]);
+                    initialSettings.secondaryMouseMove(thisRef.passParams, thisRef.canvasRect, steps[i]);
             }
         }
+    };
+
+    thisRef.keyUpHandler = function (e) {
+
+        if (initialSettings.hasOwnProperty("keyUp"))
+            initialSettings.keyUp(thisRef.passParams, e.code);
+    };
+
+    thisRef.keyDownHandler = function (e) {
+
+        if (initialSettings.hasOwnProperty("keyDown"))
+            initialSettings.keyDown(thisRef.passParams, e.code);
+    };
+
+    thisRef.keyPressHandler = function (e) {
+
+        if (initialSettings.hasOwnProperty("keyPress"))
+            initialSettings.keyPress(thisRef.passParams, e.code);
     };
 
     thisRef.run = function () {
@@ -556,3 +648,4 @@ var DemoFramework = function (initialSettings) {
 
     thisRef.initialize();
 };
+// export default DemoFramework;

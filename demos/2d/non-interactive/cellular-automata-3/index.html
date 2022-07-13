@@ -27,6 +27,7 @@
 
 <body>
     <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="editor"></div>
 </body>
 
 <script type="text/javascript">
@@ -37,18 +38,42 @@
 
     var CANVAS_WIDTH = 1920;
     var CANVAS_HEIGHT = 1080;
-    var CELL_SIZE = Math.ceil(Math.random() * 5);
-    var CELLS_X = Math.floor(CANVAS_WIDTH / CELL_SIZE);
-    var CELLS_Y = Math.floor(CANVAS_HEIGHT / CELL_SIZE);
-    var CELL_FADE = 0.5;
-    var CELL_DENSITY = 2;
+    var FPS = 60;
+
+    DF = { values: { CELL_SIZE: { Value: 1 } } };
+
+    const values = {
+        CELL_SIZE: {
+            Min: 0,
+            Max: 5,
+            TransitionFrames: 1,
+            Ceiled: true
+        },
+        CELLS_X: {
+            Min: 0,
+            Max: Math.floor(CANVAS_WIDTH / DF.values.CELL_SIZE.Value),
+            TransitionFrames: 1,
+            Ceiled: true
+        },
+        CELLS_Y: {
+            Min: 0,
+            Max: Math.floor(CANVAS_HEIGHT / DF.values.CELL_SIZE.Value),
+            TransitionFrames: 1,
+            Ceiled: true
+        },
+        CELL_FADE: {
+            Min: 0,
+            Max: 0.5,
+            TransitionFrames: 10
+        },
+        CELL_DENSITY: {
+            Min: 0,
+            Max: 2,
+            TransitionFrames: 1
+        }
+    };
 
     /////////////////////////////////////////////////////////
-
-    var localCtxReference = undefined;
-    var lastTime = 0;
-    var date = undefined;
-    var elapsed = 0;
 
     var map = null;
     var phase = 0;
@@ -56,59 +81,42 @@
     var whitePixel = null;
     var cellTop, cellLeft, cellRight, cellBottom, neighbors, state, newState;
 
-    // code to run before update looping starts.
-
-    function init(params) {
-
-        return new Promise(
-            function (resolve, reject) {
-
-                localCtxReference = params.ctx;
-                lastTime = new Date();
-                elapsed = Math.random() * 10000;
-
-                params.ctx.lineWidth = 1;
-                map = generateMap();
-                resolve();
-            });
+    const init = async p => {
+        p.ctx.lineWidth = 1;
+        map = generateMap(p);
+        new DFEditor(p.values, "editor");
     }
 
-    // code to run every frame.
-
-    function update(params) {
-
-        date = new Date();
-        elapsed += date - lastTime;
-        lastTime = date;
+    const update = p => {
 
         //ctx.clearRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
-        params.ctx.fillStyle = "rgba(255,255,255," + CELL_FADE + ")";
-        params.ctx.fillRect(0, 0, CELLS_X * CELL_SIZE, CELLS_Y * CELL_SIZE);
-        params.ctx.fillStyle = "rgba(0,0,0,1)";
+        p.ctx.fillStyle = "rgba(255,255,255," + p.values.CELL_FADE.Value + ")";
+        p.ctx.fillRect(0, 0, p.values.CELLS_X.Value * p.values.CELL_SIZE.Value, p.values.CELLS_Y.Value * p.values.CELL_SIZE.Value);
+        p.ctx.fillStyle = "rgba(0,0,0,1)";
 
         // run step
         for (var y = 0; y < map.length; y++)
             for (var x = 0; x < map[0].length; x++)
                 if (map[y][x].u)
                     if (phase == 0)
-                        map[y][x].n = checkCell(params.ctx, x, y);
+                        map[y][x].n = checkCell(p, x, y);
                     else
-                        map[y][x].c = checkCell(params.ctx, x, y);
+                        map[y][x].c = checkCell(p, x, y);
 
         phase = (phase == 0 ? 1 : 0);
     }
 
-    function generateMap() {
+    const generateMap = (p) => {
 
         var tempMap = new Array();
 
-        for (var y = 0; y < CELLS_Y; y++) {
+        for (var y = 0; y < p.values.CELLS_Y.Value; y++) {
 
             var row = new Array();
 
-            for (var x = 0; x < CELLS_X; x++) {
+            for (var x = 0; x < p.values.CELLS_X.Value; x++) {
 
-                var state = (Math.floor(Math.random() * CELL_DENSITY) == 0) ? 0 : 1;
+                var state = (Math.floor(Math.random() * p.values.CELL_DENSITY.Value) == 0) ? 0 : 1;
 
                 row.push({ c: state, n: state, u: state == 1, t: null, b: null, l: null, r: null, tl: null, tr: null, bl: null, br: null });
             }
@@ -116,27 +124,35 @@
             tempMap.push(row);
         }
 
-        for (var y = 0; y < CELLS_Y; y++) {
+        for (var y = 0; y < p.values.CELLS_Y.Value; y++) {
 
             var row = new Array();
 
-            for (var x = 0; x < CELLS_X; x++) {
+            for (var x = 0; x < p.values.CELLS_X.Value; x++) {
 
                 cellTop = y - 1;
-                if (cellTop < 0)
-                    cellTop = CELLS_Y - 1;
+
+                if (cellTop < 0) {
+                    cellTop = p.values.CELLS_Y.Value - 1;
+                }
 
                 cellLeft = x - 1;
-                if (cellLeft < 0)
-                    cellLeft = CELLS_X - 1;
+
+                if (cellLeft < 0) {
+                    cellLeft = p.values.CELLS_X.Value - 1;
+                }
 
                 cellBottom = y + 1;
-                if (cellBottom >= CELLS_Y)
+
+                if (cellBottom >= p.values.CELLS_Y.Value) {
                     cellBottom = 0;
+                }
 
                 cellRight = x + 1;
-                if (cellRight >= CELLS_X)
+
+                if (cellRight >= p.values.CELLS_X.Value) {
                     cellRight = 0;
+                }
 
                 var cell = tempMap[y][x];
                 cell.t = tempMap[cellTop][x];
@@ -153,7 +169,7 @@
         return tempMap;
     }
 
-    function checkCell(_ctx, _x, _y) {
+    function checkCell(p, _x, _y) {
 
         var cell = map[_y][_x];
         var state =
@@ -194,36 +210,34 @@
         */
 
         if (state == 1 && neighbors < 2) {
-
             newState = 0;
-
-        } else if (state == 1 && (neighbors == 2 || neighbors == 3)) {
-
+        }
+        else if (state == 1 && (neighbors == 2 || neighbors == 3)) {
             newState = 1;
             setupUpdates(cell);
 
         } else if (state == 1 && neighbors > 3) {
-
             newState = 0;
-
-        } else if (state == 0 && neighbors == 3) {
-
+        }
+        else if (state == 0 && neighbors == 3) {
             newState = 1;
-        } else {
-
+        }
+        else {
             if (Math.random() < 0.01) {
-
                 newState = 1;
             }
         }
 
-        if (newState != state)
+        if (newState != state) {
             setupUpdates(cell);
-        else
-            _ctx.u = false;
+        }
+        else {
+            p.ctx.u = false;
+        }
 
-        if (newState == 1)
-            _ctx.fillRect(_x * CELL_SIZE, _y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        if (newState == 1) {
+            p.ctx.fillRect(_x * p.values.CELL_SIZE.Value, _y * p.values.CELL_SIZE.Value, p.values.CELL_SIZE.Value, p.values.CELL_SIZE.Value);
+        }
 
         return newState;
     }
@@ -241,10 +255,16 @@
         cell.br.u = true;
     }
 
-    function mouseDown(e) {
-
-        map = generateMap();
-    }
+    new DemoFramework(
+        {
+            fps: FPS,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            values,
+            init,
+            update,
+            mouseDown: (e) => map = generateMap()
+        });
 
 </script>
 

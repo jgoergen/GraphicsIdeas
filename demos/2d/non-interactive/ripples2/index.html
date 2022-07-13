@@ -1,0 +1,167 @@
+<html>
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+
+    <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
+    <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
+    <script src="../../../libs/MiscUtilities.js" type="text/javascript"></script>
+
+    <title></title>
+
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <div id="editor"></div>
+</body>
+
+<script type="text/javascript">
+
+    /// Settings ////////////////////////////////////////////
+
+    // make a fortune variation
+    // https://jacquesheunis.com/post/fortunes-algorithm/
+    // https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
+
+    // put any adjustable settings here that would be interesting to tinker with.
+
+    var CANVAS_WIDTH = 800;
+    var CANVAS_HEIGHT = 800;
+    var FPS = 60;
+
+
+    const values = {
+        Damping: {
+            // Min: 0.7,
+            // Max: 0.999
+            Value: .62
+        },
+        Cols: {
+            Value: CANVAS_WIDTH
+        },
+        Rows: {
+            Value: CANVAS_HEIGHT
+        },
+        RAIN_CHANCE: {
+            Min: 0.1,
+            Max: 0.6
+        },
+        PixelSize: {
+            Min: 4,
+            Max: 8
+        },
+        FlipMode: {
+            // Min: 0,
+            // Max: 1,
+            // Floored: true
+            Value: 1
+        }
+    };
+
+    /////////////////////////////////////////////////////////
+
+    var buffer1 = [];
+    var buffer2 = [];
+
+    const prepData = p => {
+        var col = [];
+        for (var x = 0; x < Math.floor(p.values.Cols.Value / p.values.PixelSize.Value); x++) {
+            col.push(0);
+        }
+
+        for (var y = 0; y < Math.floor(p.values.Rows.Value / p.values.PixelSize.Value); y++) {
+            buffer1.push([...col]);
+            buffer2.push([...col]);
+        }
+    };
+
+    const init = async p => {
+        prepData(p);
+        const startY = Math.floor((p.values.Rows.Value / p.values.PixelSize.Value) / 2);
+        const startX = (Math.floor((p.values.Cols.Value / p.values.PixelSize.Value) / 2));
+        new DFEditor(p.values, "editor");
+    };
+
+    const update = p => {
+        if (Math.random() > p.values.RAIN_CHANCE.Value) {
+            placeDot(
+                p,
+                Math.floor(Math.random() * ((p.values.Rows.Value / p.values.PixelSize.Value) - 4)) + 2,
+                Math.floor(Math.random() * ((p.values.Cols.Value / p.values.PixelSize.Value) - 4)) + 2);
+        }
+
+        for (var y = 1; y < Math.floor(p.values.Rows.Value / p.values.PixelSize.Value) - 1; y++) {
+            for (var x = 1; x < Math.floor(p.values.Cols.Value / p.values.PixelSize.Value) - 1; x++) {
+                buffer2[y][x] = (((
+                    buffer1[y][x + 1] +
+                    buffer1[y][x - 1] +
+                    buffer1[y + 1][x] +
+                    buffer1[y - 1][x] +
+                    buffer1[y + 1][x + 1] +
+                    buffer1[y + 1][x - 1] +
+                    buffer1[y - 1][x + 1] +
+                    buffer1[y - 1][x - 1]) / (p.values.FlipMode.Value == 0 ? 4 : 3)) - buffer2[y][x]);
+
+                buffer2[y][x] *= p.values.Damping.Value;
+                const val = buffer2[y][x];
+                p.ctx.fillStyle = "rgb(" + val + "," + val + "," + val + ")";
+                p.ctx.fillRect(
+                    x * p.values.PixelSize.Value,
+                    y * p.values.PixelSize.Value,
+                    p.values.PixelSize.Value,
+                    p.values.PixelSize.Value);
+            }
+        }
+
+        const copy = MiscUtilities.fastCopyArray(buffer1);
+        buffer1 = MiscUtilities.fastCopyArray(buffer2);
+        buffer2 = copy;
+    };
+
+    const placeDot = (p, x, y) => {
+        const val = 255;
+        buffer1[y][x] = val;
+        buffer1[y + 1][x] = val;
+        buffer1[y - 1][x] = val;
+        buffer1[y][x + 1] = val;
+        buffer1[y][x - 1] = val;
+    }
+
+
+    const mouseDown = (p, position, canvasRect) => {
+        const startY = Math.floor(position.y / p.values.PixelSize.Value);
+        const startX = Math.floor(position.x / p.values.PixelSize.Value);
+        placeDot(p, Math.floor(position.x / p.values.PixelSize.Value), Math.floor(position.y / p.values.PixelSize.Value));
+    };
+
+    new DemoFramework(
+        {
+            fps: FPS,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            values,
+            init,
+            update,
+            mouseDown
+        });
+</script>
+
+</html>
