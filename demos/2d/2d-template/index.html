@@ -75,38 +75,36 @@
     /////////////////////////////////////////////////////////
 
     // code to run before update looping starts.
-    const init =
-        async p => {
-            console.log("Init");
-            p.ctx.fillStyle = "white";
-            p.ctx.strokeStyle = "white";
-            p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            new DFEditor(p.values, "editor");
-        };
+    const init = async p => {
+        console.log("Init");
+        p.ctx.fillStyle = "white";
+        p.ctx.strokeStyle = "white";
+        p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        new DFEditor(p.values, "editor");
+    };
 
     // code to run every frame.
-    const update =
-        p => {
-            if (Math.random() > 0.98) {
-                console.log("Regenerating");
-                p.values.FADE.Regenerate();
-                p.values.X.Regenerate();
-                p.values.Y.Regenerate();
-                p.values.R.Regenerate();
-                p.values.G.Regenerate();
-                p.values.B.Regenerate();
-            }
+    const update = p => {
+        if (Math.random() > 0.98) {
+            console.log("Regenerating");
+            p.values.FADE.Regenerate();
+            p.values.X.Regenerate();
+            p.values.Y.Regenerate();
+            p.values.R.Regenerate();
+            p.values.G.Regenerate();
+            p.values.B.Regenerate();
+        }
 
-            p.ctx.fillStyle = `rgba(0, 0, 0, ${p.values.FADE.Value})`;
-            p.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        p.ctx.fillStyle = `rgba(0, 0, 0, ${p.values.FADE.Value})`;
+        p.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-            p.ctx.fillStyle = `rgba(${Math.floor(p.values.R.Value)}, ${Math.floor(p.values.G.Value)}, ${Math.floor(p.values.B.Value)})`;
-            p.ctx.fillRect(
-                p.values.X.Value,
-                p.values.Y.Value,
-                200,
-                200);
-        };
+        p.ctx.fillStyle = `rgba(${Math.floor(p.values.R.Value)}, ${Math.floor(p.values.G.Value)}, ${Math.floor(p.values.B.Value)})`;
+        p.ctx.fillRect(
+            p.values.X.Value,
+            p.values.Y.Value,
+            200,
+            200);
+    };
 
     const mouseUp = (p, e) => {
 

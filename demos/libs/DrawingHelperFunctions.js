@@ -109,10 +109,10 @@ var DrawingHelperFunctions = {
         return positions;
     },
 
-    GetImageDataFromURL: function (url, callback) {
+    GetImageDataFromURL: function (url, callback, newWidth = null, newHeight = null) {
 
         var img = document.createElement("img");
-        img.onload = function () { callback(DrawingHelperFunctions.GetImageDataFromIMG(this)); }
+        img.onload = function () { callback(DrawingHelperFunctions.GetImageDataFromIMG(this, newWidth, newHeight)); }
         img.crossOrigin = "Anonymous";
         img.src = url;
     },
@@ -212,42 +212,48 @@ var DrawingHelperFunctions = {
 
     ReduceImageDataColors: function (imageData, reductionFactor, useDithering) {
 
-        var pixelData = undefined;
-        var reducedPixelData = undefined;
+        const { width, height } = imageData;
+        const dhFuncs = DrawingHelperFunctions;
 
-        for (var x = 1; x < imageData.width - 1; x++) {
+        for (let x = 1; x < width - 1; x++) {
 
-            for (var y = 1; y < imageData.height - 1; y++) {
+            for (let y = 1; y < height - 1; y++) {
 
-                pixelData =
-                    DrawingHelperFunctions.GetPixelDataFromImageData(
-                        imageData,
-                        x,
-                        y);
+                const pixelData = dhFuncs.GetPixelDataFromImageData(imageData, x, y);
+                const reducedPixelData = dhFuncs.ReduceColor(pixelData[0], pixelData[1], pixelData[2], reductionFactor);
 
-                reducedPixelData =
-                    DrawingHelperFunctions.ReduceColor(
-                        pixelData[0],
-                        pixelData[1],
-                        pixelData[2],
-                        reductionFactor);
-
-                DrawingHelperFunctions.ReplaceImageDataPixel(
+                dhFuncs.ReplaceImageDataPixel(
                     imageData,
                     x,
                     y,
                     reducedPixelData[0],
                     reducedPixelData[1],
                     reducedPixelData[2],
-                    pixelData[3]);
+                    pixelData[3]
+                );
 
                 if (useDithering) {
 
                     // floyd-steinberg dithering
-                    DrawingHelperFunctions.ModifyImageDataPixel(imageData, x + 1, y, reducedPixelData[3] * 7 / 16, reducedPixelData[4] * 7 / 16, reducedPixelData[5] * 7 / 16, 0);
-                    DrawingHelperFunctions.ModifyImageDataPixel(imageData, x - 1, y + 1, reducedPixelData[3] * 3 / 16, reducedPixelData[4] * 3 / 16, reducedPixelData[5] * 3 / 16, 0);
-                    DrawingHelperFunctions.ModifyImageDataPixel(imageData, x, y + 1, reducedPixelData[3] * 5 / 16, reducedPixelData[4] * 5 / 16, reducedPixelData[5] * 5 / 16, 0);
-                    DrawingHelperFunctions.ModifyImageDataPixel(imageData, x + 1, y + 1, reducedPixelData[3] * 1 / 16, reducedPixelData[4] * 1 / 16, reducedPixelData[5] * 1 / 16, 0);
+                    const [rDiff, gDiff, bDiff] = [reducedPixelData[3], reducedPixelData[4], reducedPixelData[5]];
+                    const ditheringFactors = [
+                        { dx: 1, dy: 0, factor: 7 / 16 },
+                        { dx: -1, dy: 1, factor: 3 / 16 },
+                        { dx: 0, dy: 1, factor: 5 / 16 },
+                        { dx: 1, dy: 1, factor: 1 / 16 },
+                    ];
+
+                    for (const { dx, dy, factor } of ditheringFactors) {
+                        dhFuncs.ModifyImageDataPixel(
+                            imageData,
+                            x + dx,
+                            y + dy,
+                            rDiff * factor,
+                            gDiff * factor,
+                            bDiff * factor,
+                            0
+                        );
+                    }
                 }
             }
         }

@@ -62,20 +62,21 @@
             Value: 100
         },
         POINT_COUNT: {
-            Min: 50,
-            Max: 250,
+            Min: 20,
+            Max: 70,
             Floored: true
         },
         POINT_MIN_SIZE: {
             Min: 1,
-            Max: 10
+            Max: 5
         },
         POINT_MAX_SIZE: {
-            Value: 1
+            Min: 5.1,
+            Max: 10
         },
         POINT_BORDER_THICKNESS: {
             Min: 1,
-            Max: 5
+            Max: 3
         },
         DOT_SIZE: {
             Min: 1,
@@ -232,7 +233,7 @@
     // code to run every frame.
 
     const update = p => {
-        //p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         p.ctx.fillStyle = "rgb(" + (255 - p.values.RED_MAX_RANGE.Value) + ", " + (255 - p.values.GREEN_MAX_RANGE.Value) + ", " + (255 - p.values.BLUE_MAX_RANGE.Value) + ")";
         p.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -270,18 +271,56 @@
                 p.ctx.fillStyle = p.ctx.strokeStyle = "rgba(255, 255, 255, " + point.flicker + ")";
             }
 
-            p.ctx.fillRect(point.x - (p.values.DOT_SIZE.Value / 2), point.y - (p.values.DOT_SIZE.Value / 2), p.values.DOT_SIZE.Value, p.values.DOT_SIZE.Value);
+            p.ctx.fillRect(
+                point.x - (p.values.DOT_SIZE.Value / 2),
+                point.y - (p.values.DOT_SIZE.Value / 2),
+                p.values.DOT_SIZE.Value,
+                p.values.DOT_SIZE.Value);
+
+            p.ctx.fillRect(
+                CANVAS_WIDTH - point.x - (p.values.DOT_SIZE.Value / 2),
+                point.y - (p.values.DOT_SIZE.Value / 2),
+                p.values.DOT_SIZE.Value,
+                p.values.DOT_SIZE.Value);
+
+            p.ctx.fillRect(
+                point.x - (p.values.DOT_SIZE.Value / 2),
+                CANVAS_HEIGHT - point.y - (p.values.DOT_SIZE.Value / 2),
+                p.values.DOT_SIZE.Value,
+                p.values.DOT_SIZE.Value);
+
+            p.ctx.fillRect(
+                CANVAS_WIDTH - point.x - (p.values.DOT_SIZE.Value / 2),
+                CANVAS_HEIGHT - point.y - (p.values.DOT_SIZE.Value / 2),
+                p.values.DOT_SIZE.Value,
+                p.values.DOT_SIZE.Value);
 
             for (var o = 0; o < points.length; o++) {
                 var point1 = points[o];
 
                 if (point1 != point && Math.abs(point1.x - point.x) + Math.abs(point1.y - point.y) < p.values.MAX_LENGTH.Value) {
                     p.ctx.beginPath();
+
                     p.ctx.moveTo(point1.x, point1.y);
                     p.ctx.lineTo(point.x, point.y);
+
+                    p.ctx.moveTo(CANVAS_WIDTH - point1.x, point1.y);
+                    p.ctx.lineTo(CANVAS_WIDTH - point.x, point.y);
+
+                    p.ctx.moveTo(point1.x, CANVAS_HEIGHT - point1.y);
+                    p.ctx.lineTo(point.x, CANVAS_HEIGHT - point.y);
+
+                    p.ctx.moveTo(CANVAS_WIDTH - point1.x, CANVAS_HEIGHT - point1.y);
+                    p.ctx.lineTo(CANVAS_WIDTH - point.x, CANVAS_HEIGHT - point.y);
+
                     p.ctx.stroke();
                 }
             }
+            /*
+            p.ctx.translate(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+            p.ctx.rotate(0.00001);
+            p.ctx.translate(-(CANVAS_WIDTH / 2), -(CANVAS_HEIGHT / 2));
+            */
         }
     }
 
