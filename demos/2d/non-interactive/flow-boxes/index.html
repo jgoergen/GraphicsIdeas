@@ -40,106 +40,202 @@
     var CANVAS_WIDTH = 800;
     var CANVAS_HEIGHT = 800;
     var FPS = 60;
-    var BORDER_EXCEED_AMOUNT = 100;
-    var POINT_COUNT = 400 + Math.floor(Math.random() * 800);
-    var POINT_MIN_SIZE = 1 + (Math.random() * 10);
-    var POINT_MAX_SIZE = POINT_MIN_SIZE + (Math.random() * 10);
-    var POINT_BORDER_THICKNESS = Math.random() * 5;
-    var MOVE_SPEED_X_MIN = (Math.random() * 10) - 5;
-    var MOVE_SPEED_X_MAX = (MOVE_SPEED_X_MIN + (Math.random() * 10));
-    var MOVE_SPEED_X_MIN_WIGGLE_SPEED = Math.random() * 0.02;
-    var MOVE_SPEED_X_MAX_WIGGLE_SPEED = MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
-    var MOVE_SPEED_X_MIN_WIGGLE_STRENGTH = Math.random() * 5;
-    var MOVE_SPEED_X_MAX_WIGGLE_STRENGTH = MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
-    var MOVE_SPEED_Y_MIN = (Math.random() * 10) - 5;
-    var MOVE_SPEED_Y_MAX = (MOVE_SPEED_Y_MIN + (Math.random() * 10));
-    var MOVE_SPEED_Y_MIN_WIGGLE_SPEED = Math.random() * 0.02;
-    var MOVE_SPEED_Y_MAX_WIGGLE_SPEED = MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * 0.2);
-    var MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH = Math.random() * 5;
-    var MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH = MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH + (Math.random() * 10);
-    var POINT_MIN_FLICKER_AMOUNT = Math.random() * 0.2;
-    var POINT_MAX_FLICKER_AMOUNT = POINT_MIN_FLICKER_AMOUNT + (Math.random() * 0.8);
-    var POINT_FLICKER_SPEED_BASE = Math.random() * 0.05;
-    var CIRLCE_FLICKER_SPEED_VARIANCE = POINT_FLICKER_SPEED_BASE + (Math.random() * 0.1);
-    var START_POSITIONS_ON_GRID = Math.random() > 0.5;
-    var USE_COLOR = Math.random() > 0.5;
-    var RED_MIN_RANGE = Math.random() * 125;
-    var RED_MAX_RANGE = RED_MIN_RANGE + Math.random() * 130;
-    var GREEN_MIN_RANGE = Math.random() * 125;
-    var GREEN_MAX_RANGE = GREEN_MIN_RANGE + Math.random() * 130;
-    var BLUE_MIN_RANGE = Math.random() * 125;
-    var BLUE_MAX_RANGE = BLUE_MIN_RANGE + Math.random() * 130;
-    var DRAW_MODES = ["source-over", "hard-light", "luminosity"];
-    var MAX_LENGTH = (Math.random() * (CANVAS_WIDTH / 2)) + (CANVAS_WIDTH / 4);
+
+    DF = {
+        values: {
+            POINT_MIN_SIZE: { Value: 1 },
+            CELL_SIZE: { Value: 1 },
+            MOVE_SPEED_X_MIN_WIGGLE_SPEED: { Value: 1 },
+            MOVE_SPEED_X_MIN_WIGGLE_STRENGTH: { Value: 1 },
+            MOVE_SPEED_Y_MIN: { Value: 1 },
+            MOVE_SPEED_Y_MIN_WIGGLE_SPEED: { Value: 1 },
+            MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH: { Value: 1 },
+            POINT_MIN_FLICKER_AMOUNT: { Value: 1 },
+            POINT_MIN_FLICKER_AMOUNT: { Value: 1 },
+            RED_MIN_RANGE: { Value: 1 },
+            GREEN_MIN_RANGE: { Value: 1 },
+            BLUE_MIN_RANGE: { Value: 1 },
+            POINT_FLICKER_SPEED_BASE: { Value: 1 }
+        }
+    };
+
+    var values = {
+        BORDER_EXCEED_AMOUNT: {
+            Value: 100
+        },
+        POINT_COUNT: {
+            Min: 400,
+            Max: 1200,
+            Ceiled: true
+        },
+        POINT_MIN_SIZE: {
+            Min: 1,
+            Max: 11
+        },
+        POINT_MAX_SIZE: {
+            Min: DF.values.POINT_MIN_SIZE.Value,
+            Max: 21
+        },
+        POINT_BORDER_THICKNESS: {
+            Min: 0,
+            Max: 5
+        },
+        MOVE_SPEED_X_MIN: {
+            Min: -5,
+            Max: 5
+        },
+        MOVE_SPEED_X_MAX: {
+            Min: DF.values.CELL_SIZE.Value,
+            Max: 25
+        },
+        MOVE_SPEED_X_MIN_WIGGLE_SPEED: {
+            Min: 0,
+            Max: 0.02
+        },
+        MOVE_SPEED_X_MAX_WIGGLE_SPEED: {
+            Min: DF.values.MOVE_SPEED_X_MIN_WIGGLE_SPEED.Value,
+            Max: 0.04
+        },
+        MOVE_SPEED_X_MIN_WIGGLE_STRENGTH: {
+            Min: 0,
+            Max: 5
+        },
+        MOVE_SPEED_X_MAX_WIGGLE_STRENGTH: {
+            Min: DF.values.MOVE_SPEED_X_MIN_WIGGLE_STRENGTH.Value,
+            Max: 15
+        },
+        MOVE_SPEED_Y_MIN: {
+            Min: -5,
+            Max: 5
+        },
+        MOVE_SPEED_Y_MAX: {
+            Min: DF.values.MOVE_SPEED_Y_MIN.Value,
+            Max: 15
+        },
+        MOVE_SPEED_Y_MIN_WIGGLE_SPEED: {
+            Min: 0,
+            Max: 0.02
+        },
+        MOVE_SPEED_Y_MAX_WIGGLE_SPEED: {
+            Min: DF.values.MOVE_SPEED_Y_MIN.Value,
+            Max: 0.04
+        },
+        MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH: {
+            Min: 0,
+            Max: 5
+        },
+        MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH: {
+            Min: DF.values.MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH.Value,
+            Max: 15
+        },
+        POINT_MIN_FLICKER_AMOUNT: {
+            Min: 0,
+            Max: 0.2
+        },
+        POINT_MAX_FLICKER_AMOUNT: {
+            Min: DF.values.POINT_MIN_FLICKER_AMOUNT.Value,
+            Max: 0.9
+        },
+        POINT_FLICKER_SPEED_BASE: {
+            Min: 0,
+            Max: 0.05
+        },
+        CIRLCE_FLICKER_SPEED_VARIANCE: {
+            Min: DF.values.POINT_FLICKER_SPEED_BASE.Value,
+            Max: 0.15
+        },
+        START_POSITIONS_ON_GRID: {
+            Array: [true, false]
+        },
+        USE_COLOR: {
+            Array: [true, false]
+        },
+        RED_MIN_RANGE: {
+            Min: 0,
+            Max: 125
+        },
+        RED_MAX_RANGE: {
+            Min: DF.values.RED_MIN_RANGE.Value,
+            Max: 255
+        },
+        GREEN_MIN_RANGE: {
+            Min: 0,
+            Max: 125
+        },
+        GREEN_MAX_RANGE: {
+            Min: DF.values.GREEN_MIN_RANGE.Value,
+            Max: 255
+        },
+        BLUE_MIN_RANGE: {
+            Min: 0,
+            Max: 125
+        },
+        BLUE_MAX_RANGE: {
+            Min: DF.values.BLUE_MIN_RANGE.Value,
+            Max: 255
+        },
+        MAX_LENGTH: {
+            Min: (CANVAS_WIDTH / 4),
+            Max: (CANVAS_WIDTH / 2)
+        },
+        DRAW_MODES: {
+            Array: ["source-over", "hard-light", "luminosity"]
+        }
+    };
 
     /////////////////////////////////////////////////////////
 
-    var lastTime = 0;
-    var date = undefined;
-    var elapsed = 0;
     var points = [];
 
     // code to run before update looping starts.
 
-    function init(params) {
+    const init = async p => {
+        p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        new DFEditor(p.values, "editor");
+        p.ctx.lineWidth = p.values.POINT_BORDER_THICKNESS.Value;
+        p.ctx.globalCompositeOperation = p.values.DRAW_MODES.Value;
+        p.ctx.fillStyle = "rgb(" + (255 - p.values.RED_MAX_RANGE.Value) + ", " + (255 - p.values.GREEN_MAX_RANGE.Value) + ", " + (255 - p.values.BLUE_MAX_RANGE.Value) + ")";
 
-        params.ctx.lineWidth = POINT_BORDER_THICKNESS;
-        params.ctx.globalCompositeOperation = DRAW_MODES[Math.floor(Math.random() * DRAW_MODES.length)];
-        params.ctx.fillStyle = "rgb(" + (255 - RED_MAX_RANGE) + ", " + (255 - GREEN_MAX_RANGE) + ", " + (255 - BLUE_MAX_RANGE) + ")";
+        var gridCols = Math.floor(Math.sqrt(p.values.POINT_COUNT.Value));
+        var gridColSpacing = (CANVAS_WIDTH / gridCols) + (p.values.BORDER_EXCEED_AMOUNT.Value * 2);
+        var gridRowSpacing = (CANVAS_HEIGHT / gridCols) + (p.values.BORDER_EXCEED_AMOUNT.Value * 2);
 
-        return new Promise(
-            function (resolve, reject) {
+        for (var i = 0; i < p.values.POINT_COUNT.Value; i++) {
 
-                lastTime = new Date();
-                elapsed = Math.random() * 1000;
+            var x = (Math.random() * (CANVAS_WIDTH + (p.values.BORDER_EXCEED_AMOUNT.Value * 2)) - p.values.BORDER_EXCEED_AMOUNT.Value);
+            var y = (Math.random() * (CANVAS_HEIGHT + (p.values.BORDER_EXCEED_AMOUNT.Value * 2)) - p.values.BORDER_EXCEED_AMOUNT.Value);
 
-                var gridCols = Math.floor(Math.sqrt(POINT_COUNT));
-                var gridColSpacing = (CANVAS_WIDTH / gridCols) + (BORDER_EXCEED_AMOUNT * 2);
-                var gridRowSpacing = (CANVAS_HEIGHT / gridCols) + (BORDER_EXCEED_AMOUNT * 2);
+            if (p.values.START_POSITIONS_ON_GRID.Value) {
 
-                for (var i = 0; i < POINT_COUNT; i++) {
+                var gridPos = MathHelperFunctions.IndexToXY(i, gridCols);
+                x = gridPos[0] * gridColSpacing;
+                y = gridPos[1] * gridRowSpacing;
+            }
 
-                    var x = (Math.random() * (CANVAS_WIDTH + (BORDER_EXCEED_AMOUNT * 2)) - BORDER_EXCEED_AMOUNT);
-                    var y = (Math.random() * (CANVAS_HEIGHT + (BORDER_EXCEED_AMOUNT * 2)) - BORDER_EXCEED_AMOUNT);
-
-                    if (START_POSITIONS_ON_GRID) {
-
-                        var gridPos = MathHelperFunctions.IndexToXY(i, gridCols);
-                        x = gridPos[0] * gridColSpacing;
-                        y = gridPos[1] * gridRowSpacing;
-                    }
-
-                    points.push({
-                        baseX: x,
-                        x: 0,
-                        baseY: y,
-                        y: 0,
-                        xWiggleSpeed: MOVE_SPEED_X_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_X_MAX_WIGGLE_SPEED - MOVE_SPEED_X_MIN_WIGGLE_SPEED)),
-                        xWiggleStrength: MOVE_SPEED_X_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_X_MAX_WIGGLE_STRENGTH - MOVE_SPEED_X_MIN_WIGGLE_STRENGTH)),
-                        yWiggleSpeed: MOVE_SPEED_Y_MIN_WIGGLE_SPEED + (Math.random() * (MOVE_SPEED_Y_MAX_WIGGLE_SPEED - MOVE_SPEED_Y_MIN_WIGGLE_SPEED)),
-                        yWiggleStrength: MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH + (Math.random() * (MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH - MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH)),
-                        xSpeed: MOVE_SPEED_X_MIN + (Math.random() * (MOVE_SPEED_X_MAX - MOVE_SPEED_X_MIN)),
-                        ySpeed: MOVE_SPEED_Y_MIN + (Math.random() * (MOVE_SPEED_Y_MAX - MOVE_SPEED_Y_MIN)),
-                        radius: POINT_MIN_SIZE + (Math.random() * (POINT_MAX_SIZE - POINT_MIN_SIZE)),
-                        flicker: POINT_MIN_FLICKER_AMOUNT + (Math.random() * (POINT_MAX_FLICKER_AMOUNT - POINT_MIN_FLICKER_AMOUNT)),
-                        flickerSpeed: POINT_FLICKER_SPEED_BASE + (Math.random() * CIRLCE_FLICKER_SPEED_VARIANCE)
-                    });
-                }
-
-                resolve(FPS);
+            points.push({
+                baseX: x,
+                x: 0,
+                baseY: y,
+                y: 0,
+                xWiggleSpeed: p.values.MOVE_SPEED_X_MIN_WIGGLE_SPEED.Value + (Math.random() * (p.values.MOVE_SPEED_X_MAX_WIGGLE_SPEED.Value - p.values.MOVE_SPEED_X_MIN_WIGGLE_SPEED.Value)),
+                xWiggleStrength: p.values.MOVE_SPEED_X_MIN_WIGGLE_STRENGTH.Value + (Math.random() * (p.values.MOVE_SPEED_X_MAX_WIGGLE_STRENGTH.Value - p.values.MOVE_SPEED_X_MIN_WIGGLE_STRENGTH.Value)),
+                yWiggleSpeed: p.values.MOVE_SPEED_Y_MIN_WIGGLE_SPEED.Value + (Math.random() * (p.values.MOVE_SPEED_Y_MAX_WIGGLE_SPEED.Value - p.values.MOVE_SPEED_Y_MIN_WIGGLE_SPEED.Value)),
+                yWiggleStrength: p.values.MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH.Value + (Math.random() * (p.values.MOVE_SPEED_Y_MAX_WIGGLE_STRENGTH.Value - p.values.MOVE_SPEED_Y_MIN_WIGGLE_STRENGTH.Value)),
+                xSpeed: p.values.MOVE_SPEED_X_MIN.Value + (Math.random() * (p.values.MOVE_SPEED_X_MAX.Value - p.values.MOVE_SPEED_X_MIN.Value)),
+                ySpeed: p.values.MOVE_SPEED_Y_MIN.Value + (Math.random() * (p.values.MOVE_SPEED_Y_MAX.Value - p.values.MOVE_SPEED_Y_MIN.Value)),
+                radius: p.values.POINT_MIN_SIZE.Value + (Math.random() * (p.values.POINT_MAX_SIZE.Value - p.values.POINT_MIN_SIZE.Value)),
+                flicker: p.values.POINT_MIN_FLICKER_AMOUNT.Value + (Math.random() * (p.values.POINT_MAX_FLICKER_AMOUNT.Value - p.values.POINT_MIN_FLICKER_AMOUNT.Value)),
+                flickerSpeed: p.values.POINT_FLICKER_SPEED_BASE.Value + (Math.random() * p.values.CIRLCE_FLICKER_SPEED_VARIANCE.Value)
             });
+        }
     }
 
     // code to run every frame.
 
-    function update(params) {
+    const update = p => {
+        //p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        p.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        //params.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        params.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-        date = new Date();
-        elapsed += date - lastTime;
-        lastTime = date;
         var point1 = undefined;
         var point2 = undefined;
         var point3 = undefined;
@@ -153,8 +249,8 @@
             point.y = point.baseY + (Math.cos(point.baseX * point.yWiggleSpeed) * point.yWiggleStrength);
             point.flicker += point.flickerSpeed;
 
-            point.x = MathHelperFunctions.WrapVal(point.x, (BORDER_EXCEED_AMOUNT * -1), CANVAS_WIDTH + BORDER_EXCEED_AMOUNT);
-            point.y = MathHelperFunctions.WrapVal(point.y, (BORDER_EXCEED_AMOUNT * -1), CANVAS_HEIGHT + BORDER_EXCEED_AMOUNT);
+            point.x = MathHelperFunctions.WrapVal(point.x, (p.values.BORDER_EXCEED_AMOUNT.Value * -1), CANVAS_WIDTH + p.values.BORDER_EXCEED_AMOUNT.Value);
+            point.y = MathHelperFunctions.WrapVal(point.y, (p.values.BORDER_EXCEED_AMOUNT.Value * -1), CANVAS_HEIGHT + p.values.BORDER_EXCEED_AMOUNT.Value);
 
             if (point.flicker < 0) {
 
@@ -183,27 +279,27 @@
             } else {
 
                 if (
-                    Math.abs(point1.x - point.x) + Math.abs(point1.y - point.y) < MAX_LENGTH &&
-                    Math.abs(point2.x - point1.x) + Math.abs(point2.y - point1.y) < MAX_LENGTH &&
-                    Math.abs(point3.x - point2.x) + Math.abs(point3.y - point2.y) < MAX_LENGTH) {
+                    Math.abs(point1.x - point.x) + Math.abs(point1.y - point.y) < p.values.BLUE_MAX_RANGE.Value &&
+                    Math.abs(point2.x - point1.x) + Math.abs(point2.y - point1.y) < p.values.BLUE_MAX_RANGE.Value &&
+                    Math.abs(point3.x - point2.x) + Math.abs(point3.y - point2.y) < p.values.MAX_LENGTH.Value) {
 
-                    if (USE_COLOR)
-                        params.ctx.strokeStyle =
+                    if (p.values.USE_COLOR.Value)
+                        p.ctx.strokeStyle =
                             "rgba(" +
-                            MathHelperFunctions.WrapVal(point.x / point.yWiggleStrength, RED_MIN_RANGE, RED_MAX_RANGE) + ", " +
-                            MathHelperFunctions.WrapVal(point.flicker * point.xWiggleStrength, GREEN_MIN_RANGE, GREEN_MAX_RANGE) + ", " +
-                            MathHelperFunctions.WrapVal(point.y * point.xWiggleStrength, BLUE_MIN_RANGE, BLUE_MAX_RANGE) + ", " +
+                            MathHelperFunctions.WrapVal(point.x / point.yWiggleStrength, p.values.RED_MIN_RANGE.Value, RED_MAX_RANGE) + ", " +
+                            MathHelperFunctions.WrapVal(point.flicker * point.xWiggleStrength, p.values.GREEN_MIN_RANGE.Value, p.values.GREEN_MAX_RANGE.Value) + ", " +
+                            MathHelperFunctions.WrapVal(point.y * point.xWiggleStrength, p.values.BLUE_MIN_RANGE.Value, p.values.BLUE_MAX_RANGE.Value) + ", " +
                             point.flicker + ")";
                     else
-                        params.ctx.strokeStyle = "rgba(255, 255, 255, " + point.flicker + ")";
+                        p.ctx.strokeStyle = "rgba(255, 255, 255, " + point.flicker + ")";
 
-                    params.ctx.beginPath();
-                    params.ctx.moveTo(point1.x, point1.y);
-                    params.ctx.lineTo(point2.x, point2.y);
-                    params.ctx.lineTo(point3.x, point2.y);
-                    params.ctx.lineTo(point.x, point.y);
-                    params.ctx.lineTo(point1.x, point1.y);
-                    params.ctx.stroke();
+                    p.ctx.beginPath();
+                    p.ctx.moveTo(point1.x, point1.y);
+                    p.ctx.lineTo(point2.x, point2.y);
+                    p.ctx.lineTo(point3.x, point2.y);
+                    p.ctx.lineTo(point.x, point.y);
+                    p.ctx.lineTo(point1.x, point1.y);
+                    p.ctx.stroke();
                 }
 
                 point1 = undefined;
@@ -213,6 +309,15 @@
         }
     }
 
+    new DemoFramework(
+        {
+            fps: FPS,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            values,
+            init,
+            update
+        });
 </script>
 
 </html>

@@ -10,6 +10,7 @@
 
     <script src="../../../libs/DemoFramework2.js" type="text/javascript"></script>
     <script src="../../../libs/DFEditor.js" type="text/javascript"></script>
+    <script src="../../../libs/MathHelperFunctions.js" type="text/javascript"></script>
 
     <title></title>
 
@@ -40,83 +41,97 @@
     var CANVAS_HEIGHT = 1080;
     var FPS = 60;
 
+    DF = {
+        values: {
+        }
+    };
+
+    var values = {
+        A_DEVISOR: {
+            Min: 0,
+            Max: 4
+        },
+        C_DEVISOR: {
+            Min: 0,
+            Max: 4
+        },
+        BASE_R: {
+            Min: 0,
+            Max: 255,
+            Floored: true
+        },
+        BASE_G: {
+            Min: 0,
+            Max: 150,
+            Floored: true
+        },
+        BASE_B: {
+            Min: 0,
+            Max: 150,
+            Floored: true
+        },
+        BASE_G_MULTIPLIER: {
+            Min: 0,
+            Max: 20
+        },
+        EXPANSION_DEVISOR: {
+            Min: 0,
+            Max: 20
+        },
+        ALPHA: {
+            Min: 0.2,
+            Max: 1
+        },
+    };
+
     /////////////////////////////////////////////////////////
 
-    var lastTime = 0;
-    var date = undefined;
-    var elapsed = 0;
-    var aDevisor = 2;
-    var cDevisor = 4;
-    var baseR = 80;
-    var baseGMultiplier = 35;
-    var baseB = 150;
-    var expansionDevisor = 10;
-    var alpha = 1;
-
-    // code to run before update looping starts.
-
-    function init(params) {
-
-        return new Promise(
-            function (resolve, reject) {
-
-                lastTime = new Date();
-                elapsed = Math.random() * 10000;
-                aDevisor = Math.random() * 4;
-                cDevisor = Math.random() * 4;
-                baseR = parseInt(Math.random() * 255);
-                baseB = parseInt(Math.random() * 150);
-                baseGMultiplier = parseInt(Math.random() * 40);
-                expansionDevisor = Math.random() * 20;
-                alpha = 0.2 + Math.random() * 0.8;
-
-                resolve(FPS);
-            });
+    const init = async p => {
+        p.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        new DFEditor(p.values, "editor");
     }
 
     // code to run every frame.
 
-    function update(params) {
+    const update = p => {
 
-        date = new Date();
-        elapsed += date - lastTime;
-        lastTime = date;
+        var a = Math.cos((p.elapsed / 1000) / p.values.A_DEVISOR.Value) * 100;
+        var b = Math.cos(p.elapsed / 1000) * (a / 100);
+        var c = Math.sin((p.elapsed / 1000) / p.values.C_DEVISOR.Value) * 100;
 
-        var a =
-            Math.cos((elapsed / 1000) / aDevisor) * 100;
-
-        var b =
-            Math.cos(elapsed / 1000) * (a / 100);
-
-        var c =
-            Math.sin((elapsed / 1000) / cDevisor) * 100;
-
-        params.ctx.drawImage(
+        p.ctx.drawImage(
             canvas,
             b,
             b,
-            CANVAS_WIDTH + (b / expansionDevisor),
-            CANVAS_HEIGHT + (b / expansionDevisor));
+            CANVAS_WIDTH + (b / p.values.EXPANSION_DEVISOR.Value),
+            CANVAS_HEIGHT + (b / p.values.EXPANSION_DEVISOR.Value));
 
-        params.ctx.fillStyle =
-            "rgba(80, " + parseInt(Math.abs(b) * baseGMultiplier) + ", " + parseInt(a + baseB) + ", " + alpha + ")";
+        p.ctx.fillStyle =
+            "rgba(80, " + parseInt(Math.abs(b) * p.values.BASE_G_MULTIPLIER.Value) + ", " + parseInt(a + p.values.BASE_B.Value) + ", " + p.values.ALPHA.Value + ")";
 
-        params.ctx.save();
+        p.ctx.save();
 
-        params.ctx.rotate(b);
+        p.ctx.rotate(b);
 
-        params.ctx.fillRect(
+        p.ctx.fillRect(
             (CANVAS_WIDTH / 2) + (c * 10),
             a * 4,
             a * b,
             (c + ((CANVAS_HEIGHT - (a * 4)) / 2)));
 
-        params.ctx.restore();
-
-        params.ctx.rotate(
-            b / 4080);
+        p.ctx.restore();
+        p.ctx.rotate(b / 4080);
     }
 
+    new DemoFramework(
+        {
+            fps: FPS,
+            width: CANVAS_WIDTH,
+            height: CANVAS_HEIGHT,
+            values,
+            init,
+            update
+        });
 </script>
 
 </html>
