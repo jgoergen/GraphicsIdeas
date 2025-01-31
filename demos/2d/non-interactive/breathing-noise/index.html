@@ -41,7 +41,20 @@
     var CANVAS_HEIGHT = 400;
     var FPS = -1;
 
-    const values = {};
+    const values = {
+        v1: {
+            Min: 50,
+            Max: 2000,
+            TransitionFrames: 1,
+            Ceiled: true
+        },
+        v2: {
+            Min: 100,
+            Max: 40000,
+            TransitionFrames: 1,
+            Ceiled: true
+        },
+    };
 
     /////////////////////////////////////////////////////////
 
@@ -55,9 +68,9 @@
 
         var imageData = p.ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         var pixels = imageData.data;
-        var moveSpeed = Math.floor((Math.cos(reducedTime / 2) * Math.sin(reducedTime) + 1) * 500);
+        var moveSpeed = Math.floor((Math.cos(reducedTime / 2) * Math.sin(reducedTime) + 1) * (p.values.v1.Value / 2));
 
-        for (var i = 1000, n = pixels.length - 1000; i < n; i += (12 + moveSpeed)) {
+        for (var i = p.values.v1.Value, n = pixels.length - p.values.v1.Value; i < n; i += (12 + moveSpeed)) {
             pixels[i] = pixels[i - moveSpeed];
             pixels[i + 1] = pixels[i];
             pixels[i + 2] = pixels[i + moveSpeed];
@@ -65,7 +78,7 @@
             pixels[i + 3] =
                 Math.floor(Math.random() *
                     Math.floor(
-                        (Math.sin(reducedTime + (i / 500)) + 1) * 30020)
+                        (Math.sin(reducedTime + (i / (p.values.v1.Value / 2))) + 1) * p.values.v2.Value)
                     % 255);
 
             pixels[i + 4] = pixels[i - moveSpeed];
@@ -75,7 +88,7 @@
             pixels[i + 7] =
                 Math.floor(Math.random() *
                     Math.floor(
-                        (Math.sin(reducedTime + (i / 1000)) + 1) * 30020)
+                        (Math.sin(reducedTime + (i / p.values.v1.Value)) + 1) * p.values.v2.Value)
                     % 255);
         }
 
