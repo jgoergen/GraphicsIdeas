@@ -1,0 +1,83 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base-msvc",
+      "hidden": true,
+      "generator": "Visual Studio 17 2022",
+      "architecture": { "value": "x64", "strategy": "set" },
+      "binaryDir": "${sourceDir}/build/msvc",
+      "cacheVariables": {
+        "CMAKE_POLICY_DEFAULT_CMP0091": "NEW",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<IF:$<CONFIG:Debug>,Debug,>",
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_CXX_EXTENSIONS": "OFF",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "debug-msvc",
+      "displayName": "Debug (MSVC)",
+      "description": "Debug build using MSVC generator",
+      "inherits": "base-msvc",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "release-msvc",
+      "displayName": "Release (MSVC)",
+      "description": "Release build using MSVC generator",
+      "inherits": "base-msvc",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "relwithdebinfo-msvc",
+      "displayName": "RelWithDebInfo (MSVC)",
+      "description": "RelWithDebInfo build using MSVC generator",
+      "inherits": "base-msvc",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
+    },
+
+    {
+      "name": "base-ninja",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/ninja/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_CXX_EXTENSIONS": "OFF",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "debug-ninja",
+      "displayName": "Debug (Ninja)",
+      "description": "Debug build using Ninja",
+      "inherits": "base-ninja",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "release-ninja",
+      "displayName": "Release (Ninja)",
+      "description": "Release build using Ninja",
+      "inherits": "base-ninja",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "debug-msvc", "configurePreset": "debug-msvc", "configuration": "Debug" },
+    { "name": "release-msvc", "configurePreset": "release-msvc", "configuration": "Release" },
+    { "name": "relwithdebinfo-msvc", "configurePreset": "relwithdebinfo-msvc", "configuration": "RelWithDebInfo" },
+    { "name": "debug-ninja", "configurePreset": "debug-ninja" },
+    { "name": "release-ninja", "configurePreset": "release-ninja" }
+  ],
+  "testPresets": [
+    { "name": "debug-msvc", "configurePreset": "debug-msvc" }
+  ]
+}

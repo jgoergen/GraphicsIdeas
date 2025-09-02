@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Demo (Debug MSVC Preset)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/msvc/Debug/demo.exe",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "preLaunchTask": "Build (debug-msvc preset)"
+        },
+        {
+            "name": "Launch Demo (Release MSVC Preset)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/msvc/Release/demo.exe",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "preLaunchTask": "Build (release-msvc preset)"
+        },
+        {
+            "name": "Run Demo (Release without debugger)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/msvc/Release/demo.exe",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "preLaunchTask": "Build (release-msvc preset)",
+            "stopAtEntry": false
+        }
+    ]
+}

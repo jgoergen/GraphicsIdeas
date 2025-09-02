@@ -1,0 +1,14 @@
+# Build artifacts
+/build/
+*.o
+/demo
+.DS_Store
+build/
+CMakeCache.txt
+CMakeFiles/
+*.dir/
+*.pdb
+*.exe
+*.ilk
+*.vcxproj*
+*.sln
